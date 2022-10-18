@@ -1,0 +1,16 @@
+import * as admin from "firebase-admin";
+import { ObjectString } from "../interfaces";
+import { NexusInputObjectTypeDef } from "nexus/dist/core";
+export declare const hasType: (typeName: string, values: ObjectString<NexusInputObjectTypeDef<any>>) => boolean;
+export declare const ObjectReduce: <T, U>(object: ObjectString<T>, callback: (acc: any, key: string, value: T, index: number) => any, initialValue?: any) => U;
+export declare const ObjectMap: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => any) => any[];
+export declare const ObjectEach: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => any) => void;
+export declare const AsyncObjectReduce: <T>(object: ObjectString<T>, callback: (acc: any, key: string, value: T) => any, initialValue?: any) => any;
+export declare const capitalize: (str: string) => string;
+export declare const firstLowercase: (str: string) => string;
+export declare const plural: (str: string) => string;
+export declare const getTarget: (name: string) => import("../parser").ParsedCollectionOptions;
+export declare const getCollectionName: (name: string, parent?: string) => string;
+export declare const getTargetCollection: (name: string, ids: string[]) => admin.firestore.CollectionReference;
+export declare const getParentIds: (name?: string, currentIds?: string[]) => string[];
+export declare const getParentLabelValues: (labels: string[], callback: (label: string, index: number) => any, initialValue?: ObjectString) => ObjectString<string> | undefined;

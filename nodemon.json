@@ -1,0 +1,5 @@
+{
+	"watch": ["**/*.ts", "**/*.graphql"],
+	"ext": "ts,graphql",
+	"exec": "yarn schema"
+}

@@ -1,0 +1,53 @@
+{
+  "name": "graphql-firebase",
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts .",
+    "build": "rm -rf lib && tsc",
+    "schema": "graphql-codegen",
+    "start": "concurrently -r \"ts-node-dev --transpile-only ./tests/index.ts\"",
+    "serve": "firebase emulators:start",
+    "dev": "start-server-and-test \"yarn serve\" \"4000\" \"yarn start\"",
+    "test": "start-server-and-test \"yarn serve\" \"4000\" \"jest --watchAll $*\"",
+    "coverage": "firebase emulators:exec \"jest --coverage $*\""
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "apollo-server-express": "^3.10.3",
+    "async": "^3.2.4",
+    "firebase-admin": "^11.2.0",
+    "graphql": "^16.6.0",
+    "graphql-fields-list": "^2.2.4",
+    "graphql-relay": "^0.10.0",
+    "graphql-scalars": "^1.19.0",
+    "graphql-upload-minimal": "1.5.4"
+  },
+  "peerDependencies": {
+    "nexus": "^1.3.0"
+  },
+  "devDependencies": {
+    "nexus": "^1.3.0",
+    "@graphql-codegen/cli": "^2.13.7",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.6",
+    "@types/async": "^3.2.15",
+    "@types/express": "^4.17.14",
+    "@types/jest": "^29.2.0",
+    "@types/uuid": "^8.3.4",
+    "concurrently": "^7.4.0",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.2.0",
+    "firebase-functions": "^4.0.1",
+    "form-data": "^4.0.0",
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.0.0",
+    "jest": "^29.2.0",
+    "nodemon": "^2.0.20",
+    "start-server-and-test": "^1.14.0",
+    "ts-jest": "^29.0.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.8.4",
+    "uuid": "^9.0.0",
+    "wait-on": "^6.0.1"
+  },
+  "private": true
+}

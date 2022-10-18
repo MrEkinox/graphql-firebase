@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "sourceMap": false,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "declaration": true,
+    "target": "es2017",
+    "outDir": "lib"
+  },
+  "compileOnSave": true,
+  "exclude": ["node_modules", "lib"],
+  "include": ["./src/**/*.ts"]
+}

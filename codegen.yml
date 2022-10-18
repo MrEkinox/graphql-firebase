@@ -1,0 +1,18 @@
+schema:
+    - ./tests/generated/schema.graphql
+documents:
+    - ./tests/index.graphql
+generates:
+    ./tests/generated/graphql-gen.ts:
+        plugins:
+            - typescript
+            - typescript-operations
+            - typescript-graphql-request
+        config:
+            enumsAsTypes: true
+            scalars:
+                Date: Date
+                Country: string
+                Email: string
+                Phone: string
+                Number: number
