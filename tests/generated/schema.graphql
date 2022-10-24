@@ -31,58 +31,12 @@ input CountryWhereInput {
   notIn: [Country]
 }
 
-input CreateGroupInput {
-  messages: GroupMessageCollectionInput
-  name: String
-  users: UserRelationInput!
+input CreateFolderDocumentInput {
+  name: String!
 }
 
-input CreateGroupMessageInput {
-  createdBy: UserPointerInput
-  image: UploadFileInput
-  text: String
-}
-
-input CreateUserInput {
-  avatar: UploadFileInput
-  birthDate: Date
-  customEnum: CustomEnum
-  customScalar: CustomScalar
-  customType: UserCustomTypeInput
-  email: String!
-  number: Number
-  username: String!
-}
-
-enum CustomEnum {
-  Member1
-  Member2
-}
-
-input CustomEnumWhereInput {
-  equalTo: CustomEnum
-  exists: Boolean
-  greaterThan: CustomEnum
-  greaterThanOrEqualTo: CustomEnum
-  in: [CustomEnum]
-  lessThan: CustomEnum
-  lessThanOrEqualTo: CustomEnum
-  notEqualTo: CustomEnum
-  notIn: [CustomEnum]
-}
-
-scalar CustomScalar
-
-input CustomScalarWhereInput {
-  equalTo: CustomScalar
-  exists: Boolean
-  greaterThan: CustomScalar
-  greaterThanOrEqualTo: CustomScalar
-  in: [CustomScalar]
-  lessThan: CustomScalar
-  lessThanOrEqualTo: CustomScalar
-  notEqualTo: CustomScalar
-  notIn: [CustomScalar]
+input CreateFolderInput {
+  documents: FolderDocumentCollectionInput
 }
 
 scalar Date
@@ -99,15 +53,11 @@ input DateWhereInput {
   notIn: [Date]
 }
 
-input DeleteGroupInput {
+input DeleteFolderDocumentInput {
   id: ID!
 }
 
-input DeleteGroupMessageInput {
-  id: ID!
-}
-
-input DeleteUserInput {
+input DeleteFolderInput {
   id: ID!
 }
 
@@ -138,87 +88,73 @@ input FileWhereInput {
   exists: Boolean
 }
 
-type Group {
+type Folder {
   createdAt: Date!
+  documents(limit: Int = 50, offset: Int = 0, orderBy: FolderDocumentOrderByInput, where: FolderDocumentWhereInput): FolderDocumentsCollection
   id: ID!
-  messages(limit: Int = 50, offset: Int = 0, orderBy: GroupMessageOrderByInput, where: GroupMessageWhereInput): GroupMessagesCollection
-  name: String
   updatedAt: Date!
-  users: [User!]!
 }
 
-input GroupCollectionInput {
-  createAndAdd: [CreateGroupInput]
+input FolderCollectionInput {
+  createAndAdd: [CreateFolderInput]
   delete: [ID]
+  update: [UpdateFolderInput]
 }
 
-type GroupEdge {
+type FolderDocument {
+  createdAt: Date!
+  folderId: ID!
+  id: ID!
+  name: String!
+  updatedAt: Date!
+}
+
+input FolderDocumentCollectionInput {
+  createAndAdd: [CreateFolderDocumentInput]
+  delete: [ID]
+  update: [UpdateFolderDocumentInput]
+}
+
+type FolderDocumentEdge {
   """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
   """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Group
+  node: FolderDocument
 }
 
-type GroupMessage {
-  createdAt: Date!
-  createdBy: User
-  groupId: ID!
-  id: ID!
-  image: File
-  text: String
-  updatedAt: Date!
-}
-
-input GroupMessageCollectionInput {
-  createAndAdd: [CreateGroupMessageInput]
-  delete: [ID]
-}
-
-type GroupMessageEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: GroupMessage
-}
-
-input GroupMessageOrderByInput {
+input FolderDocumentOrderByInput {
   createdAt: OrderByEnum
-  createdBy: OrderByEnum
   id: OrderByEnum
-  image: OrderByEnum
-  text: OrderByEnum
+  name: OrderByEnum
   updatedAt: OrderByEnum
 }
 
-input GroupMessagePointerInput {
-  createAndLink: CreateGroupMessageInput
+input FolderDocumentPointerInput {
+  createAndLink: CreateFolderDocumentInput
   link: ID
 }
 
-input GroupMessageRelationInput {
+input FolderDocumentRelationInput {
   add: [ID]
-  createAndAdd: [CreateGroupMessageInput]
+  createAndAdd: [CreateFolderDocumentInput]
   remove: [ID]
 }
 
-input GroupMessageWhereInput {
+input FolderDocumentWhereInput {
   createdAt: DateWhereInput
-  createdBy: UserWhereInput
   id: IDWhereInput
-  image: FileWhereInput
-  text: StringWhereInput
+  name: StringWhereInput
   updatedAt: DateWhereInput
 }
 
-type GroupMessagesCollection {
+type FolderDocumentsCollection {
   count: Int
 
   """
   https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
   """
-  edges: [GroupMessageEdge]
+  edges: [FolderDocumentEdge]
 
   """
   https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
@@ -226,42 +162,46 @@ type GroupMessagesCollection {
   pageInfo: PageInfo!
 }
 
-input GroupOrderByInput {
-  createdAt: OrderByEnum
-  id: OrderByEnum
-  messages: OrderByEnum
-  name: OrderByEnum
-  updatedAt: OrderByEnum
-  users: OrderByEnum
+type FolderEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Folder
 }
 
-input GroupPointerInput {
-  createAndLink: CreateGroupInput
+input FolderOrderByInput {
+  createdAt: OrderByEnum
+  documents: OrderByEnum
+  id: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+input FolderPointerInput {
+  createAndLink: CreateFolderInput
   link: ID
 }
 
-input GroupRelationInput {
+input FolderRelationInput {
   add: [ID]
-  createAndAdd: [CreateGroupInput]
+  createAndAdd: [CreateFolderInput]
   remove: [ID]
 }
 
-input GroupWhereInput {
+input FolderWhereInput {
   createdAt: DateWhereInput
+  documents: FolderDocumentWhereInput
   id: IDWhereInput
-  messages: GroupMessageWhereInput
-  name: StringWhereInput
   updatedAt: DateWhereInput
-  users: UserWhereInput
 }
 
-type GroupsCollection {
+type FoldersCollection {
   count: Int
 
   """
   https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
   """
-  edges: [GroupEdge]
+  edges: [FolderEdge]
 
   """
   https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
@@ -282,15 +222,12 @@ input IDWhereInput {
 }
 
 type Mutation {
-  createGroup(input: CreateGroupInput!): Group
-  createGroupMessage(groupId: ID!, input: CreateGroupMessageInput!): GroupMessage
-  createUser(input: CreateUserInput!): User
-  deleteGroup(input: DeleteGroupInput!): Boolean
-  deleteGroupMessage(groupId: ID!, input: DeleteGroupMessageInput!): Boolean
-  deleteUser(input: DeleteUserInput!): Boolean
-  updateGroup(force: Boolean, input: UpdateGroupInput!): Group
-  updateGroupMessage(force: Boolean, groupId: ID!, input: UpdateGroupMessageInput!): GroupMessage
-  updateUser(force: Boolean, input: UpdateUserInput!): User
+  createFolder(input: CreateFolderInput!): Folder
+  createFolderDocument(folderId: ID!, input: CreateFolderDocumentInput!): FolderDocument
+  deleteFolder(input: DeleteFolderInput!): Boolean
+  deleteFolderDocument(folderId: ID!, input: DeleteFolderDocumentInput!): Boolean
+  updateFolder(force: Boolean, input: UpdateFolderInput!): Folder
+  updateFolderDocument(folderId: ID!, force: Boolean, input: UpdateFolderDocumentInput!): FolderDocument
 }
 
 scalar Number
@@ -355,12 +292,10 @@ input PhoneWhereInput {
 }
 
 type Query {
-  group(id: ID!): Group
-  groupMessage(groupId: ID!, id: ID!): GroupMessage
-  groupMessages(groupId: ID!, limit: Int, offset: Int, orderBy: GroupMessageOrderByInput, where: GroupMessageWhereInput): GroupMessagesCollection
-  groups(limit: Int, offset: Int, orderBy: GroupOrderByInput, where: GroupWhereInput): GroupsCollection
-  user(id: ID!): User
-  users(limit: Int, offset: Int, orderBy: UserOrderByInput, where: UserWhereInput): UsersCollection
+  folder(id: ID!): Folder
+  folderDocument(folderId: ID!, id: ID!): FolderDocument
+  folderDocuments(folderId: ID!, limit: Int, offset: Int, orderBy: FolderDocumentOrderByInput, where: FolderDocumentWhereInput): FolderDocumentsCollection
+  folders(limit: Int, offset: Int, orderBy: FolderOrderByInput, where: FolderWhereInput): FoldersCollection
 }
 
 input StringWhereInput {
@@ -375,41 +310,21 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdateGroupFieldsInput {
-  messages: GroupMessageCollectionInput
+input UpdateFolderDocumentFieldsInput {
   name: String
-  users: UserRelationInput
 }
 
-input UpdateGroupInput {
-  fields: UpdateGroupFieldsInput!
+input UpdateFolderDocumentInput {
+  fields: UpdateFolderDocumentFieldsInput!
   id: ID!
 }
 
-input UpdateGroupMessageFieldsInput {
-  createdBy: UserPointerInput
-  image: UploadFileInput
-  text: String
+input UpdateFolderFieldsInput {
+  documents: FolderDocumentCollectionInput
 }
 
-input UpdateGroupMessageInput {
-  fields: UpdateGroupMessageFieldsInput!
-  id: ID!
-}
-
-input UpdateUserFieldsInput {
-  avatar: UploadFileInput
-  birthDate: Date
-  customEnum: CustomEnum
-  customScalar: CustomScalar
-  customType: UserCustomTypeInput
-  email: String
-  number: Number
-  username: String
-}
-
-input UpdateUserInput {
-  fields: UpdateUserFieldsInput!
+input UpdateFolderInput {
+  fields: UpdateFolderFieldsInput!
   id: ID!
 }
 
@@ -430,111 +345,4 @@ input UploadFileListInput {
   add: [Upload]
   link: [UploadFileLinkInput]
   remove: [String]
-}
-
-type User {
-  avatar: File
-  birthDate: Date
-  createdAt: Date!
-  customEnum: CustomEnum
-  customScalar: CustomScalar
-  customType: UserCustomType
-  email: String!
-  id: ID!
-  number: Number
-  updatedAt: Date!
-  username: String!
-}
-
-input UserCollectionInput {
-  createAndAdd: [CreateUserInput]
-  delete: [ID]
-}
-
-type UserCustomType {
-  customType2: UserCustomTypeCustomType2
-  test: String!
-}
-
-type UserCustomTypeCustomType2 {
-  test: String
-}
-
-input UserCustomTypeCustomType2Input {
-  test: String
-}
-
-input UserCustomTypeCustomType2WhereInput {
-  test: StringWhereInput
-}
-
-input UserCustomTypeInput {
-  customType2: UserCustomTypeCustomType2Input
-  test: String!
-}
-
-input UserCustomTypeWhereInput {
-  customType2: UserCustomTypeCustomType2WhereInput
-  test: StringWhereInput
-}
-
-type UserEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: User
-}
-
-input UserOrderByInput {
-  avatar: OrderByEnum
-  birthDate: OrderByEnum
-  createdAt: OrderByEnum
-  customEnum: OrderByEnum
-  customScalar: OrderByEnum
-  customType: OrderByEnum
-  email: OrderByEnum
-  id: OrderByEnum
-  number: OrderByEnum
-  updatedAt: OrderByEnum
-  username: OrderByEnum
-}
-
-input UserPointerInput {
-  createAndLink: CreateUserInput
-  link: ID
-}
-
-input UserRelationInput {
-  add: [ID]
-  createAndAdd: [CreateUserInput]
-  remove: [ID]
-}
-
-input UserWhereInput {
-  avatar: FileWhereInput
-  birthDate: DateWhereInput
-  createdAt: DateWhereInput
-  customEnum: CustomEnumWhereInput
-  customScalar: CustomScalarWhereInput
-  customType: UserCustomTypeWhereInput
-  email: StringWhereInput
-  id: IDWhereInput
-  number: NumberWhereInput
-  updatedAt: DateWhereInput
-  username: StringWhereInput
-}
-
-type UsersCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [UserEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
 }

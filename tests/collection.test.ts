@@ -117,6 +117,25 @@ describe("Collection Test", () => {
     folderDocuments = documents;
   });
 
+  it("Update field", async () => {
+    const { updateFolder } = await graphQLClient.request(UPDATE_DOCUMENT, {
+      id: folderId,
+      fields: {
+        documents: {
+          update: [
+            { id: folderDocuments[0].id, fields: { name: "Document1Updated" } },
+          ],
+        },
+      },
+    });
+
+    const documents = updateFolder?.documents?.edges?.map((edge) => edge?.node);
+
+    expect(updateFolder).not.toBeUndefined();
+    expect(documents).toHaveLength(3);
+    expect(documents[0].name).toEqual("Document1Updated");
+  });
+
   it("Query without where", async () => {
     const { folders } = await graphQLClient.request(QUERY_DOCUMENT);
 

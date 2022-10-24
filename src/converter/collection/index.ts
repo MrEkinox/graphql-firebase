@@ -50,10 +50,11 @@ export const collectionToFirestore = async (
 
   await async.map(input?.update || [], async (data2) => {
     const docRef = collectionRef.doc(data2.id);
+    console.log(docRef.path, data2)
     const snapshot = await docRef.get();
     const data = await targetToFirestore(
       target,
-      data2,
+      data2.fields,
       batch,
       docRef,
       snapshot
