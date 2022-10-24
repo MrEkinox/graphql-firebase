@@ -140,5 +140,6 @@ export interface RelationInput {
 
 export interface CollectionInput {
   createAndAdd?: ObjectString[] | null;
+  update?: ObjectString[] | null;
   delete?: string[] | null;
 }

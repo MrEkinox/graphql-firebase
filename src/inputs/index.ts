@@ -248,6 +248,8 @@ const getCollectionInput = (name: string) =>
       t.id("delete", { list: true });
       // @ts-ignore
       t.field("createAndAdd", { type: `Create${name}Input`, list: true });
+      // @ts-ignore
+      t.field("update", { type: `Update${name}Input`, list: true });
     },
   });
 

@@ -19,10 +19,10 @@ export const relationToFirestore = async (
     const targetRef = targetCollection.doc();
     const data = await targetToFirestore(target, data2, batch, targetRef);
     batch.set(targetRef, {
+      ...data,
       id: targetRef.id,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...data,
     });
     return targetRef;
   });

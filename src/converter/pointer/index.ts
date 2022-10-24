@@ -22,10 +22,10 @@ export const pointerToFirestore = async (
       docRef
     );
     batch.set(docRef, {
+      ...data,
       id: docRef.id,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...data,
     });
 
     return docRef;

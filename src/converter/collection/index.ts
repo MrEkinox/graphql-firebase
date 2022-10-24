@@ -40,11 +40,25 @@ export const collectionToFirestore = async (
     const docRef = collectionRef.doc();
     const data = await targetToFirestore(target, data2, batch, docRef);
     batch.set(docRef, {
+      ...data,
       id: docRef.id,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...data,
     });
+    return docRef;
+  });
+
+  await async.map(input?.update || [], async (data2) => {
+    const docRef = collectionRef.doc(data2.id);
+    const snapshot = await docRef.get();
+    const data = await targetToFirestore(
+      target,
+      data2,
+      batch,
+      docRef,
+      snapshot
+    );
+    batch.update(docRef, { ...data, updatedAt: new Date() });
     return docRef;
   });
 
