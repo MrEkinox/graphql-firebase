@@ -85,9 +85,13 @@ describe("Collection Test", () => {
   let folderId = "";
   let folderDocuments: any[] = [];
 
-  it("Single Create And Add", async () => {
+  it.only("Single Create And Add", async () => {
     const { createFolder } = await graphQLClient.request(CREATE_DOCUMENT, {
       input: { documents: { createAndAdd: [{ name: "Document1" }] } },
+    });
+
+    await graphQLClient.request(CREATE_DOCUMENT, {
+      input: { documents: { createAndAdd: [{ name: "Document4" }] } },
     });
 
     const documents = createFolder?.documents?.edges?.map((edge) => edge?.node);
@@ -99,7 +103,7 @@ describe("Collection Test", () => {
     folderId = createFolder.id;
   });
 
-  it("Multiple Create And Add", async () => {
+  it.only("Multiple Create And Add", async () => {
     const { updateFolder } = await graphQLClient.request(UPDATE_DOCUMENT, {
       id: folderId,
       fields: {
@@ -152,7 +156,8 @@ describe("Collection Test", () => {
     expect(folders.edges).toHaveLength(0);
   });
 
-  it("Query with equal where", async () => {
+  it.only("Query with equal where", async () => {
+    console.log("Query with equal where");
     const { folders } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { documents: { id: { equalTo: folderDocuments[0].id } } },
     });

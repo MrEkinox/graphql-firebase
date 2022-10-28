@@ -10,7 +10,6 @@ import {
   getParentLabelValues,
   getTarget,
   getTargetCollection,
-  plural,
 } from "../../utils";
 import async from "async";
 import { targetFromFirestore, targetToFirestore } from "..";
@@ -22,7 +21,7 @@ import {
 } from "../../where";
 import { orderByCollection, OrderByEnum } from "../../orderBy";
 import { ParsedCollectionOptions } from "../../parser";
-import { fieldsList, fieldsMap } from "graphql-fields-list";
+import { fieldsList } from "graphql-fields-list";
 import { GraphQLResolveInfo } from "graphql";
 
 export const collectionToFirestore = async (
@@ -50,7 +49,7 @@ export const collectionToFirestore = async (
 
   await async.map(input?.update || [], async (data2) => {
     const docRef = collectionRef.doc(data2.id);
-    console.log(docRef.path, data2)
+    console.log(docRef.path, data2);
     const snapshot = await docRef.get();
     const data = await targetToFirestore(
       target,
@@ -82,9 +81,13 @@ export const collectionWhereFromFirestore = async (
 
   const ref = whereCollection(target, collection, whereInput);
 
-  const documents = await ref.get();
+  const countQuery = await ref.count().get();
 
-  if (whereInput && !documents.size) throw new Error("no where");
+  const count = countQuery.data().count;
+
+  console.log("get documents", count);
+
+  if (whereInput && !count) throw new Error("no where");
 };
 
 export const collectionTargetFromFirestore = async (
@@ -123,6 +126,7 @@ export const collectionFromFirestore = async (
   root?: any,
   info?: GraphQLResolveInfo
 ): Promise<any> => {
+  console.log("start", targetName, whereInput);
   const target = getTarget(targetName);
   const parentLabelIds = getParentIds(target.parent);
 
@@ -139,12 +143,22 @@ export const collectionFromFirestore = async (
 
   const collection = getTargetCollection(targetName, ids);
 
-  const listDocuments = await collection.listDocuments();
+  const listDocuments = await collection.count().get();
 
-  const count = listDocuments.length;
+  const count = listDocuments.data().count;
 
   let ref = whereCollection(target, collection, whereInput);
 
+  if (whereInput) {
+    const test = firestore()
+      .collectionGroup("documents")
+      .where("id", "==", whereInput?.documents.id.equalTo);
+    const test2 = await test.get();
+    console.log(
+      "test",
+      test2.docs.map((doc) => doc.data())
+    );
+  }
   if (orderByInput) {
     ref = orderByCollection(collection, orderByInput);
   }
@@ -163,7 +177,7 @@ export const collectionFromFirestore = async (
 
   const documents = await ref.get();
 
-  const edges: any = await async.reduce(
+  const edges: any[] = await async.reduce(
     documents.docs,
     [] as any[],
     async (acc, doc: typeof documents.docs[0]) => {
@@ -182,5 +196,6 @@ export const collectionFromFirestore = async (
     }
   );
 
+  console.log("end", documents.size, edges.length);
   return { count, edges };
 };
