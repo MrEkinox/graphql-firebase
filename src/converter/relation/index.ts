@@ -54,9 +54,9 @@ export const relationFromFirestore = async (
       true
     ).where("__name__", "in", refs);
 
-    const documents = await collection.count().get();
+    const documents = await collection.get();
 
-    if (!documents.data().count) throw new Error("no where");
+    if (!documents.size) throw new Error("no where");
   }
 
   const collection = targetCollection.where("__name__", "in", refs);
