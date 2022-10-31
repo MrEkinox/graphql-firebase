@@ -4,6 +4,7 @@ import { NexusInputObjectTypeDef } from "nexus/dist/core";
 export declare const hasType: (typeName: string, values: ObjectString<NexusInputObjectTypeDef<any>>) => boolean;
 export declare const ObjectReduce: <T, U>(object: ObjectString<T>, callback: (acc: any, key: string, value: T, index: number) => any, initialValue?: any) => U;
 export declare const ObjectMap: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => any) => any[];
+export declare const ObjectSome: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => boolean) => boolean;
 export declare const ObjectEach: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => any) => void;
 export declare const AsyncObjectReduce: <T>(object: ObjectString<T>, callback: (acc: any, key: string, value: T) => any, initialValue?: any) => any;
 export declare const capitalize: (str: string) => string;
