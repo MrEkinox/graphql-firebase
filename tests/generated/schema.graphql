@@ -31,7 +31,12 @@ input CountryWhereInput {
   notIn: [Country]
 }
 
+input CreateFolderDocumentFileInput {
+  name: String
+}
+
 input CreateFolderDocumentInput {
+  file: FolderDocumentFileCollectionInput
   name: String!
 }
 
@@ -51,6 +56,10 @@ input DateWhereInput {
   lessThanOrEqualTo: Date
   notEqualTo: Date
   notIn: [Date]
+}
+
+input DeleteFolderDocumentFileInput {
+  id: ID!
 }
 
 input DeleteFolderDocumentInput {
@@ -103,6 +112,7 @@ input FolderCollectionInput {
 
 type FolderDocument {
   createdAt: Date!
+  file(limit: Int = 50, offset: Int = 0, orderBy: FolderDocumentFileOrderByInput, where: FolderDocumentFileWhereInput): FolderDocumentFileCollection
   folderId: ID!
   id: ID!
   name: String!
@@ -123,8 +133,85 @@ type FolderDocumentEdge {
   node: FolderDocument
 }
 
+type FolderDocumentFile {
+  createdAt: Date!
+  documentId: ID!
+  folderId: ID!
+  id: ID!
+  name: String
+  updatedAt: Date!
+}
+
+type FolderDocumentFileCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [FolderDocumentFileEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input FolderDocumentFileCollectionInput {
+  createAndAdd: [CreateFolderDocumentFileInput]
+  delete: [ID]
+  update: [UpdateFolderDocumentFileInput]
+}
+
+type FolderDocumentFileEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: FolderDocumentFile
+}
+
+input FolderDocumentFileOrderByInput {
+  createdAt: OrderByEnum
+  id: OrderByEnum
+  name: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+input FolderDocumentFilePointerInput {
+  createAndLink: CreateFolderDocumentFileInput
+  link: ID
+}
+
+input FolderDocumentFileRelationInput {
+  add: [ID]
+  createAndAdd: [CreateFolderDocumentFileInput]
+  remove: [ID]
+}
+
+input FolderDocumentFileWhereInput {
+  createdAt: DateWhereInput
+  id: IDWhereInput
+  name: StringWhereInput
+  updatedAt: DateWhereInput
+}
+
+type FolderDocumentFilesCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [FolderDocumentFileEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
 input FolderDocumentOrderByInput {
   createdAt: OrderByEnum
+  file: OrderByEnum
   id: OrderByEnum
   name: OrderByEnum
   updatedAt: OrderByEnum
@@ -143,6 +230,7 @@ input FolderDocumentRelationInput {
 
 input FolderDocumentWhereInput {
   createdAt: DateWhereInput
+  file: FolderDocumentFileWhereInput
   id: IDWhereInput
   name: StringWhereInput
   updatedAt: DateWhereInput
@@ -224,10 +312,13 @@ input IDWhereInput {
 type Mutation {
   createFolder(input: CreateFolderInput!): Folder
   createFolderDocument(folderId: ID!, input: CreateFolderDocumentInput!): FolderDocument
+  createFolderDocumentFile(documentId: ID!, folderId: ID!, input: CreateFolderDocumentFileInput!): FolderDocumentFile
   deleteFolder(input: DeleteFolderInput!): Boolean
   deleteFolderDocument(folderId: ID!, input: DeleteFolderDocumentInput!): Boolean
+  deleteFolderDocumentFile(documentId: ID!, folderId: ID!, input: DeleteFolderDocumentFileInput!): Boolean
   updateFolder(force: Boolean, input: UpdateFolderInput!): Folder
   updateFolderDocument(folderId: ID!, force: Boolean, input: UpdateFolderDocumentInput!): FolderDocument
+  updateFolderDocumentFile(documentId: ID!, folderId: ID!, force: Boolean, input: UpdateFolderDocumentFileInput!): FolderDocumentFile
 }
 
 scalar Number
@@ -294,6 +385,8 @@ input PhoneWhereInput {
 type Query {
   folder(id: ID!): Folder
   folderDocument(folderId: ID!, id: ID!): FolderDocument
+  folderDocumentFile(documentId: ID!, folderId: ID!, id: ID!): FolderDocumentFile
+  folderDocumentFiles(documentId: ID!, folderId: ID!, limit: Int, offset: Int, orderBy: FolderDocumentFileOrderByInput, where: FolderDocumentFileWhereInput): FolderDocumentFilesCollection
   folderDocuments(folderId: ID!, limit: Int, offset: Int, orderBy: FolderDocumentOrderByInput, where: FolderDocumentWhereInput): FolderDocumentsCollection
   folders(limit: Int, offset: Int, orderBy: FolderOrderByInput, where: FolderWhereInput): FoldersCollection
 }
@@ -311,7 +404,17 @@ input StringWhereInput {
 }
 
 input UpdateFolderDocumentFieldsInput {
+  file: FolderDocumentFileCollectionInput
   name: String
+}
+
+input UpdateFolderDocumentFileFieldsInput {
+  name: String
+}
+
+input UpdateFolderDocumentFileInput {
+  fields: UpdateFolderDocumentFileFieldsInput!
+  id: ID!
 }
 
 input UpdateFolderDocumentInput {

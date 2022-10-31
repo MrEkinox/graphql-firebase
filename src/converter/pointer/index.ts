@@ -51,7 +51,7 @@ export const pointerFromFirestore = async (
     whereInput
   ).where("__name__", "==", ref);
 
-  const documents = await collection.get();
+  const documents = await collection.limit(1).get();
 
   const document = documents.docs[0];
 

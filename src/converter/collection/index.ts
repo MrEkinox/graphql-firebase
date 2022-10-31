@@ -5,11 +5,14 @@ import {
   ObjectString,
 } from "../../interfaces";
 import {
+  AsyncObjectReduce,
   getCollectionName,
   getParentIds,
   getParentLabelValues,
   getTarget,
   getTargetCollection,
+  ObjectReduce,
+  ObjectSome,
   plural,
 } from "../../utils";
 import async from "async";
@@ -22,7 +25,7 @@ import {
 } from "../../where";
 import { orderByCollection, OrderByEnum } from "../../orderBy";
 import { ParsedCollectionOptions } from "../../parser";
-import { fieldsList, fieldsMap } from "graphql-fields-list";
+import { fieldsList } from "graphql-fields-list";
 import { GraphQLResolveInfo } from "graphql";
 
 export const collectionToFirestore = async (
@@ -50,7 +53,6 @@ export const collectionToFirestore = async (
 
   await async.map(input?.update || [], async (data2) => {
     const docRef = collectionRef.doc(data2.id);
-    console.log(docRef.path, data2)
     const snapshot = await docRef.get();
     const data = await targetToFirestore(
       target,
@@ -85,6 +87,31 @@ export const collectionWhereFromFirestore = async (
   const documents = await ref.get();
 
   if (whereInput && !documents.size) throw new Error("no where");
+
+  const loop = await async.map(documents.docs, async (doc) => {
+    return AsyncObjectReduce(
+      target.fields,
+      async (_, fieldName, fieldOptions) => {
+        try {
+          const whereFieldInput = whereInput[fieldName];
+          if (whereFieldInput && fieldOptions.type === "Collection") {
+            await collectionWhereFromFirestore(
+              fieldOptions.target,
+              { ...parentIds, [targetName]: doc.id },
+              whereFieldInput
+            );
+          }
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+    );
+  });
+
+  const exist = loop.some((l) => l);
+
+  if (!exist) throw new Error("no where");
 };
 
 export const collectionTargetFromFirestore = async (

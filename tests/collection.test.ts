@@ -13,6 +13,13 @@ const collections: CollectionOptions[] = [
         name: "Document",
         fields: {
           name: { type: "String", required: true },
+          file: {
+            type: "Collection",
+            name: "File",
+            fields: {
+              name: { type: "String" },
+            },
+          },
         },
       },
     },
@@ -28,6 +35,13 @@ const CREATE_DOCUMENT = gql`
           node {
             id
             name
+            file {
+              edges {
+                node {
+                  name
+                }
+              }
+            }
           }
         }
       }
@@ -44,6 +58,13 @@ const UPDATE_DOCUMENT = gql`
           node {
             id
             name
+            file {
+              edges {
+                node {
+                  name
+                }
+              }
+            }
           }
         }
       }
@@ -62,6 +83,13 @@ const QUERY_DOCUMENT = gql`
               node {
                 id
                 name
+                file {
+                  edges {
+                    node {
+                      name
+                    }
+                  }
+                }
               }
             }
           }
@@ -123,7 +151,13 @@ describe("Collection Test", () => {
       fields: {
         documents: {
           update: [
-            { id: folderDocuments[0].id, fields: { name: "Document1Updated" } },
+            {
+              id: folderDocuments[0].id,
+              fields: {
+                name: "Document1Updated",
+                file: { createAndAdd: [{ name: "File1" }] },
+              },
+            },
           ],
         },
       },
@@ -134,6 +168,24 @@ describe("Collection Test", () => {
     expect(updateFolder).not.toBeUndefined();
     expect(documents).toHaveLength(3);
     expect(documents[0].name).toEqual("Document1Updated");
+  });
+
+  it("Query with where in subcollection", async () => {
+    const { folders } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { documents: { file: { name: { equalTo: "File1" } } } },
+    });
+
+    expect(folders).not.toBeUndefined();
+    expect(folders.edges).toHaveLength(1);
+  });
+
+  it("Query with not equal where in subcollection", async () => {
+    const { folders } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { documents: { file: { name: { equalTo: "File2" } } } },
+    });
+
+    expect(folders).not.toBeUndefined();
+    expect(folders.edges).toHaveLength(0);
   });
 
   it("Query without where", async () => {

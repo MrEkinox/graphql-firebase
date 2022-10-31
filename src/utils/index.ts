@@ -29,6 +29,12 @@ export const ObjectMap = <T>(
   callback: (key: string, value: T, index: number) => any
 ) => Object.keys(object).map((key, index) => callback(key, object[key], index));
 
+export const ObjectSome = <T>(
+  object: ObjectString<T>,
+  callback: (key: string, value: T, index: number) => boolean
+) =>
+  Object.keys(object).some((key, index) => callback(key, object[key], index));
+
 export const ObjectEach = <T>(
   object: ObjectString<T>,
   callback: (key: string, value: T, index: number) => any

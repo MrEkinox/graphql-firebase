@@ -49,7 +49,11 @@ export interface NexusGenInputs {
     notEqualTo?: NexusGenScalars['Country'] | null; // Country
     notIn?: Array<NexusGenScalars['Country'] | null> | null; // [Country]
   }
+  CreateFolderDocumentFileInput: { // input type
+    name?: string | null; // String
+  }
   CreateFolderDocumentInput: { // input type
+    file?: NexusGenInputs['FolderDocumentFileCollectionInput'] | null; // FolderDocumentFileCollectionInput
     name: string; // String!
   }
   CreateFolderInput: { // input type
@@ -65,6 +69,9 @@ export interface NexusGenInputs {
     lessThanOrEqualTo?: NexusGenScalars['Date'] | null; // Date
     notEqualTo?: NexusGenScalars['Date'] | null; // Date
     notIn?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
+  }
+  DeleteFolderDocumentFileInput: { // input type
+    id: string; // ID!
   }
   DeleteFolderDocumentInput: { // input type
     id: string; // ID!
@@ -96,8 +103,35 @@ export interface NexusGenInputs {
     delete?: Array<string | null> | null; // [ID]
     update?: Array<NexusGenInputs['UpdateFolderDocumentInput'] | null> | null; // [UpdateFolderDocumentInput]
   }
+  FolderDocumentFileCollectionInput: { // input type
+    createAndAdd?: Array<NexusGenInputs['CreateFolderDocumentFileInput'] | null> | null; // [CreateFolderDocumentFileInput]
+    delete?: Array<string | null> | null; // [ID]
+    update?: Array<NexusGenInputs['UpdateFolderDocumentFileInput'] | null> | null; // [UpdateFolderDocumentFileInput]
+  }
+  FolderDocumentFileOrderByInput: { // input type
+    createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    id?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    name?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    updatedAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+  }
+  FolderDocumentFilePointerInput: { // input type
+    createAndLink?: NexusGenInputs['CreateFolderDocumentFileInput'] | null; // CreateFolderDocumentFileInput
+    link?: string | null; // ID
+  }
+  FolderDocumentFileRelationInput: { // input type
+    add?: Array<string | null> | null; // [ID]
+    createAndAdd?: Array<NexusGenInputs['CreateFolderDocumentFileInput'] | null> | null; // [CreateFolderDocumentFileInput]
+    remove?: Array<string | null> | null; // [ID]
+  }
+  FolderDocumentFileWhereInput: { // input type
+    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
+    name?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+  }
   FolderDocumentOrderByInput: { // input type
     createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    file?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
     id?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
     name?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
     updatedAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
@@ -113,6 +147,7 @@ export interface NexusGenInputs {
   }
   FolderDocumentWhereInput: { // input type
     createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    file?: NexusGenInputs['FolderDocumentFileWhereInput'] | null; // FolderDocumentFileWhereInput
     id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
     name?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
     updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
@@ -183,7 +218,15 @@ export interface NexusGenInputs {
     notIn?: Array<string | null> | null; // [String]
   }
   UpdateFolderDocumentFieldsInput: { // input type
+    file?: NexusGenInputs['FolderDocumentFileCollectionInput'] | null; // FolderDocumentFileCollectionInput
     name?: string | null; // String
+  }
+  UpdateFolderDocumentFileFieldsInput: { // input type
+    name?: string | null; // String
+  }
+  UpdateFolderDocumentFileInput: { // input type
+    fields: NexusGenInputs['UpdateFolderDocumentFileFieldsInput']; // UpdateFolderDocumentFileFieldsInput!
+    id: string; // ID!
   }
   UpdateFolderDocumentInput: { // input type
     fields: NexusGenInputs['UpdateFolderDocumentFieldsInput']; // UpdateFolderDocumentFieldsInput!
@@ -252,6 +295,28 @@ export interface NexusGenObjects {
     cursor: string; // String!
     node?: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
   }
+  FolderDocumentFile: { // root type
+    createdAt: NexusGenScalars['Date']; // Date!
+    documentId: string; // ID!
+    folderId: string; // ID!
+    id: string; // ID!
+    name?: string | null; // String
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  FolderDocumentFileCollection: { // root type
+    count?: number | null; // Int
+    edges?: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  FolderDocumentFileEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
+  }
+  FolderDocumentFilesCollection: { // root type
+    count?: number | null; // Int
+    edges?: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
   FolderDocumentsCollection: { // root type
     count?: number | null; // Int
     edges?: Array<NexusGenRootTypes['FolderDocumentEdge'] | null> | null; // [FolderDocumentEdge]
@@ -300,6 +365,7 @@ export interface NexusGenFieldTypes {
   }
   FolderDocument: { // field return type
     createdAt: NexusGenScalars['Date']; // Date!
+    file: NexusGenRootTypes['FolderDocumentFileCollection'] | null; // FolderDocumentFileCollection
     folderId: string; // ID!
     id: string; // ID!
     name: string; // String!
@@ -308,6 +374,28 @@ export interface NexusGenFieldTypes {
   FolderDocumentEdge: { // field return type
     cursor: string; // String!
     node: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
+  }
+  FolderDocumentFile: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    documentId: string; // ID!
+    folderId: string; // ID!
+    id: string; // ID!
+    name: string | null; // String
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  FolderDocumentFileCollection: { // field return type
+    count: number | null; // Int
+    edges: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  FolderDocumentFileEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
+  }
+  FolderDocumentFilesCollection: { // field return type
+    count: number | null; // Int
+    edges: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   FolderDocumentsCollection: { // field return type
     count: number | null; // Int
@@ -326,10 +414,13 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     createFolder: NexusGenRootTypes['Folder'] | null; // Folder
     createFolderDocument: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
+    createFolderDocumentFile: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
     deleteFolder: boolean | null; // Boolean
     deleteFolderDocument: boolean | null; // Boolean
+    deleteFolderDocumentFile: boolean | null; // Boolean
     updateFolder: NexusGenRootTypes['Folder'] | null; // Folder
     updateFolderDocument: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
+    updateFolderDocumentFile: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
   }
   PageInfo: { // field return type
     endCursor: string | null; // String
@@ -340,6 +431,8 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     folder: NexusGenRootTypes['Folder'] | null; // Folder
     folderDocument: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
+    folderDocumentFile: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
+    folderDocumentFiles: NexusGenRootTypes['FolderDocumentFilesCollection'] | null; // FolderDocumentFilesCollection
     folderDocuments: NexusGenRootTypes['FolderDocumentsCollection'] | null; // FolderDocumentsCollection
     folders: NexusGenRootTypes['FoldersCollection'] | null; // FoldersCollection
   }
@@ -359,6 +452,7 @@ export interface NexusGenFieldTypeNames {
   }
   FolderDocument: { // field return type name
     createdAt: 'Date'
+    file: 'FolderDocumentFileCollection'
     folderId: 'ID'
     id: 'ID'
     name: 'String'
@@ -367,6 +461,28 @@ export interface NexusGenFieldTypeNames {
   FolderDocumentEdge: { // field return type name
     cursor: 'String'
     node: 'FolderDocument'
+  }
+  FolderDocumentFile: { // field return type name
+    createdAt: 'Date'
+    documentId: 'ID'
+    folderId: 'ID'
+    id: 'ID'
+    name: 'String'
+    updatedAt: 'Date'
+  }
+  FolderDocumentFileCollection: { // field return type name
+    count: 'Int'
+    edges: 'FolderDocumentFileEdge'
+    pageInfo: 'PageInfo'
+  }
+  FolderDocumentFileEdge: { // field return type name
+    cursor: 'String'
+    node: 'FolderDocumentFile'
+  }
+  FolderDocumentFilesCollection: { // field return type name
+    count: 'Int'
+    edges: 'FolderDocumentFileEdge'
+    pageInfo: 'PageInfo'
   }
   FolderDocumentsCollection: { // field return type name
     count: 'Int'
@@ -385,10 +501,13 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     createFolder: 'Folder'
     createFolderDocument: 'FolderDocument'
+    createFolderDocumentFile: 'FolderDocumentFile'
     deleteFolder: 'Boolean'
     deleteFolderDocument: 'Boolean'
+    deleteFolderDocumentFile: 'Boolean'
     updateFolder: 'Folder'
     updateFolderDocument: 'FolderDocument'
+    updateFolderDocumentFile: 'FolderDocumentFile'
   }
   PageInfo: { // field return type name
     endCursor: 'String'
@@ -399,6 +518,8 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     folder: 'Folder'
     folderDocument: 'FolderDocument'
+    folderDocumentFile: 'FolderDocumentFile'
+    folderDocumentFiles: 'FolderDocumentFilesCollection'
     folderDocuments: 'FolderDocumentsCollection'
     folders: 'FoldersCollection'
   }
@@ -413,6 +534,14 @@ export interface NexusGenArgTypes {
       where?: NexusGenInputs['FolderDocumentWhereInput'] | null; // FolderDocumentWhereInput
     }
   }
+  FolderDocument: {
+    file: { // args
+      limit: number | null; // Int
+      offset?: number | null; // Int
+      orderBy?: NexusGenInputs['FolderDocumentFileOrderByInput'] | null; // FolderDocumentFileOrderByInput
+      where?: NexusGenInputs['FolderDocumentFileWhereInput'] | null; // FolderDocumentFileWhereInput
+    }
+  }
   Mutation: {
     createFolder: { // args
       input: NexusGenInputs['CreateFolderInput']; // CreateFolderInput!
@@ -421,12 +550,22 @@ export interface NexusGenArgTypes {
       folderId: string; // ID!
       input: NexusGenInputs['CreateFolderDocumentInput']; // CreateFolderDocumentInput!
     }
+    createFolderDocumentFile: { // args
+      documentId: string; // ID!
+      folderId: string; // ID!
+      input: NexusGenInputs['CreateFolderDocumentFileInput']; // CreateFolderDocumentFileInput!
+    }
     deleteFolder: { // args
       input: NexusGenInputs['DeleteFolderInput']; // DeleteFolderInput!
     }
     deleteFolderDocument: { // args
       folderId: string; // ID!
       input: NexusGenInputs['DeleteFolderDocumentInput']; // DeleteFolderDocumentInput!
+    }
+    deleteFolderDocumentFile: { // args
+      documentId: string; // ID!
+      folderId: string; // ID!
+      input: NexusGenInputs['DeleteFolderDocumentFileInput']; // DeleteFolderDocumentFileInput!
     }
     updateFolder: { // args
       force?: boolean | null; // Boolean
@@ -437,6 +576,12 @@ export interface NexusGenArgTypes {
       force?: boolean | null; // Boolean
       input: NexusGenInputs['UpdateFolderDocumentInput']; // UpdateFolderDocumentInput!
     }
+    updateFolderDocumentFile: { // args
+      documentId: string; // ID!
+      folderId: string; // ID!
+      force?: boolean | null; // Boolean
+      input: NexusGenInputs['UpdateFolderDocumentFileInput']; // UpdateFolderDocumentFileInput!
+    }
   }
   Query: {
     folder: { // args
@@ -445,6 +590,19 @@ export interface NexusGenArgTypes {
     folderDocument: { // args
       folderId: string; // ID!
       id: string; // ID!
+    }
+    folderDocumentFile: { // args
+      documentId: string; // ID!
+      folderId: string; // ID!
+      id: string; // ID!
+    }
+    folderDocumentFiles: { // args
+      documentId: string; // ID!
+      folderId: string; // ID!
+      limit?: number | null; // Int
+      offset?: number | null; // Int
+      orderBy?: NexusGenInputs['FolderDocumentFileOrderByInput'] | null; // FolderDocumentFileOrderByInput
+      where?: NexusGenInputs['FolderDocumentFileWhereInput'] | null; // FolderDocumentFileWhereInput
     }
     folderDocuments: { // args
       folderId: string; // ID!
