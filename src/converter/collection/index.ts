@@ -88,10 +88,18 @@ export const collectionWhereFromFirestore = async (
 
   if (whereInput && !documents.size) throw new Error("no where");
 
+  const hasSubField = ObjectSome(target.fields, (fieldName, fieldOptions) => {
+    const whereFieldInput = whereInput[fieldName];
+
+    return whereFieldInput && fieldOptions.type === "Collection";
+  });
+
+  if (!hasSubField) return;
+
   const loop = await async.map(documents.docs, async (doc) => {
     return AsyncObjectReduce(
       target.fields,
-      async (_, fieldName, fieldOptions) => {
+      async (acc, fieldName, fieldOptions) => {
         try {
           const whereFieldInput = whereInput[fieldName];
           if (whereFieldInput && fieldOptions.type === "Collection") {
@@ -100,8 +108,9 @@ export const collectionWhereFromFirestore = async (
               { ...parentIds, [targetName]: doc.id },
               whereFieldInput
             );
+            return true;
           }
-          return true;
+          return acc;
         } catch (error) {
           return false;
         }
