@@ -9,6 +9,7 @@ export declare type WhereInputOperator = {
     lessThanOrEqualTo?: any;
     greaterThan?: any;
     greaterThanOrEqualTo?: any;
+    arrayContains?: any;
     in?: any[];
     notIn?: any[];
 };

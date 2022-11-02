@@ -84,6 +84,8 @@ export const getFieldWhereInput = (type: string) =>
       // @ts-ignore
       t.field("notEqualTo", { type });
       // @ts-ignore
+      t.field("arrayContains", { type });
+      // @ts-ignore
       t.field("lessThan", { type });
       // @ts-ignore
       t.field("lessThanOrEqualTo", { type });

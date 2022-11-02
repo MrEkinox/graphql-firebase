@@ -17,6 +17,7 @@ const collections: CollectionOptions[] = [
       endDate: { type: "Date" },
       testEnm: { type: TestEnum },
       testEnm2: { type: TestEnum },
+      array: { type: "String", list: true },
       viewNumber: { type: "Number", defaultValue: 50 },
       viewNumber2: { type: "Number", defaultValue: 50 },
       customObject: {
@@ -90,6 +91,7 @@ describe("Where Test", () => {
         meetDate: new Date("2022"),
         endDate: new Date("2023"),
         viewNumber: 50,
+        array: ["1"],
         customObject: {
           test: "string",
           customObject2: {
@@ -105,6 +107,24 @@ describe("Where Test", () => {
 
   afterAll(async () => {
     await httpApolloServer.stop();
+  });
+
+  it.only("Query with where array contain", async () => {
+    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { array: { arrayContains: "1" } },
+    });
+
+    expect(likes).not.toBeUndefined();
+    expect(likes.edges).toHaveLength(1);
+  });
+
+  it.only("Query with where array not contain", async () => {
+    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { array: { arrayContains: "2" } },
+    });
+
+    expect(likes).not.toBeUndefined();
+    expect(likes.edges).toHaveLength(0);
   });
 
   it("Query with where date equal", async () => {
@@ -147,7 +167,7 @@ describe("Where Test", () => {
     expect(likes.edges).toHaveLength(0);
   });
 
-  it.only("Query with where date is less", async () => {
+  it("Query with where date is less", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { endDate: { lessThanOrEqualTo: new Date("2024").toISOString() } },
     });
@@ -156,7 +176,7 @@ describe("Where Test", () => {
     expect(likes.edges).toHaveLength(1);
   });
 
-  it.only("Query with where date is not less", async () => {
+  it("Query with where date is not less", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { endDate: { lessThanOrEqualTo: new Date("2003").toISOString() } },
     });

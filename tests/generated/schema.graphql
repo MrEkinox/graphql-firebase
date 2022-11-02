@@ -5,6 +5,7 @@
 scalar Any
 
 input BooleanWhereInput {
+  arrayContains: Boolean
   equalTo: Boolean
   exists: Boolean
   greaterThan: Boolean
@@ -20,6 +21,7 @@ input BooleanWhereInput {
 scalar Country
 
 input CountryWhereInput {
+  arrayContains: Country
   equalTo: Country
   exists: Boolean
   greaterThan: Country
@@ -31,22 +33,27 @@ input CountryWhereInput {
   notIn: [Country]
 }
 
-input CreateFolderDocumentFileInput {
-  name: String
+input CreateLikeInput {
+  array: [String]
+  createdBy: UserPointerInput
+  customObject: LikeCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
+  users: UserRelationInput!
+  viewNumber: Number
+  viewNumber2: Number
 }
 
-input CreateFolderDocumentInput {
-  file: FolderDocumentFileCollectionInput
-  name: String!
-}
-
-input CreateFolderInput {
-  documents: FolderDocumentCollectionInput
+input CreateUserInput {
+  username: String!
 }
 
 scalar Date
 
 input DateWhereInput {
+  arrayContains: Date
   equalTo: Date
   exists: Boolean
   greaterThan: Date
@@ -58,15 +65,11 @@ input DateWhereInput {
   notIn: [Date]
 }
 
-input DeleteFolderDocumentFileInput {
+input DeleteLikeInput {
   id: ID!
 }
 
-input DeleteFolderDocumentInput {
-  id: ID!
-}
-
-input DeleteFolderInput {
+input DeleteUserInput {
   id: ID!
 }
 
@@ -76,6 +79,7 @@ A field whose value conforms to the standard internet email address format as sp
 scalar Email @specifiedBy(url: "https://www.w3.org/Protocols/rfc822/")
 
 input EmailWhereInput {
+  arrayContains: Email
   equalTo: Email
   exists: Boolean
   greaterThan: Email
@@ -97,207 +101,8 @@ input FileWhereInput {
   exists: Boolean
 }
 
-type Folder {
-  createdAt: Date!
-  documents(limit: Int = 50, offset: Int = 0, orderBy: FolderDocumentOrderByInput, where: FolderDocumentWhereInput): FolderDocumentsCollection
-  id: ID!
-  updatedAt: Date!
-}
-
-input FolderCollectionInput {
-  createAndAdd: [CreateFolderInput]
-  delete: [ID]
-  update: [UpdateFolderInput]
-}
-
-type FolderDocument {
-  createdAt: Date!
-  file(limit: Int = 50, offset: Int = 0, orderBy: FolderDocumentFileOrderByInput, where: FolderDocumentFileWhereInput): FolderDocumentFileCollection
-  folderId: ID!
-  id: ID!
-  name: String!
-  updatedAt: Date!
-}
-
-input FolderDocumentCollectionInput {
-  createAndAdd: [CreateFolderDocumentInput]
-  delete: [ID]
-  update: [UpdateFolderDocumentInput]
-}
-
-type FolderDocumentEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: FolderDocument
-}
-
-type FolderDocumentFile {
-  createdAt: Date!
-  documentId: ID!
-  folderId: ID!
-  id: ID!
-  name: String
-  updatedAt: Date!
-}
-
-type FolderDocumentFileCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FolderDocumentFileEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input FolderDocumentFileCollectionInput {
-  createAndAdd: [CreateFolderDocumentFileInput]
-  delete: [ID]
-  update: [UpdateFolderDocumentFileInput]
-}
-
-type FolderDocumentFileEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: FolderDocumentFile
-}
-
-input FolderDocumentFileOrderByInput {
-  createdAt: OrderByEnum
-  id: OrderByEnum
-  name: OrderByEnum
-  updatedAt: OrderByEnum
-}
-
-input FolderDocumentFilePointerInput {
-  createAndLink: CreateFolderDocumentFileInput
-  link: ID
-}
-
-input FolderDocumentFileRelationInput {
-  add: [ID]
-  createAndAdd: [CreateFolderDocumentFileInput]
-  remove: [ID]
-}
-
-input FolderDocumentFileWhereInput {
-  createdAt: DateWhereInput
-  id: IDWhereInput
-  name: StringWhereInput
-  updatedAt: DateWhereInput
-}
-
-type FolderDocumentFilesCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FolderDocumentFileEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input FolderDocumentOrderByInput {
-  createdAt: OrderByEnum
-  file: OrderByEnum
-  id: OrderByEnum
-  name: OrderByEnum
-  updatedAt: OrderByEnum
-}
-
-input FolderDocumentPointerInput {
-  createAndLink: CreateFolderDocumentInput
-  link: ID
-}
-
-input FolderDocumentRelationInput {
-  add: [ID]
-  createAndAdd: [CreateFolderDocumentInput]
-  remove: [ID]
-}
-
-input FolderDocumentWhereInput {
-  createdAt: DateWhereInput
-  file: FolderDocumentFileWhereInput
-  id: IDWhereInput
-  name: StringWhereInput
-  updatedAt: DateWhereInput
-}
-
-type FolderDocumentsCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FolderDocumentEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-type FolderEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Folder
-}
-
-input FolderOrderByInput {
-  createdAt: OrderByEnum
-  documents: OrderByEnum
-  id: OrderByEnum
-  updatedAt: OrderByEnum
-}
-
-input FolderPointerInput {
-  createAndLink: CreateFolderInput
-  link: ID
-}
-
-input FolderRelationInput {
-  add: [ID]
-  createAndAdd: [CreateFolderInput]
-  remove: [ID]
-}
-
-input FolderWhereInput {
-  createdAt: DateWhereInput
-  documents: FolderDocumentWhereInput
-  id: IDWhereInput
-  updatedAt: DateWhereInput
-}
-
-type FoldersCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FolderEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
 input IDWhereInput {
+  arrayContains: ID
   equalTo: ID
   exists: Boolean
   greaterThan: ID
@@ -309,21 +114,160 @@ input IDWhereInput {
   notIn: [ID]
 }
 
+type Like {
+  array: [String]
+  createdAt: Date!
+  createdBy: User
+  customObject: LikeCustomObject
+  endDate: Date
+  id: ID!
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
+  updatedAt: Date!
+  users: [User!]!
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+input LikeCollectionInput {
+  createAndAdd: [CreateLikeInput]
+  delete: [ID]
+  update: [UpdateLikeInput]
+}
+
+type LikeCustomObject {
+  customObject2: LikeCustomObjectCustomObject2
+  test: String!
+  test8: String
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+type LikeCustomObjectCustomObject2 {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3
+  test: String
+  test2: String
+}
+
+type LikeCustomObjectCustomObject2CustomObject3 {
+  test: String
+}
+
+input LikeCustomObjectCustomObject2CustomObject3Input {
+  test: String
+}
+
+input LikeCustomObjectCustomObject2CustomObject3WhereInput {
+  test: StringWhereInput
+}
+
+input LikeCustomObjectCustomObject2Input {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3Input
+  test: String
+  test2: String
+}
+
+input LikeCustomObjectCustomObject2WhereInput {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3WhereInput
+  test: StringWhereInput
+  test2: StringWhereInput
+}
+
+input LikeCustomObjectInput {
+  customObject2: LikeCustomObjectCustomObject2Input
+  test: String!
+  test8: String
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+input LikeCustomObjectWhereInput {
+  customObject2: LikeCustomObjectCustomObject2WhereInput
+  test: StringWhereInput
+  test8: StringWhereInput
+  viewNumber: NumberWhereInput
+  viewNumber2: NumberWhereInput
+}
+
+type LikeEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Like
+}
+
+input LikeOrderByInput {
+  array: OrderByEnum
+  createdAt: OrderByEnum
+  createdBy: OrderByEnum
+  customObject: OrderByEnum
+  endDate: OrderByEnum
+  id: OrderByEnum
+  meetDate: OrderByEnum
+  testEnm: OrderByEnum
+  testEnm2: OrderByEnum
+  updatedAt: OrderByEnum
+  users: OrderByEnum
+  viewNumber: OrderByEnum
+  viewNumber2: OrderByEnum
+}
+
+input LikePointerInput {
+  createAndLink: CreateLikeInput
+  link: ID
+}
+
+input LikeRelationInput {
+  add: [ID]
+  createAndAdd: [CreateLikeInput]
+  remove: [ID]
+}
+
+input LikeWhereInput {
+  array: StringWhereInput
+  createdAt: DateWhereInput
+  createdBy: UserWhereInput
+  customObject: LikeCustomObjectWhereInput
+  endDate: DateWhereInput
+  id: IDWhereInput
+  meetDate: DateWhereInput
+  testEnm: TestEnumWhereInput
+  testEnm2: TestEnumWhereInput
+  updatedAt: DateWhereInput
+  users: UserWhereInput
+  viewNumber: NumberWhereInput
+  viewNumber2: NumberWhereInput
+}
+
+type LikesCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [LikeEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
 type Mutation {
-  createFolder(input: CreateFolderInput!): Folder
-  createFolderDocument(folderId: ID!, input: CreateFolderDocumentInput!): FolderDocument
-  createFolderDocumentFile(documentId: ID!, folderId: ID!, input: CreateFolderDocumentFileInput!): FolderDocumentFile
-  deleteFolder(input: DeleteFolderInput!): Boolean
-  deleteFolderDocument(folderId: ID!, input: DeleteFolderDocumentInput!): Boolean
-  deleteFolderDocumentFile(documentId: ID!, folderId: ID!, input: DeleteFolderDocumentFileInput!): Boolean
-  updateFolder(force: Boolean, input: UpdateFolderInput!): Folder
-  updateFolderDocument(folderId: ID!, force: Boolean, input: UpdateFolderDocumentInput!): FolderDocument
-  updateFolderDocumentFile(documentId: ID!, folderId: ID!, force: Boolean, input: UpdateFolderDocumentFileInput!): FolderDocumentFile
+  createLike(input: CreateLikeInput!): Like
+  createUser(input: CreateUserInput!): User
+  deleteLike(input: DeleteLikeInput!): Boolean
+  deleteUser(input: DeleteUserInput!): Boolean
+  updateLike(force: Boolean, input: UpdateLikeInput!): Like
+  updateUser(force: Boolean, input: UpdateUserInput!): User
 }
 
 scalar Number
 
 input NumberWhereInput {
+  arrayContains: Number
   equalTo: Number
   exists: Boolean
   greaterThan: Number
@@ -371,6 +315,7 @@ A field whose value conforms to the standard E.164 format as specified in: https
 scalar Phone
 
 input PhoneWhereInput {
+  arrayContains: Phone
   equalTo: Phone
   exists: Boolean
   greaterThan: Phone
@@ -383,15 +328,14 @@ input PhoneWhereInput {
 }
 
 type Query {
-  folder(id: ID!): Folder
-  folderDocument(folderId: ID!, id: ID!): FolderDocument
-  folderDocumentFile(documentId: ID!, folderId: ID!, id: ID!): FolderDocumentFile
-  folderDocumentFiles(documentId: ID!, folderId: ID!, limit: Int, offset: Int, orderBy: FolderDocumentFileOrderByInput, where: FolderDocumentFileWhereInput): FolderDocumentFilesCollection
-  folderDocuments(folderId: ID!, limit: Int, offset: Int, orderBy: FolderDocumentOrderByInput, where: FolderDocumentWhereInput): FolderDocumentsCollection
-  folders(limit: Int, offset: Int, orderBy: FolderOrderByInput, where: FolderWhereInput): FoldersCollection
+  like(id: ID!): Like
+  likes(limit: Int, offset: Int, orderBy: LikeOrderByInput, where: LikeWhereInput): LikesCollection
+  user(id: ID!): User
+  users(limit: Int, offset: Int, orderBy: UserOrderByInput, where: UserWhereInput): UsersCollection
 }
 
 input StringWhereInput {
+  arrayContains: String
   equalTo: String
   exists: Boolean
   greaterThan: String
@@ -403,31 +347,47 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdateFolderDocumentFieldsInput {
-  file: FolderDocumentFileCollectionInput
-  name: String
+enum TestEnum {
+  other
 }
 
-input UpdateFolderDocumentFileFieldsInput {
-  name: String
+input TestEnumWhereInput {
+  arrayContains: TestEnum
+  equalTo: TestEnum
+  exists: Boolean
+  greaterThan: TestEnum
+  greaterThanOrEqualTo: TestEnum
+  in: [TestEnum]
+  lessThan: TestEnum
+  lessThanOrEqualTo: TestEnum
+  notEqualTo: TestEnum
+  notIn: [TestEnum]
 }
 
-input UpdateFolderDocumentFileInput {
-  fields: UpdateFolderDocumentFileFieldsInput!
+input UpdateLikeFieldsInput {
+  array: [String]
+  createdBy: UserPointerInput
+  customObject: LikeCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
+  users: UserRelationInput
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+input UpdateLikeInput {
+  fields: UpdateLikeFieldsInput!
   id: ID!
 }
 
-input UpdateFolderDocumentInput {
-  fields: UpdateFolderDocumentFieldsInput!
-  id: ID!
+input UpdateUserFieldsInput {
+  username: String
 }
 
-input UpdateFolderFieldsInput {
-  documents: FolderDocumentCollectionInput
-}
-
-input UpdateFolderInput {
-  fields: UpdateFolderFieldsInput!
+input UpdateUserInput {
+  fields: UpdateUserFieldsInput!
   id: ID!
 }
 
@@ -448,4 +408,64 @@ input UploadFileListInput {
   add: [Upload]
   link: [UploadFileLinkInput]
   remove: [String]
+}
+
+type User {
+  createdAt: Date!
+  id: ID!
+  updatedAt: Date!
+  username: String!
+}
+
+input UserCollectionInput {
+  createAndAdd: [CreateUserInput]
+  delete: [ID]
+  update: [UpdateUserInput]
+}
+
+type UserEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: User
+}
+
+input UserOrderByInput {
+  createdAt: OrderByEnum
+  id: OrderByEnum
+  updatedAt: OrderByEnum
+  username: OrderByEnum
+}
+
+input UserPointerInput {
+  createAndLink: CreateUserInput
+  link: ID
+}
+
+input UserRelationInput {
+  add: [ID]
+  createAndAdd: [CreateUserInput]
+  remove: [ID]
+}
+
+input UserWhereInput {
+  createdAt: DateWhereInput
+  id: IDWhereInput
+  updatedAt: DateWhereInput
+  username: StringWhereInput
+}
+
+type UsersCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [UserEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
 }

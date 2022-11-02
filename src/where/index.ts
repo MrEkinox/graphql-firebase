@@ -15,6 +15,7 @@ export type WhereInputOperator = {
   lessThanOrEqualTo?: any;
   greaterThan?: any;
   greaterThanOrEqualTo?: any;
+  arrayContains?: any;
   in?: any[];
   notIn?: any[];
 };
@@ -45,6 +46,8 @@ const getWhereType = (
       return "in";
     case "notIn":
       return "not-in";
+    case "arrayContains":
+      return "array-contains";
   }
   return undefined;
 };

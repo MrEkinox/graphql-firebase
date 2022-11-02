@@ -28,6 +28,7 @@ declare global {
 
 export interface NexusGenInputs {
   BooleanWhereInput: { // input type
+    arrayContains?: boolean | null; // Boolean
     equalTo?: boolean | null; // Boolean
     exists?: boolean | null; // Boolean
     greaterThan?: boolean | null; // Boolean
@@ -39,6 +40,7 @@ export interface NexusGenInputs {
     notIn?: Array<boolean | null> | null; // [Boolean]
   }
   CountryWhereInput: { // input type
+    arrayContains?: NexusGenScalars['Country'] | null; // Country
     equalTo?: NexusGenScalars['Country'] | null; // Country
     exists?: boolean | null; // Boolean
     greaterThan?: NexusGenScalars['Country'] | null; // Country
@@ -49,17 +51,23 @@ export interface NexusGenInputs {
     notEqualTo?: NexusGenScalars['Country'] | null; // Country
     notIn?: Array<NexusGenScalars['Country'] | null> | null; // [Country]
   }
-  CreateFolderDocumentFileInput: { // input type
-    name?: string | null; // String
+  CreateLikeInput: { // input type
+    array?: Array<string | null> | null; // [String]
+    createdBy?: NexusGenInputs['UserPointerInput'] | null; // UserPointerInput
+    customObject?: NexusGenInputs['LikeCustomObjectInput'] | null; // LikeCustomObjectInput
+    endDate?: NexusGenScalars['Date'] | null; // Date
+    meetDate?: NexusGenScalars['Date'] | null; // Date
+    testEnm?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    testEnm2?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    users: NexusGenInputs['UserRelationInput']; // UserRelationInput!
+    viewNumber?: NexusGenScalars['Number'] | null; // Number
+    viewNumber2?: NexusGenScalars['Number'] | null; // Number
   }
-  CreateFolderDocumentInput: { // input type
-    file?: NexusGenInputs['FolderDocumentFileCollectionInput'] | null; // FolderDocumentFileCollectionInput
-    name: string; // String!
-  }
-  CreateFolderInput: { // input type
-    documents?: NexusGenInputs['FolderDocumentCollectionInput'] | null; // FolderDocumentCollectionInput
+  CreateUserInput: { // input type
+    username: string; // String!
   }
   DateWhereInput: { // input type
+    arrayContains?: NexusGenScalars['Date'] | null; // Date
     equalTo?: NexusGenScalars['Date'] | null; // Date
     exists?: boolean | null; // Boolean
     greaterThan?: NexusGenScalars['Date'] | null; // Date
@@ -70,16 +78,14 @@ export interface NexusGenInputs {
     notEqualTo?: NexusGenScalars['Date'] | null; // Date
     notIn?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
   }
-  DeleteFolderDocumentFileInput: { // input type
+  DeleteLikeInput: { // input type
     id: string; // ID!
   }
-  DeleteFolderDocumentInput: { // input type
-    id: string; // ID!
-  }
-  DeleteFolderInput: { // input type
+  DeleteUserInput: { // input type
     id: string; // ID!
   }
   EmailWhereInput: { // input type
+    arrayContains?: NexusGenScalars['Email'] | null; // Email
     equalTo?: NexusGenScalars['Email'] | null; // Email
     exists?: boolean | null; // Boolean
     greaterThan?: NexusGenScalars['Email'] | null; // Email
@@ -93,87 +99,8 @@ export interface NexusGenInputs {
   FileWhereInput: { // input type
     exists?: boolean | null; // Boolean
   }
-  FolderCollectionInput: { // input type
-    createAndAdd?: Array<NexusGenInputs['CreateFolderInput'] | null> | null; // [CreateFolderInput]
-    delete?: Array<string | null> | null; // [ID]
-    update?: Array<NexusGenInputs['UpdateFolderInput'] | null> | null; // [UpdateFolderInput]
-  }
-  FolderDocumentCollectionInput: { // input type
-    createAndAdd?: Array<NexusGenInputs['CreateFolderDocumentInput'] | null> | null; // [CreateFolderDocumentInput]
-    delete?: Array<string | null> | null; // [ID]
-    update?: Array<NexusGenInputs['UpdateFolderDocumentInput'] | null> | null; // [UpdateFolderDocumentInput]
-  }
-  FolderDocumentFileCollectionInput: { // input type
-    createAndAdd?: Array<NexusGenInputs['CreateFolderDocumentFileInput'] | null> | null; // [CreateFolderDocumentFileInput]
-    delete?: Array<string | null> | null; // [ID]
-    update?: Array<NexusGenInputs['UpdateFolderDocumentFileInput'] | null> | null; // [UpdateFolderDocumentFileInput]
-  }
-  FolderDocumentFileOrderByInput: { // input type
-    createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    id?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    name?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    updatedAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-  }
-  FolderDocumentFilePointerInput: { // input type
-    createAndLink?: NexusGenInputs['CreateFolderDocumentFileInput'] | null; // CreateFolderDocumentFileInput
-    link?: string | null; // ID
-  }
-  FolderDocumentFileRelationInput: { // input type
-    add?: Array<string | null> | null; // [ID]
-    createAndAdd?: Array<NexusGenInputs['CreateFolderDocumentFileInput'] | null> | null; // [CreateFolderDocumentFileInput]
-    remove?: Array<string | null> | null; // [ID]
-  }
-  FolderDocumentFileWhereInput: { // input type
-    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
-    name?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
-    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-  }
-  FolderDocumentOrderByInput: { // input type
-    createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    file?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    id?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    name?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    updatedAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-  }
-  FolderDocumentPointerInput: { // input type
-    createAndLink?: NexusGenInputs['CreateFolderDocumentInput'] | null; // CreateFolderDocumentInput
-    link?: string | null; // ID
-  }
-  FolderDocumentRelationInput: { // input type
-    add?: Array<string | null> | null; // [ID]
-    createAndAdd?: Array<NexusGenInputs['CreateFolderDocumentInput'] | null> | null; // [CreateFolderDocumentInput]
-    remove?: Array<string | null> | null; // [ID]
-  }
-  FolderDocumentWhereInput: { // input type
-    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    file?: NexusGenInputs['FolderDocumentFileWhereInput'] | null; // FolderDocumentFileWhereInput
-    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
-    name?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
-    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-  }
-  FolderOrderByInput: { // input type
-    createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    documents?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    id?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-    updatedAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
-  }
-  FolderPointerInput: { // input type
-    createAndLink?: NexusGenInputs['CreateFolderInput'] | null; // CreateFolderInput
-    link?: string | null; // ID
-  }
-  FolderRelationInput: { // input type
-    add?: Array<string | null> | null; // [ID]
-    createAndAdd?: Array<NexusGenInputs['CreateFolderInput'] | null> | null; // [CreateFolderInput]
-    remove?: Array<string | null> | null; // [ID]
-  }
-  FolderWhereInput: { // input type
-    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    documents?: NexusGenInputs['FolderDocumentWhereInput'] | null; // FolderDocumentWhereInput
-    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
-    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-  }
   IDWhereInput: { // input type
+    arrayContains?: string | null; // ID
     equalTo?: string | null; // ID
     exists?: boolean | null; // Boolean
     greaterThan?: string | null; // ID
@@ -184,7 +111,82 @@ export interface NexusGenInputs {
     notEqualTo?: string | null; // ID
     notIn?: Array<string | null> | null; // [ID]
   }
+  LikeCollectionInput: { // input type
+    createAndAdd?: Array<NexusGenInputs['CreateLikeInput'] | null> | null; // [CreateLikeInput]
+    delete?: Array<string | null> | null; // [ID]
+    update?: Array<NexusGenInputs['UpdateLikeInput'] | null> | null; // [UpdateLikeInput]
+  }
+  LikeCustomObjectCustomObject2CustomObject3Input: { // input type
+    test?: string | null; // String
+  }
+  LikeCustomObjectCustomObject2CustomObject3WhereInput: { // input type
+    test?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+  }
+  LikeCustomObjectCustomObject2Input: { // input type
+    customObject3?: NexusGenInputs['LikeCustomObjectCustomObject2CustomObject3Input'] | null; // LikeCustomObjectCustomObject2CustomObject3Input
+    test?: string | null; // String
+    test2?: string | null; // String
+  }
+  LikeCustomObjectCustomObject2WhereInput: { // input type
+    customObject3?: NexusGenInputs['LikeCustomObjectCustomObject2CustomObject3WhereInput'] | null; // LikeCustomObjectCustomObject2CustomObject3WhereInput
+    test?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+    test2?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+  }
+  LikeCustomObjectInput: { // input type
+    customObject2?: NexusGenInputs['LikeCustomObjectCustomObject2Input'] | null; // LikeCustomObjectCustomObject2Input
+    test: string; // String!
+    test8?: string | null; // String
+    viewNumber?: NexusGenScalars['Number'] | null; // Number
+    viewNumber2?: NexusGenScalars['Number'] | null; // Number
+  }
+  LikeCustomObjectWhereInput: { // input type
+    customObject2?: NexusGenInputs['LikeCustomObjectCustomObject2WhereInput'] | null; // LikeCustomObjectCustomObject2WhereInput
+    test?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+    test8?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+    viewNumber?: NexusGenInputs['NumberWhereInput'] | null; // NumberWhereInput
+    viewNumber2?: NexusGenInputs['NumberWhereInput'] | null; // NumberWhereInput
+  }
+  LikeOrderByInput: { // input type
+    array?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    createdBy?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    customObject?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    endDate?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    id?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    meetDate?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    testEnm?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    testEnm2?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    updatedAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    users?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    viewNumber?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    viewNumber2?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+  }
+  LikePointerInput: { // input type
+    createAndLink?: NexusGenInputs['CreateLikeInput'] | null; // CreateLikeInput
+    link?: string | null; // ID
+  }
+  LikeRelationInput: { // input type
+    add?: Array<string | null> | null; // [ID]
+    createAndAdd?: Array<NexusGenInputs['CreateLikeInput'] | null> | null; // [CreateLikeInput]
+    remove?: Array<string | null> | null; // [ID]
+  }
+  LikeWhereInput: { // input type
+    array?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    createdBy?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
+    customObject?: NexusGenInputs['LikeCustomObjectWhereInput'] | null; // LikeCustomObjectWhereInput
+    endDate?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
+    meetDate?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    testEnm?: NexusGenInputs['TestEnumWhereInput'] | null; // TestEnumWhereInput
+    testEnm2?: NexusGenInputs['TestEnumWhereInput'] | null; // TestEnumWhereInput
+    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    users?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
+    viewNumber?: NexusGenInputs['NumberWhereInput'] | null; // NumberWhereInput
+    viewNumber2?: NexusGenInputs['NumberWhereInput'] | null; // NumberWhereInput
+  }
   NumberWhereInput: { // input type
+    arrayContains?: NexusGenScalars['Number'] | null; // Number
     equalTo?: NexusGenScalars['Number'] | null; // Number
     exists?: boolean | null; // Boolean
     greaterThan?: NexusGenScalars['Number'] | null; // Number
@@ -196,6 +198,7 @@ export interface NexusGenInputs {
     notIn?: Array<NexusGenScalars['Number'] | null> | null; // [Number]
   }
   PhoneWhereInput: { // input type
+    arrayContains?: NexusGenScalars['Phone'] | null; // Phone
     equalTo?: NexusGenScalars['Phone'] | null; // Phone
     exists?: boolean | null; // Boolean
     greaterThan?: NexusGenScalars['Phone'] | null; // Phone
@@ -207,6 +210,7 @@ export interface NexusGenInputs {
     notIn?: Array<NexusGenScalars['Phone'] | null> | null; // [Phone]
   }
   StringWhereInput: { // input type
+    arrayContains?: string | null; // String
     equalTo?: string | null; // String
     exists?: boolean | null; // Boolean
     greaterThan?: string | null; // String
@@ -217,26 +221,39 @@ export interface NexusGenInputs {
     notEqualTo?: string | null; // String
     notIn?: Array<string | null> | null; // [String]
   }
-  UpdateFolderDocumentFieldsInput: { // input type
-    file?: NexusGenInputs['FolderDocumentFileCollectionInput'] | null; // FolderDocumentFileCollectionInput
-    name?: string | null; // String
+  TestEnumWhereInput: { // input type
+    arrayContains?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    equalTo?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    exists?: boolean | null; // Boolean
+    greaterThan?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    greaterThanOrEqualTo?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    in?: Array<NexusGenEnums['TestEnum'] | null> | null; // [TestEnum]
+    lessThan?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    lessThanOrEqualTo?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    notEqualTo?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    notIn?: Array<NexusGenEnums['TestEnum'] | null> | null; // [TestEnum]
   }
-  UpdateFolderDocumentFileFieldsInput: { // input type
-    name?: string | null; // String
+  UpdateLikeFieldsInput: { // input type
+    array?: Array<string | null> | null; // [String]
+    createdBy?: NexusGenInputs['UserPointerInput'] | null; // UserPointerInput
+    customObject?: NexusGenInputs['LikeCustomObjectInput'] | null; // LikeCustomObjectInput
+    endDate?: NexusGenScalars['Date'] | null; // Date
+    meetDate?: NexusGenScalars['Date'] | null; // Date
+    testEnm?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    testEnm2?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    users?: NexusGenInputs['UserRelationInput'] | null; // UserRelationInput
+    viewNumber?: NexusGenScalars['Number'] | null; // Number
+    viewNumber2?: NexusGenScalars['Number'] | null; // Number
   }
-  UpdateFolderDocumentFileInput: { // input type
-    fields: NexusGenInputs['UpdateFolderDocumentFileFieldsInput']; // UpdateFolderDocumentFileFieldsInput!
+  UpdateLikeInput: { // input type
+    fields: NexusGenInputs['UpdateLikeFieldsInput']; // UpdateLikeFieldsInput!
     id: string; // ID!
   }
-  UpdateFolderDocumentInput: { // input type
-    fields: NexusGenInputs['UpdateFolderDocumentFieldsInput']; // UpdateFolderDocumentFieldsInput!
-    id: string; // ID!
+  UpdateUserFieldsInput: { // input type
+    username?: string | null; // String
   }
-  UpdateFolderFieldsInput: { // input type
-    documents?: NexusGenInputs['FolderDocumentCollectionInput'] | null; // FolderDocumentCollectionInput
-  }
-  UpdateFolderInput: { // input type
-    fields: NexusGenInputs['UpdateFolderFieldsInput']; // UpdateFolderFieldsInput!
+  UpdateUserInput: { // input type
+    fields: NexusGenInputs['UpdateUserFieldsInput']; // UpdateUserFieldsInput!
     id: string; // ID!
   }
   UploadFileInput: { // input type
@@ -252,10 +269,37 @@ export interface NexusGenInputs {
     link?: Array<NexusGenInputs['UploadFileLinkInput'] | null> | null; // [UploadFileLinkInput]
     remove?: Array<string | null> | null; // [String]
   }
+  UserCollectionInput: { // input type
+    createAndAdd?: Array<NexusGenInputs['CreateUserInput'] | null> | null; // [CreateUserInput]
+    delete?: Array<string | null> | null; // [ID]
+    update?: Array<NexusGenInputs['UpdateUserInput'] | null> | null; // [UpdateUserInput]
+  }
+  UserOrderByInput: { // input type
+    createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    id?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    updatedAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+    username?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+  }
+  UserPointerInput: { // input type
+    createAndLink?: NexusGenInputs['CreateUserInput'] | null; // CreateUserInput
+    link?: string | null; // ID
+  }
+  UserRelationInput: { // input type
+    add?: Array<string | null> | null; // [ID]
+    createAndAdd?: Array<NexusGenInputs['CreateUserInput'] | null> | null; // [CreateUserInput]
+    remove?: Array<string | null> | null; // [ID]
+  }
+  UserWhereInput: { // input type
+    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
+    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    username?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+  }
 }
 
 export interface NexusGenEnums {
   OrderByEnum: "asc" | "desc"
+  TestEnum: "other"
 }
 
 export interface NexusGenScalars {
@@ -279,56 +323,43 @@ export interface NexusGenObjects {
     name?: string | null; // String
     url?: string | null; // String
   }
-  Folder: { // root type
+  Like: { // root type
+    array?: Array<string | null> | null; // [String]
     createdAt: NexusGenScalars['Date']; // Date!
+    createdBy?: NexusGenRootTypes['User'] | null; // User
+    customObject?: NexusGenRootTypes['LikeCustomObject'] | null; // LikeCustomObject
+    endDate?: NexusGenScalars['Date'] | null; // Date
     id: string; // ID!
+    meetDate?: NexusGenScalars['Date'] | null; // Date
+    testEnm?: NexusGenEnums['TestEnum'] | null; // TestEnum
+    testEnm2?: NexusGenEnums['TestEnum'] | null; // TestEnum
     updatedAt: NexusGenScalars['Date']; // Date!
+    users: NexusGenRootTypes['User'][]; // [User!]!
+    viewNumber?: NexusGenScalars['Number'] | null; // Number
+    viewNumber2?: NexusGenScalars['Number'] | null; // Number
   }
-  FolderDocument: { // root type
-    createdAt: NexusGenScalars['Date']; // Date!
-    folderId: string; // ID!
-    id: string; // ID!
-    name: string; // String!
-    updatedAt: NexusGenScalars['Date']; // Date!
+  LikeCustomObject: { // root type
+    customObject2?: NexusGenRootTypes['LikeCustomObjectCustomObject2'] | null; // LikeCustomObjectCustomObject2
+    test: string; // String!
+    test8?: string | null; // String
+    viewNumber?: NexusGenScalars['Number'] | null; // Number
+    viewNumber2?: NexusGenScalars['Number'] | null; // Number
   }
-  FolderDocumentEdge: { // root type
+  LikeCustomObjectCustomObject2: { // root type
+    customObject3?: NexusGenRootTypes['LikeCustomObjectCustomObject2CustomObject3'] | null; // LikeCustomObjectCustomObject2CustomObject3
+    test?: string | null; // String
+    test2?: string | null; // String
+  }
+  LikeCustomObjectCustomObject2CustomObject3: { // root type
+    test?: string | null; // String
+  }
+  LikeEdge: { // root type
     cursor: string; // String!
-    node?: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
+    node?: NexusGenRootTypes['Like'] | null; // Like
   }
-  FolderDocumentFile: { // root type
-    createdAt: NexusGenScalars['Date']; // Date!
-    documentId: string; // ID!
-    folderId: string; // ID!
-    id: string; // ID!
-    name?: string | null; // String
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
-  FolderDocumentFileCollection: { // root type
+  LikesCollection: { // root type
     count?: number | null; // Int
-    edges?: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  FolderDocumentFileEdge: { // root type
-    cursor: string; // String!
-    node?: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
-  }
-  FolderDocumentFilesCollection: { // root type
-    count?: number | null; // Int
-    edges?: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  FolderDocumentsCollection: { // root type
-    count?: number | null; // Int
-    edges?: Array<NexusGenRootTypes['FolderDocumentEdge'] | null> | null; // [FolderDocumentEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  FolderEdge: { // root type
-    cursor: string; // String!
-    node?: NexusGenRootTypes['Folder'] | null; // Folder
-  }
-  FoldersCollection: { // root type
-    count?: number | null; // Int
-    edges?: Array<NexusGenRootTypes['FolderEdge'] | null> | null; // [FolderEdge]
+    edges?: Array<NexusGenRootTypes['LikeEdge'] | null> | null; // [LikeEdge]
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   Mutation: {};
@@ -339,6 +370,21 @@ export interface NexusGenObjects {
     startCursor?: string | null; // String
   }
   Query: {};
+  User: { // root type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+    username: string; // String!
+  }
+  UserEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['User'] | null; // User
+  }
+  UsersCollection: { // root type
+    count?: number | null; // Int
+    edges?: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -357,70 +403,52 @@ export interface NexusGenFieldTypes {
     name: string | null; // String
     url: string | null; // String
   }
-  Folder: { // field return type
+  Like: { // field return type
+    array: Array<string | null> | null; // [String]
     createdAt: NexusGenScalars['Date']; // Date!
-    documents: NexusGenRootTypes['FolderDocumentsCollection'] | null; // FolderDocumentsCollection
+    createdBy: NexusGenRootTypes['User'] | null; // User
+    customObject: NexusGenRootTypes['LikeCustomObject'] | null; // LikeCustomObject
+    endDate: NexusGenScalars['Date'] | null; // Date
     id: string; // ID!
+    meetDate: NexusGenScalars['Date'] | null; // Date
+    testEnm: NexusGenEnums['TestEnum'] | null; // TestEnum
+    testEnm2: NexusGenEnums['TestEnum'] | null; // TestEnum
     updatedAt: NexusGenScalars['Date']; // Date!
+    users: NexusGenRootTypes['User'][]; // [User!]!
+    viewNumber: NexusGenScalars['Number'] | null; // Number
+    viewNumber2: NexusGenScalars['Number'] | null; // Number
   }
-  FolderDocument: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    file: NexusGenRootTypes['FolderDocumentFileCollection'] | null; // FolderDocumentFileCollection
-    folderId: string; // ID!
-    id: string; // ID!
-    name: string; // String!
-    updatedAt: NexusGenScalars['Date']; // Date!
+  LikeCustomObject: { // field return type
+    customObject2: NexusGenRootTypes['LikeCustomObjectCustomObject2'] | null; // LikeCustomObjectCustomObject2
+    test: string; // String!
+    test8: string | null; // String
+    viewNumber: NexusGenScalars['Number'] | null; // Number
+    viewNumber2: NexusGenScalars['Number'] | null; // Number
   }
-  FolderDocumentEdge: { // field return type
+  LikeCustomObjectCustomObject2: { // field return type
+    customObject3: NexusGenRootTypes['LikeCustomObjectCustomObject2CustomObject3'] | null; // LikeCustomObjectCustomObject2CustomObject3
+    test: string | null; // String
+    test2: string | null; // String
+  }
+  LikeCustomObjectCustomObject2CustomObject3: { // field return type
+    test: string | null; // String
+  }
+  LikeEdge: { // field return type
     cursor: string; // String!
-    node: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
+    node: NexusGenRootTypes['Like'] | null; // Like
   }
-  FolderDocumentFile: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    documentId: string; // ID!
-    folderId: string; // ID!
-    id: string; // ID!
-    name: string | null; // String
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
-  FolderDocumentFileCollection: { // field return type
+  LikesCollection: { // field return type
     count: number | null; // Int
-    edges: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  FolderDocumentFileEdge: { // field return type
-    cursor: string; // String!
-    node: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
-  }
-  FolderDocumentFilesCollection: { // field return type
-    count: number | null; // Int
-    edges: Array<NexusGenRootTypes['FolderDocumentFileEdge'] | null> | null; // [FolderDocumentFileEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  FolderDocumentsCollection: { // field return type
-    count: number | null; // Int
-    edges: Array<NexusGenRootTypes['FolderDocumentEdge'] | null> | null; // [FolderDocumentEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  FolderEdge: { // field return type
-    cursor: string; // String!
-    node: NexusGenRootTypes['Folder'] | null; // Folder
-  }
-  FoldersCollection: { // field return type
-    count: number | null; // Int
-    edges: Array<NexusGenRootTypes['FolderEdge'] | null> | null; // [FolderEdge]
+    edges: Array<NexusGenRootTypes['LikeEdge'] | null> | null; // [LikeEdge]
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   Mutation: { // field return type
-    createFolder: NexusGenRootTypes['Folder'] | null; // Folder
-    createFolderDocument: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
-    createFolderDocumentFile: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
-    deleteFolder: boolean | null; // Boolean
-    deleteFolderDocument: boolean | null; // Boolean
-    deleteFolderDocumentFile: boolean | null; // Boolean
-    updateFolder: NexusGenRootTypes['Folder'] | null; // Folder
-    updateFolderDocument: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
-    updateFolderDocumentFile: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
+    createLike: NexusGenRootTypes['Like'] | null; // Like
+    createUser: NexusGenRootTypes['User'] | null; // User
+    deleteLike: boolean | null; // Boolean
+    deleteUser: boolean | null; // Boolean
+    updateLike: NexusGenRootTypes['Like'] | null; // Like
+    updateUser: NexusGenRootTypes['User'] | null; // User
   }
   PageInfo: { // field return type
     endCursor: string | null; // String
@@ -429,12 +457,25 @@ export interface NexusGenFieldTypes {
     startCursor: string | null; // String
   }
   Query: { // field return type
-    folder: NexusGenRootTypes['Folder'] | null; // Folder
-    folderDocument: NexusGenRootTypes['FolderDocument'] | null; // FolderDocument
-    folderDocumentFile: NexusGenRootTypes['FolderDocumentFile'] | null; // FolderDocumentFile
-    folderDocumentFiles: NexusGenRootTypes['FolderDocumentFilesCollection'] | null; // FolderDocumentFilesCollection
-    folderDocuments: NexusGenRootTypes['FolderDocumentsCollection'] | null; // FolderDocumentsCollection
-    folders: NexusGenRootTypes['FoldersCollection'] | null; // FoldersCollection
+    like: NexusGenRootTypes['Like'] | null; // Like
+    likes: NexusGenRootTypes['LikesCollection'] | null; // LikesCollection
+    user: NexusGenRootTypes['User'] | null; // User
+    users: NexusGenRootTypes['UsersCollection'] | null; // UsersCollection
+  }
+  User: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+    username: string; // String!
+  }
+  UserEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['User'] | null; // User
+  }
+  UsersCollection: { // field return type
+    count: number | null; // Int
+    edges: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
 }
 
@@ -444,70 +485,52 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     url: 'String'
   }
-  Folder: { // field return type name
+  Like: { // field return type name
+    array: 'String'
     createdAt: 'Date'
-    documents: 'FolderDocumentsCollection'
+    createdBy: 'User'
+    customObject: 'LikeCustomObject'
+    endDate: 'Date'
     id: 'ID'
+    meetDate: 'Date'
+    testEnm: 'TestEnum'
+    testEnm2: 'TestEnum'
     updatedAt: 'Date'
+    users: 'User'
+    viewNumber: 'Number'
+    viewNumber2: 'Number'
   }
-  FolderDocument: { // field return type name
-    createdAt: 'Date'
-    file: 'FolderDocumentFileCollection'
-    folderId: 'ID'
-    id: 'ID'
-    name: 'String'
-    updatedAt: 'Date'
+  LikeCustomObject: { // field return type name
+    customObject2: 'LikeCustomObjectCustomObject2'
+    test: 'String'
+    test8: 'String'
+    viewNumber: 'Number'
+    viewNumber2: 'Number'
   }
-  FolderDocumentEdge: { // field return type name
+  LikeCustomObjectCustomObject2: { // field return type name
+    customObject3: 'LikeCustomObjectCustomObject2CustomObject3'
+    test: 'String'
+    test2: 'String'
+  }
+  LikeCustomObjectCustomObject2CustomObject3: { // field return type name
+    test: 'String'
+  }
+  LikeEdge: { // field return type name
     cursor: 'String'
-    node: 'FolderDocument'
+    node: 'Like'
   }
-  FolderDocumentFile: { // field return type name
-    createdAt: 'Date'
-    documentId: 'ID'
-    folderId: 'ID'
-    id: 'ID'
-    name: 'String'
-    updatedAt: 'Date'
-  }
-  FolderDocumentFileCollection: { // field return type name
+  LikesCollection: { // field return type name
     count: 'Int'
-    edges: 'FolderDocumentFileEdge'
-    pageInfo: 'PageInfo'
-  }
-  FolderDocumentFileEdge: { // field return type name
-    cursor: 'String'
-    node: 'FolderDocumentFile'
-  }
-  FolderDocumentFilesCollection: { // field return type name
-    count: 'Int'
-    edges: 'FolderDocumentFileEdge'
-    pageInfo: 'PageInfo'
-  }
-  FolderDocumentsCollection: { // field return type name
-    count: 'Int'
-    edges: 'FolderDocumentEdge'
-    pageInfo: 'PageInfo'
-  }
-  FolderEdge: { // field return type name
-    cursor: 'String'
-    node: 'Folder'
-  }
-  FoldersCollection: { // field return type name
-    count: 'Int'
-    edges: 'FolderEdge'
+    edges: 'LikeEdge'
     pageInfo: 'PageInfo'
   }
   Mutation: { // field return type name
-    createFolder: 'Folder'
-    createFolderDocument: 'FolderDocument'
-    createFolderDocumentFile: 'FolderDocumentFile'
-    deleteFolder: 'Boolean'
-    deleteFolderDocument: 'Boolean'
-    deleteFolderDocumentFile: 'Boolean'
-    updateFolder: 'Folder'
-    updateFolderDocument: 'FolderDocument'
-    updateFolderDocumentFile: 'FolderDocumentFile'
+    createLike: 'Like'
+    createUser: 'User'
+    deleteLike: 'Boolean'
+    deleteUser: 'Boolean'
+    updateLike: 'Like'
+    updateUser: 'User'
   }
   PageInfo: { // field return type name
     endCursor: 'String'
@@ -516,106 +539,69 @@ export interface NexusGenFieldTypeNames {
     startCursor: 'String'
   }
   Query: { // field return type name
-    folder: 'Folder'
-    folderDocument: 'FolderDocument'
-    folderDocumentFile: 'FolderDocumentFile'
-    folderDocumentFiles: 'FolderDocumentFilesCollection'
-    folderDocuments: 'FolderDocumentsCollection'
-    folders: 'FoldersCollection'
+    like: 'Like'
+    likes: 'LikesCollection'
+    user: 'User'
+    users: 'UsersCollection'
+  }
+  User: { // field return type name
+    createdAt: 'Date'
+    id: 'ID'
+    updatedAt: 'Date'
+    username: 'String'
+  }
+  UserEdge: { // field return type name
+    cursor: 'String'
+    node: 'User'
+  }
+  UsersCollection: { // field return type name
+    count: 'Int'
+    edges: 'UserEdge'
+    pageInfo: 'PageInfo'
   }
 }
 
 export interface NexusGenArgTypes {
-  Folder: {
-    documents: { // args
-      limit: number | null; // Int
-      offset?: number | null; // Int
-      orderBy?: NexusGenInputs['FolderDocumentOrderByInput'] | null; // FolderDocumentOrderByInput
-      where?: NexusGenInputs['FolderDocumentWhereInput'] | null; // FolderDocumentWhereInput
-    }
-  }
-  FolderDocument: {
-    file: { // args
-      limit: number | null; // Int
-      offset?: number | null; // Int
-      orderBy?: NexusGenInputs['FolderDocumentFileOrderByInput'] | null; // FolderDocumentFileOrderByInput
-      where?: NexusGenInputs['FolderDocumentFileWhereInput'] | null; // FolderDocumentFileWhereInput
-    }
-  }
   Mutation: {
-    createFolder: { // args
-      input: NexusGenInputs['CreateFolderInput']; // CreateFolderInput!
+    createLike: { // args
+      input: NexusGenInputs['CreateLikeInput']; // CreateLikeInput!
     }
-    createFolderDocument: { // args
-      folderId: string; // ID!
-      input: NexusGenInputs['CreateFolderDocumentInput']; // CreateFolderDocumentInput!
+    createUser: { // args
+      input: NexusGenInputs['CreateUserInput']; // CreateUserInput!
     }
-    createFolderDocumentFile: { // args
-      documentId: string; // ID!
-      folderId: string; // ID!
-      input: NexusGenInputs['CreateFolderDocumentFileInput']; // CreateFolderDocumentFileInput!
+    deleteLike: { // args
+      input: NexusGenInputs['DeleteLikeInput']; // DeleteLikeInput!
     }
-    deleteFolder: { // args
-      input: NexusGenInputs['DeleteFolderInput']; // DeleteFolderInput!
+    deleteUser: { // args
+      input: NexusGenInputs['DeleteUserInput']; // DeleteUserInput!
     }
-    deleteFolderDocument: { // args
-      folderId: string; // ID!
-      input: NexusGenInputs['DeleteFolderDocumentInput']; // DeleteFolderDocumentInput!
-    }
-    deleteFolderDocumentFile: { // args
-      documentId: string; // ID!
-      folderId: string; // ID!
-      input: NexusGenInputs['DeleteFolderDocumentFileInput']; // DeleteFolderDocumentFileInput!
-    }
-    updateFolder: { // args
+    updateLike: { // args
       force?: boolean | null; // Boolean
-      input: NexusGenInputs['UpdateFolderInput']; // UpdateFolderInput!
+      input: NexusGenInputs['UpdateLikeInput']; // UpdateLikeInput!
     }
-    updateFolderDocument: { // args
-      folderId: string; // ID!
+    updateUser: { // args
       force?: boolean | null; // Boolean
-      input: NexusGenInputs['UpdateFolderDocumentInput']; // UpdateFolderDocumentInput!
-    }
-    updateFolderDocumentFile: { // args
-      documentId: string; // ID!
-      folderId: string; // ID!
-      force?: boolean | null; // Boolean
-      input: NexusGenInputs['UpdateFolderDocumentFileInput']; // UpdateFolderDocumentFileInput!
+      input: NexusGenInputs['UpdateUserInput']; // UpdateUserInput!
     }
   }
   Query: {
-    folder: { // args
+    like: { // args
       id: string; // ID!
     }
-    folderDocument: { // args
-      folderId: string; // ID!
+    likes: { // args
+      limit?: number | null; // Int
+      offset?: number | null; // Int
+      orderBy?: NexusGenInputs['LikeOrderByInput'] | null; // LikeOrderByInput
+      where?: NexusGenInputs['LikeWhereInput'] | null; // LikeWhereInput
+    }
+    user: { // args
       id: string; // ID!
     }
-    folderDocumentFile: { // args
-      documentId: string; // ID!
-      folderId: string; // ID!
-      id: string; // ID!
-    }
-    folderDocumentFiles: { // args
-      documentId: string; // ID!
-      folderId: string; // ID!
+    users: { // args
       limit?: number | null; // Int
       offset?: number | null; // Int
-      orderBy?: NexusGenInputs['FolderDocumentFileOrderByInput'] | null; // FolderDocumentFileOrderByInput
-      where?: NexusGenInputs['FolderDocumentFileWhereInput'] | null; // FolderDocumentFileWhereInput
-    }
-    folderDocuments: { // args
-      folderId: string; // ID!
-      limit?: number | null; // Int
-      offset?: number | null; // Int
-      orderBy?: NexusGenInputs['FolderDocumentOrderByInput'] | null; // FolderDocumentOrderByInput
-      where?: NexusGenInputs['FolderDocumentWhereInput'] | null; // FolderDocumentWhereInput
-    }
-    folders: { // args
-      limit?: number | null; // Int
-      offset?: number | null; // Int
-      orderBy?: NexusGenInputs['FolderOrderByInput'] | null; // FolderOrderByInput
-      where?: NexusGenInputs['FolderWhereInput'] | null; // FolderWhereInput
+      orderBy?: NexusGenInputs['UserOrderByInput'] | null; // UserOrderByInput
+      where?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
     }
   }
 }
