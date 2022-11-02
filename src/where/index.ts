@@ -105,7 +105,7 @@ const whereObjectCollection = (
       if (isEqualityFilter(operator)) return acc;
       if (whereFieldInput instanceof Array) {
         if (!whereFieldInput.length) return acc;
-      } else if (typeof whereFieldInput === "object") {
+      } else if (whereFieldInput && typeof whereFieldInput === "object") {
         return whereObjectCollection(
           `${parentName}.${fieldName}`,
           operator,
