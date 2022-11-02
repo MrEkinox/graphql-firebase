@@ -18,6 +18,7 @@ const collections: CollectionOptions[] = [
       testEnm: { type: TestEnum },
       testEnm2: { type: TestEnum },
       array: { type: "String", list: true },
+      any: { type: "Any" },
       viewNumber: { type: "Number", defaultValue: 50 },
       viewNumber2: { type: "Number", defaultValue: 50 },
       customObject: {
@@ -92,6 +93,7 @@ describe("Where Test", () => {
         endDate: new Date("2023"),
         viewNumber: 50,
         array: ["1"],
+        any: { "87878-877667": true },
         customObject: {
           test: "string",
           customObject2: {
@@ -109,16 +111,34 @@ describe("Where Test", () => {
     await httpApolloServer.stop();
   });
 
-  it.only("Query with where array contain", async () => {
+  it.only("Query with where any equal", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
-      where: { array: { arrayContains: "1" } },
+      where: { any: { "87878-877667": { equalTo: true } } },
     });
 
     expect(likes).not.toBeUndefined();
     expect(likes.edges).toHaveLength(1);
   });
 
-  it.only("Query with where array not contain", async () => {
+  it.only("Query with where any not equal", async () => {
+    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { any: { "87878-877669": { equalTo: true } } },
+    });
+
+    expect(likes).not.toBeUndefined();
+    expect(likes.edges).toHaveLength(0);
+  });
+
+  it("Query with where array contain", async () => {
+    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { any: { arrayContains: "1" } },
+    });
+
+    expect(likes).not.toBeUndefined();
+    expect(likes.edges).toHaveLength(1);
+  });
+
+  it("Query with where array not contain", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { array: { arrayContains: "2" } },
     });

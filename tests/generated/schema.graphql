@@ -34,6 +34,7 @@ input CountryWhereInput {
 }
 
 input CreateLikeInput {
+  any: Any
   array: [String]
   createdBy: UserPointerInput
   customObject: LikeCustomObjectInput
@@ -115,6 +116,7 @@ input IDWhereInput {
 }
 
 type Like {
+  any: Any
   array: [String]
   createdAt: Date!
   createdBy: User
@@ -199,6 +201,7 @@ type LikeEdge {
 }
 
 input LikeOrderByInput {
+  any: OrderByEnum
   array: OrderByEnum
   createdAt: OrderByEnum
   createdBy: OrderByEnum
@@ -226,6 +229,7 @@ input LikeRelationInput {
 }
 
 input LikeWhereInput {
+  any: Any
   array: StringWhereInput
   createdAt: DateWhereInput
   createdBy: UserWhereInput
@@ -365,6 +369,7 @@ input TestEnumWhereInput {
 }
 
 input UpdateLikeFieldsInput {
+  any: Any
   array: [String]
   createdBy: UserPointerInput
   customObject: LikeCustomObjectInput

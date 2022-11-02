@@ -78,6 +78,7 @@ export const getFieldWhereInput = (type: string) =>
       if (type === "File") return;
       if (type === "Collection") return;
       if (type === "Relation") return;
+      if (type === "Any") return;
 
       // @ts-ignore
       t.field("equalTo", { type });
@@ -142,6 +143,10 @@ export const getWhereInput = (name: string, fields: ParsedFieldsOptions) =>
           case "Collection":
             // @ts-ignore
             t.field(fieldName, { type: `${options.target}WhereInput` });
+            break;
+          case "Any":
+            // @ts-ignore
+            t.field(fieldName, { type: "Any" });
             break;
           case "Object":
             const target = name + capitalize(fieldName);

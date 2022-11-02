@@ -52,6 +52,7 @@ export interface NexusGenInputs {
     notIn?: Array<NexusGenScalars['Country'] | null> | null; // [Country]
   }
   CreateLikeInput: { // input type
+    any?: NexusGenScalars['Any'] | null; // Any
     array?: Array<string | null> | null; // [String]
     createdBy?: NexusGenInputs['UserPointerInput'] | null; // UserPointerInput
     customObject?: NexusGenInputs['LikeCustomObjectInput'] | null; // LikeCustomObjectInput
@@ -147,6 +148,7 @@ export interface NexusGenInputs {
     viewNumber2?: NexusGenInputs['NumberWhereInput'] | null; // NumberWhereInput
   }
   LikeOrderByInput: { // input type
+    any?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
     array?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
     createdAt?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
     createdBy?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
@@ -171,6 +173,7 @@ export interface NexusGenInputs {
     remove?: Array<string | null> | null; // [ID]
   }
   LikeWhereInput: { // input type
+    any?: NexusGenScalars['Any'] | null; // Any
     array?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
     createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
     createdBy?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
@@ -234,6 +237,7 @@ export interface NexusGenInputs {
     notIn?: Array<NexusGenEnums['TestEnum'] | null> | null; // [TestEnum]
   }
   UpdateLikeFieldsInput: { // input type
+    any?: NexusGenScalars['Any'] | null; // Any
     array?: Array<string | null> | null; // [String]
     createdBy?: NexusGenInputs['UserPointerInput'] | null; // UserPointerInput
     customObject?: NexusGenInputs['LikeCustomObjectInput'] | null; // LikeCustomObjectInput
@@ -324,6 +328,7 @@ export interface NexusGenObjects {
     url?: string | null; // String
   }
   Like: { // root type
+    any?: NexusGenScalars['Any'] | null; // Any
     array?: Array<string | null> | null; // [String]
     createdAt: NexusGenScalars['Date']; // Date!
     createdBy?: NexusGenRootTypes['User'] | null; // User
@@ -404,6 +409,7 @@ export interface NexusGenFieldTypes {
     url: string | null; // String
   }
   Like: { // field return type
+    any: NexusGenScalars['Any'] | null; // Any
     array: Array<string | null> | null; // [String]
     createdAt: NexusGenScalars['Date']; // Date!
     createdBy: NexusGenRootTypes['User'] | null; // User
@@ -486,6 +492,7 @@ export interface NexusGenFieldTypeNames {
     url: 'String'
   }
   Like: { // field return type name
+    any: 'Any'
     array: 'String'
     createdAt: 'Date'
     createdBy: 'User'

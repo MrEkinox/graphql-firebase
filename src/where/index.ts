@@ -151,6 +151,9 @@ export const whereCollection = (
           if (field.type === "Object" && typeof value === "object") {
             return whereObjectCollection(fieldName, operator, value, acc2);
           }
+          if (field.type === "Any" && typeof value === "object") {
+            return whereObjectCollection(fieldName, operator, value, acc2);
+          }
           if (typeof value === "object" && operator === "id") {
             const whereField = Object.keys(value).at(0);
             const whereID = Object.values(value).at(0);
