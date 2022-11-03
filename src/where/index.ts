@@ -115,6 +115,7 @@ const whereObjectCollection = (
       }
 
       const whereOperator = getWhereType(operator);
+      console.log(`${parentName}.${fieldName}`, whereOperator, whereFieldInput);
       return acc.where(
         `${parentName}.${fieldName}`,
         whereOperator,

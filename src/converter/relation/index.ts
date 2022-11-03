@@ -29,9 +29,13 @@ export const relationToFirestore = async (
 
   const addRef = (input.add || []).map((id) => targetCollection.doc(id));
 
-  return [...currentData, ...addRef, ...created].filter(
-    (newData) => !input.remove?.includes(newData.id)
-  );
+  return [...currentData, ...addRef, ...created]
+    .filter((newData) => !input.remove?.includes(newData.id))
+    .reduce((acc, cur) => {
+      const exist = acc.find((c) => c.id === cur.id);
+      if (exist) return acc;
+      return [...acc, cur];
+    }, [] as firestore.DocumentReference<firestore.DocumentData>[]);
 };
 
 export const relationFromFirestore = async (

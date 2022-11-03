@@ -131,6 +131,18 @@ describe("Relation Test", () => {
     expect(updateLike.users).toHaveLength(3);
   });
 
+  it("Can't add existing relation", async () => {
+    const { updateLike } = await graphQLClient.request(UPDATE_LIKE_DOCUMENT, {
+      id: likeId,
+      users: { add: [likeUsers[1].id, likeUsers[2].id] },
+    });
+
+    console.log(updateLike.users)
+
+    expect(updateLike).not.toBeUndefined();
+    expect(updateLike.users).toHaveLength(3);
+  });
+
   it("Query without where", async () => {
     const { likes } = await graphQLClient.request(QUERY_LIKE_DOCUMENT);
 
@@ -150,7 +162,7 @@ describe("Relation Test", () => {
 
   it("Query with equal where", async () => {
     const { likes } = await graphQLClient.request(QUERY_LIKE_DOCUMENT, {
-      where: { users: { id: { in: likeUsers[0].id } } },
+      where: { users: { id: { equalTo: likeUsers[0].id } } },
     });
 
     expect(likes).not.toBeUndefined();
