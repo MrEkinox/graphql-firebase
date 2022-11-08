@@ -34,7 +34,18 @@ input CountryWhereInput {
 }
 
 input CreateLikeInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdBy: UserPointerInput
+  customObject: LikeCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
   users: UserRelationInput!
+  viewNumber: Number
+  viewNumber2: Number
 }
 
 input CreateUserInput {
@@ -106,16 +117,81 @@ input IDWhereInput {
 }
 
 type Like {
+  any: Any
+  array: [String]
+  boolean: Boolean
   createdAt: Date!
+  createdBy: User
+  customObject: LikeCustomObject
+  endDate: Date
   id: ID!
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
   updatedAt: Date!
   users: [User!]!
+  viewNumber: Number
+  viewNumber2: Number
 }
 
 input LikeCollectionInput {
   createAndAdd: [CreateLikeInput]
   delete: [ID]
   update: [UpdateLikeInput]
+}
+
+type LikeCustomObject {
+  customObject2: LikeCustomObjectCustomObject2
+  test: String!
+  test8: String
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+type LikeCustomObjectCustomObject2 {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3
+  test: String
+  test2: String
+}
+
+type LikeCustomObjectCustomObject2CustomObject3 {
+  test: String
+}
+
+input LikeCustomObjectCustomObject2CustomObject3Input {
+  test: String
+}
+
+input LikeCustomObjectCustomObject2CustomObject3WhereInput {
+  test: StringWhereInput
+}
+
+input LikeCustomObjectCustomObject2Input {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3Input
+  test: String
+  test2: String
+}
+
+input LikeCustomObjectCustomObject2WhereInput {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3WhereInput
+  test: StringWhereInput
+  test2: StringWhereInput
+}
+
+input LikeCustomObjectInput {
+  customObject2: LikeCustomObjectCustomObject2Input
+  test: String!
+  test8: String
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+input LikeCustomObjectWhereInput {
+  customObject2: LikeCustomObjectCustomObject2WhereInput
+  test: StringWhereInput
+  test8: StringWhereInput
+  viewNumber: NumberWhereInput
+  viewNumber2: NumberWhereInput
 }
 
 type LikeEdge {
@@ -127,10 +203,21 @@ type LikeEdge {
 }
 
 input LikeOrderByInput {
+  any: OrderByEnum
+  array: OrderByEnum
+  boolean: OrderByEnum
   createdAt: OrderByEnum
+  createdBy: OrderByEnum
+  customObject: OrderByEnum
+  endDate: OrderByEnum
   id: OrderByEnum
+  meetDate: OrderByEnum
+  testEnm: OrderByEnum
+  testEnm2: OrderByEnum
   updatedAt: OrderByEnum
   users: OrderByEnum
+  viewNumber: OrderByEnum
+  viewNumber2: OrderByEnum
 }
 
 input LikePointerInput {
@@ -145,10 +232,21 @@ input LikeRelationInput {
 }
 
 input LikeWhereInput {
+  any: Any
+  array: StringWhereInput
+  boolean: BooleanWhereInput
   createdAt: DateWhereInput
+  createdBy: UserWhereInput
+  customObject: LikeCustomObjectWhereInput
+  endDate: DateWhereInput
   id: IDWhereInput
+  meetDate: DateWhereInput
+  testEnm: TestEnumWhereInput
+  testEnm2: TestEnumWhereInput
   updatedAt: DateWhereInput
   users: UserWhereInput
+  viewNumber: NumberWhereInput
+  viewNumber2: NumberWhereInput
 }
 
 type LikesCollection {
@@ -257,8 +355,36 @@ input StringWhereInput {
   notIn: [String]
 }
 
+enum TestEnum {
+  other
+}
+
+input TestEnumWhereInput {
+  arrayContains: TestEnum
+  equalTo: TestEnum
+  exists: Boolean
+  greaterThan: TestEnum
+  greaterThanOrEqualTo: TestEnum
+  in: [TestEnum]
+  lessThan: TestEnum
+  lessThanOrEqualTo: TestEnum
+  notEqualTo: TestEnum
+  notIn: [TestEnum]
+}
+
 input UpdateLikeFieldsInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdBy: UserPointerInput
+  customObject: LikeCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
   users: UserRelationInput
+  viewNumber: Number
+  viewNumber2: Number
 }
 
 input UpdateLikeInput {

@@ -175,11 +175,9 @@ export const collectionFromFirestore = async (
 
   const collection = getTargetCollection(targetName, ids);
 
-  const listDocuments = await collection.listDocuments();
-
-  const count = listDocuments.length;
-
   let ref = whereCollection(target, collection, whereInput);
+
+  const count = (await ref.count().get()).data().count;
 
   if (orderByInput) {
     ref = orderByCollection(collection, orderByInput);

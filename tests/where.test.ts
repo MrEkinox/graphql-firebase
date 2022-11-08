@@ -17,6 +17,7 @@ const collections: CollectionOptions[] = [
       endDate: { type: "Date" },
       testEnm: { type: TestEnum },
       testEnm2: { type: TestEnum },
+      boolean: { type: "Boolean" },
       array: { type: "String", list: true },
       any: { type: "Any" },
       viewNumber: { type: "Number", defaultValue: 50 },
@@ -93,6 +94,7 @@ describe("Where Test", () => {
         endDate: new Date("2023"),
         viewNumber: 50,
         array: ["1"],
+        boolean: true,
         any: { "87878-877667": true },
         customObject: {
           test: "string",
@@ -111,7 +113,25 @@ describe("Where Test", () => {
     await httpApolloServer.stop();
   });
 
-  it.only("Query with where any equal", async () => {
+  it.only("Query with where boolean equal", async () => {
+    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { boolean: { equalTo: true } },
+    });
+
+    expect(likes).not.toBeUndefined();
+    expect(likes.edges).toHaveLength(1);
+  });
+
+  it.only("Query with where boolean not equal", async () => {
+    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { boolean: { equalTo: false } },
+    });
+
+    expect(likes).not.toBeUndefined();
+    expect(likes.edges).toHaveLength(0);
+  });
+
+  it("Query with where any equal", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { any: { "87878-877667": { equalTo: true } } },
     });
@@ -120,7 +140,7 @@ describe("Where Test", () => {
     expect(likes.edges).toHaveLength(1);
   });
 
-  it.only("Query with where any not equal", async () => {
+  it("Query with where any not equal", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { any: { "87878-877669": { equalTo: true } } },
     });
