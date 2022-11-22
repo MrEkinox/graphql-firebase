@@ -115,7 +115,6 @@ const whereObjectCollection = (
       }
 
       const whereOperator = getWhereType(operator);
-      console.log(`${parentName}.${fieldName}`, whereOperator, whereFieldInput);
       return acc.where(
         `${parentName}.${fieldName}`,
         whereOperator,
@@ -185,13 +184,13 @@ export const whereCollection = (
               }
             }
           }
+          if (operator === "exists") {
+            return acc2.where(fieldName, value ? "!=" : "==", undefined);
+          }
+
           const whereOperator = getWhereType(operator);
           if (!whereOperator) return acc2;
 
-          if (operator === "exists") {
-            console.log({ fieldName, operator, value });
-            return acc2.where(fieldName, value ? "!=" : "==", undefined);
-          }
           if (fieldName === "id") {
             if (withoutID) return acc2;
             return acc2.where("__name__", whereOperator, value);
