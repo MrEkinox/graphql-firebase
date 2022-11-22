@@ -190,7 +190,7 @@ export const whereCollection = (
 
           if (operator === "exists") {
             console.log({ fieldName, operator, value });
-            return acc2.where(fieldName, value ? "!=" : "==", null);
+            return acc2.where(fieldName, value ? "!=" : "==", undefined);
           }
           if (fieldName === "id") {
             if (withoutID) return acc2;
