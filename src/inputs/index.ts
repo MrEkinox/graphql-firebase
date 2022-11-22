@@ -129,6 +129,7 @@ export const getWhereInput = (name: string, fields: ParsedFieldsOptions) =>
   inputObjectType({
     name: `${name}WhereInput`,
     definition(t) {
+      t.boolean("exists");
       // @ts-ignore
       ObjectEach(fields, (fieldName, options) => {
         switch (options.type) {

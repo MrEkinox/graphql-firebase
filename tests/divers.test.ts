@@ -56,6 +56,7 @@ const CREATE_DOCUMENT = gql`
 const QUERY_DOCUMENT = gql`
   query queryLike($where: LikeWhereInput) {
     likes(where: $where) {
+      count
       edges {
         node {
           id
@@ -92,6 +93,9 @@ describe("Divers Test", () => {
   it("Query without where", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT);
 
+    console.log(likes)
+
     expect(likes.edges).toHaveLength(1);
+    expect(likes.count).toEqual(1);
   });
 });

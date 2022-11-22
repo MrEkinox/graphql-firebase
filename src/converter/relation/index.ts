@@ -63,11 +63,9 @@ export const relationFromFirestore = async (
     if (!count) throw new Error("no where");
   }
 
-  const collection = targetCollection.where("__name__", "in", refs);
+  const documents = await firestore().getAll(...refs);
 
-  const documents = await collection.get();
-
-  return async.map(documents.docs, async (doc: typeof documents.docs[0]) =>
+  return async.map(documents, async (doc: typeof documents[0]) =>
     collectionTargetFromFirestore(doc, target)
   );
 };

@@ -67,7 +67,7 @@ describe("Pointer Test", () => {
   let postId = "";
   let createdById = "";
 
-  it("Create And Link", async () => {
+  it.only("Create And Link", async () => {
     const { createPost } = await graphQLClient.request(CREATE_DOCUMENT, {
       createdBy: { createAndLink: { username: "User1" } },
     });
@@ -79,7 +79,7 @@ describe("Pointer Test", () => {
     createdById = createPost.createdBy.id;
   });
 
-  it("Unlink", async () => {
+  it.only("Unlink", async () => {
     const { updatePost } = await graphQLClient.request(UPDATE_DOCUMENT, {
       id: postId,
       createdBy: null,
@@ -113,6 +113,24 @@ describe("Pointer Test", () => {
 
     expect(updatePost).not.toBeUndefined();
     expect(updatePost.createdBy.username).toEqual("User1");
+  });
+
+  it("Query with not equal where with exists", async () => {
+    const { posts } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { createdBy: { exists: true } },
+    });
+
+    expect(posts).not.toBeUndefined();
+    expect(posts.edges).toHaveLength(1);
+  });
+
+  it("Query with not equal where with not exists", async () => {
+    const { posts } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: { createdBy: { exists: false } },
+    });
+
+    expect(posts).not.toBeUndefined();
+    expect(posts.edges).toHaveLength(0);
   });
 
   it("Query without where", async () => {

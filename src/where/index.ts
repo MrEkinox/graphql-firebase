@@ -189,6 +189,7 @@ export const whereCollection = (
           if (!whereOperator) return acc2;
 
           if (operator === "exists") {
+            console.log({ fieldName, operator, value });
             return acc2.where(fieldName, value ? "!=" : "==", null);
           }
           if (fieldName === "id") {
