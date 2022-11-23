@@ -84,9 +84,11 @@ export const collectionWhereFromFirestore = async (
 
   const ref = whereCollection(target, collection, whereInput);
 
-  const documents = await ref.get();
+  const count = await (await ref.count().get()).data().count;
 
-  if (whereInput && !documents.size) throw new Error("no where");
+  console.log({ targetName, whereInput, count });
+
+  if (whereInput && !count) throw new Error("no where");
 
   const hasSubField = ObjectSome(target.fields, (fieldName, fieldOptions) => {
     const whereFieldInput = whereInput[fieldName];
@@ -95,6 +97,8 @@ export const collectionWhereFromFirestore = async (
   });
 
   if (!hasSubField) return;
+
+  const documents = await ref.get();
 
   const loop = await async.map(documents.docs, async (doc) => {
     return AsyncObjectReduce(
