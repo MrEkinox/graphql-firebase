@@ -161,6 +161,7 @@ export const whereCollection = (
             if (!whereID) return acc2;
 
             if (field.type === "Pointer" && whereOperator) {
+              console.log({ fieldName, whereOperator, whereID });
               const targetCollection = getTargetCollection(field.target, []);
               const targetDoc = targetCollection.doc(whereID);
 
