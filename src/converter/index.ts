@@ -30,6 +30,8 @@ export const targetToFirestore = (
     if (typeof fieldData === "undefined") {
       if (!currentData && typeof fieldOptions["defaultValue"] !== "undefined")
         return { ...acc, [fieldName]: fieldOptions["defaultValue"] };
+      if (!currentData && type === "Pointer")
+        return { ...acc, [fieldName]: null };
       return acc;
     }
 
