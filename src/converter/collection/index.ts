@@ -86,8 +86,6 @@ export const collectionWhereFromFirestore = async (
 
   const count = await (await ref.count().get()).data().count;
 
-  console.log({ targetName, whereInput, count });
-
   if (whereInput && !count) throw new Error("no where");
 
   const hasSubField = ObjectSome(target.fields, (fieldName, fieldOptions) => {
@@ -182,6 +180,8 @@ export const collectionFromFirestore = async (
   let ref = whereCollection(target, collection, whereInput);
 
   const count = (await ref.count().get()).data().count;
+
+  console.log({ count });
 
   if (orderByInput) {
     ref = orderByCollection(collection, orderByInput);

@@ -150,7 +150,7 @@ describe("Pointer Test", () => {
     expect(posts.edges).toHaveLength(0);
   });
 
-  it.only("Query with equal where", async () => {
+  it("Query with equal where", async () => {
     const { posts } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { createdBy: { id: { equalTo: createdById } } },
     });
@@ -166,6 +166,6 @@ describe("Pointer Test", () => {
     });
 
     expect(posts).not.toBeUndefined();
-    expect(posts.edges).toHaveLength(0);
+    expect(posts.edges).toHaveLength(1);
   });
 });
