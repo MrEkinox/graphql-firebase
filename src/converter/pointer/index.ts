@@ -38,10 +38,11 @@ export const pointerToFirestore = async (
 };
 
 export const pointerFromFirestore = async (
-  ref: firestore.DocumentReference,
+  ref: firestore.DocumentReference | null,
   targetName: string,
   whereInput?: WhereInput
 ) => {
+  if (!ref) return null;
   const target = getTarget(targetName);
   const targetCollection = getTargetCollection(targetName, []);
 

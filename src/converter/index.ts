@@ -27,6 +27,13 @@ export const targetToFirestore = (
 
     const { type } = fieldOptions;
 
+    if (type === "Pointer") {
+      const { target } = fieldOptions;
+      fieldData = await pointerToFirestore(fieldData, target, batch);
+
+      return { ...acc, [fieldName]: fieldData };
+    }
+
     if (typeof fieldData === "undefined") {
       if (!currentData && typeof fieldOptions["defaultValue"] !== "undefined")
         return { ...acc, [fieldName]: fieldOptions["defaultValue"] };
@@ -37,13 +44,6 @@ export const targetToFirestore = (
       if (fieldOptions.list)
         fieldData = await fileListToFireStore(fieldData, fieldLastData);
       else fieldData = await fileToFirestore(fieldData, fieldLastData);
-
-      return { ...acc, [fieldName]: fieldData };
-    }
-
-    if (type === "Pointer") {
-      const { target } = fieldOptions;
-      fieldData = await pointerToFirestore(fieldData, target, batch);
 
       return { ...acc, [fieldName]: fieldData };
     }
