@@ -185,6 +185,9 @@ export const whereCollection = (
             }
           }
           if (operator === "exists") {
+            if (field.type === "Pointer") {
+              return acc2.where(fieldName, value ? "!=" : "==", "");
+            }
             return acc2.where(fieldName, value ? "!=" : "==", null);
           }
 
