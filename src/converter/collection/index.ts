@@ -133,17 +133,17 @@ export const collectionTargetFromFirestore = async (
 ) => {
   const currentData = snapshot.data();
 
+  if (whereInput) {
+    const whereResult = await whereFilterEquality(whereInput, currentData);
+    if (!whereResult) throw new Error("no where");
+  }
+
   const convertedData = await targetFromFirestore(
     collection,
     currentData,
     whereInput,
     parentIds
   );
-
-  if (whereInput) {
-    const whereResult = await whereFilterEquality(whereInput, currentData);
-    if (!whereResult) throw new Error("no where");
-  }
 
   return { ...convertedData, ...parentIds };
 };
@@ -195,9 +195,9 @@ export const collectionFromFirestore = async (
     ref = ref.select(...fields);
   }
 
-  const documents = await ref.get();
-
   const countData = (await ref.count().get()).data().count;
+
+  const documents = await ref.get();
 
   const edges: any[] = await async.reduce(
     documents.docs,

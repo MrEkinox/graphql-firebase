@@ -33,8 +33,19 @@ input CountryWhereInput {
   notIn: [Country]
 }
 
-input CreatePostInput {
+input CreateLikeInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
   createdBy: UserPointerInput
+  customObject: LikeCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
+  users: UserRelationInput!
+  viewNumber: Number
+  viewNumber2: Number
 }
 
 input CreateUserInput {
@@ -56,7 +67,7 @@ input DateWhereInput {
   notIn: [Date]
 }
 
-input DeletePostInput {
+input DeleteLikeInput {
   id: ID!
 }
 
@@ -105,12 +116,163 @@ input IDWhereInput {
   notIn: [ID]
 }
 
+type Like {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdAt: Date!
+  createdBy: User
+  customObject: LikeCustomObject
+  endDate: Date
+  id: ID!
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
+  updatedAt: Date!
+  users: [User!]!
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+input LikeCollectionInput {
+  createAndAdd: [CreateLikeInput]
+  delete: [ID]
+  update: [UpdateLikeInput]
+}
+
+type LikeCustomObject {
+  customObject2: LikeCustomObjectCustomObject2
+  test: String!
+  test8: String
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+type LikeCustomObjectCustomObject2 {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3
+  test: String
+  test2: String
+}
+
+type LikeCustomObjectCustomObject2CustomObject3 {
+  test: String
+}
+
+input LikeCustomObjectCustomObject2CustomObject3Input {
+  test: String
+}
+
+input LikeCustomObjectCustomObject2CustomObject3WhereInput {
+  exists: Boolean
+  test: StringWhereInput
+}
+
+input LikeCustomObjectCustomObject2Input {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3Input
+  test: String
+  test2: String
+}
+
+input LikeCustomObjectCustomObject2WhereInput {
+  customObject3: LikeCustomObjectCustomObject2CustomObject3WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test2: StringWhereInput
+}
+
+input LikeCustomObjectInput {
+  customObject2: LikeCustomObjectCustomObject2Input
+  test: String!
+  test8: String
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+input LikeCustomObjectWhereInput {
+  customObject2: LikeCustomObjectCustomObject2WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test8: StringWhereInput
+  viewNumber: NumberWhereInput
+  viewNumber2: NumberWhereInput
+}
+
+type LikeEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Like
+}
+
+input LikeOrderByInput {
+  any: OrderByEnum
+  array: OrderByEnum
+  boolean: OrderByEnum
+  createdAt: OrderByEnum
+  createdBy: OrderByEnum
+  customObject: OrderByEnum
+  endDate: OrderByEnum
+  id: OrderByEnum
+  meetDate: OrderByEnum
+  testEnm: OrderByEnum
+  testEnm2: OrderByEnum
+  updatedAt: OrderByEnum
+  users: OrderByEnum
+  viewNumber: OrderByEnum
+  viewNumber2: OrderByEnum
+}
+
+input LikePointerInput {
+  createAndLink: CreateLikeInput
+  link: ID
+}
+
+input LikeRelationInput {
+  add: [ID]
+  createAndAdd: [CreateLikeInput]
+  remove: [ID]
+}
+
+input LikeWhereInput {
+  any: Any
+  array: StringWhereInput
+  boolean: BooleanWhereInput
+  createdAt: DateWhereInput
+  createdBy: UserWhereInput
+  customObject: LikeCustomObjectWhereInput
+  endDate: DateWhereInput
+  exists: Boolean
+  id: IDWhereInput
+  meetDate: DateWhereInput
+  testEnm: TestEnumWhereInput
+  testEnm2: TestEnumWhereInput
+  updatedAt: DateWhereInput
+  users: UserWhereInput
+  viewNumber: NumberWhereInput
+  viewNumber2: NumberWhereInput
+}
+
+type LikesCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [LikeEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
 type Mutation {
-  createPost(input: CreatePostInput!): Post
+  createLike(input: CreateLikeInput!): Like
   createUser(input: CreateUserInput!): User
-  deletePost(input: DeletePostInput!): Boolean
+  deleteLike(input: DeleteLikeInput!): Boolean
   deleteUser(input: DeleteUserInput!): Boolean
-  updatePost(force: Boolean, input: UpdatePostInput!): Post
+  updateLike(force: Boolean, input: UpdateLikeInput!): Like
   updateUser(force: Boolean, input: UpdateUserInput!): User
 }
 
@@ -177,70 +339,9 @@ input PhoneWhereInput {
   notIn: [Phone]
 }
 
-type Post {
-  createdAt: Date!
-  createdBy: User
-  id: ID!
-  updatedAt: Date!
-}
-
-input PostCollectionInput {
-  createAndAdd: [CreatePostInput]
-  delete: [ID]
-  update: [UpdatePostInput]
-}
-
-type PostEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Post
-}
-
-input PostOrderByInput {
-  createdAt: OrderByEnum
-  createdBy: OrderByEnum
-  id: OrderByEnum
-  updatedAt: OrderByEnum
-}
-
-input PostPointerInput {
-  createAndLink: CreatePostInput
-  link: ID
-}
-
-input PostRelationInput {
-  add: [ID]
-  createAndAdd: [CreatePostInput]
-  remove: [ID]
-}
-
-input PostWhereInput {
-  createdAt: DateWhereInput
-  createdBy: UserWhereInput
-  exists: Boolean
-  id: IDWhereInput
-  updatedAt: DateWhereInput
-}
-
-type PostsCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [PostEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
 type Query {
-  post(id: ID!): Post
-  posts(limit: Int, offset: Int, orderBy: PostOrderByInput, where: PostWhereInput): PostsCollection
+  like(id: ID!): Like
+  likes(limit: Int, offset: Int, orderBy: LikeOrderByInput, where: LikeWhereInput): LikesCollection
   user(id: ID!): User
   users(limit: Int, offset: Int, orderBy: UserOrderByInput, where: UserWhereInput): UsersCollection
 }
@@ -258,12 +359,40 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdatePostFieldsInput {
-  createdBy: UserPointerInput
+enum TestEnum {
+  other
 }
 
-input UpdatePostInput {
-  fields: UpdatePostFieldsInput!
+input TestEnumWhereInput {
+  arrayContains: TestEnum
+  equalTo: TestEnum
+  exists: Boolean
+  greaterThan: TestEnum
+  greaterThanOrEqualTo: TestEnum
+  in: [TestEnum]
+  lessThan: TestEnum
+  lessThanOrEqualTo: TestEnum
+  notEqualTo: TestEnum
+  notIn: [TestEnum]
+}
+
+input UpdateLikeFieldsInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdBy: UserPointerInput
+  customObject: LikeCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm: TestEnum
+  testEnm2: TestEnum
+  users: UserRelationInput
+  viewNumber: Number
+  viewNumber2: Number
+}
+
+input UpdateLikeInput {
+  fields: UpdateLikeFieldsInput!
   id: ID!
 }
 

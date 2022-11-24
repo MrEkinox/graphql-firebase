@@ -64,9 +64,11 @@ const CREATE_DOCUMENT = gql`
 const QUERY_DOCUMENT = gql`
   query queryLike($where: LikeWhereInput) {
     likes(where: $where) {
+      count
       edges {
         node {
           id
+          meetDate
           users {
             id
             username
@@ -113,7 +115,7 @@ describe("Where Test", () => {
     await httpApolloServer.stop();
   });
 
-  it.only("Query with where boolean equal", async () => {
+  it("Query with where boolean equal", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { boolean: { equalTo: true } },
     });
@@ -122,7 +124,7 @@ describe("Where Test", () => {
     expect(likes.edges).toHaveLength(1);
   });
 
-  it.only("Query with where boolean not equal", async () => {
+  it("Query with where boolean not equal", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { boolean: { equalTo: false } },
     });
@@ -185,7 +187,7 @@ describe("Where Test", () => {
     expect(likes.edges).toHaveLength(0);
   });
 
-  it("Query with where date is between", async () => {
+  it.only("Query with where date is between", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: {
         meetDate: { greaterThan: new Date("2021"), lessThan: new Date("2023") },
@@ -194,6 +196,7 @@ describe("Where Test", () => {
 
     expect(likes).not.toBeUndefined();
     expect(likes.edges).toHaveLength(1);
+    expect(likes.count).toEqual(1);
   });
 
   it("Query with where date is not between", async () => {
@@ -205,6 +208,7 @@ describe("Where Test", () => {
 
     expect(likes).not.toBeUndefined();
     expect(likes.edges).toHaveLength(0);
+    expect(likes.count).toEqual(0);
   });
 
   it("Query with where date is less", async () => {
