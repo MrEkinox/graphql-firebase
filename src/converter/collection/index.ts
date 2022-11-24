@@ -199,9 +199,7 @@ export const collectionFromFirestore = async (
 
   const countData = (await ref.count().get()).data().count;
 
-  const count = documents.size ? countData : documents.size;
-
-  const edges: any = await async.reduce(
+  const edges: any[] = await async.reduce(
     documents.docs,
     [] as any[],
     async (acc, doc: typeof documents.docs[0]) => {
@@ -219,6 +217,8 @@ export const collectionFromFirestore = async (
       }
     }
   );
+
+  const count = edges.length ? countData : edges.length;
 
   return { count, edges };
 };
