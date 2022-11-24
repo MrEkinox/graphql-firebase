@@ -179,10 +179,6 @@ export const collectionFromFirestore = async (
 
   let ref = whereCollection(target, collection, whereInput);
 
-  const count = (await ref.count().get()).data().count;
-
-  console.log({ count });
-
   if (orderByInput) {
     ref = orderByCollection(collection, orderByInput);
   }
@@ -200,6 +196,10 @@ export const collectionFromFirestore = async (
   }
 
   const documents = await ref.get();
+
+  const countData = (await ref.count().get()).data().count;
+
+  const count = documents.size ? countData : documents.size;
 
   const edges: any = await async.reduce(
     documents.docs,
