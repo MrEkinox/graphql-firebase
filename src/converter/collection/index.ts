@@ -220,5 +220,7 @@ export const collectionFromFirestore = async (
 
   const count = edges.length ? countData : edges.length;
 
+  console.log({ count, countData }, edges.length);
+
   return { count, edges };
 };
