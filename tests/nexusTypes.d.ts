@@ -51,28 +51,11 @@ export interface NexusGenInputs {
     notEqualTo?: boolean | null; // Boolean
     notIn?: Array<boolean | null> | null; // [Boolean]
   }
+  CreatePostInput: { // input type
+    createdBy?: NexusGenInputs['UserReferenceInput'] | null; // UserReferenceInput
+  }
   CreateUserInput: { // input type
-    description?: string | null; // String
-    email: string; // String!
-    firstname: string; // String!
-    isOnline?: boolean | null; // Boolean
-    lastname: string; // String!
-    liked?: NexusGenInputs['UserReferenceListInput'] | null; // UserReferenceListInput
-    modelInfos?: NexusGenInputs['CreateUserModelInfoInput'] | null; // CreateUserModelInfoInput
-    phone: string; // String!
-    picture: NexusGenInputs['UploadFileInput']; // UploadFileInput!
-    reviews?: NexusGenInputs['UserReviewCollectionInput'] | null; // UserReviewCollectionInput
-    type?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    viewers?: NexusGenInputs['UserReferenceListInput'] | null; // UserReferenceListInput
-  }
-  CreateUserModelInfoInput: { // input type
-    personality?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-  }
-  CreateUserReviewInput: { // input type
-    createdBy: NexusGenInputs['UserReferenceInput']; // UserReferenceInput!
-    message?: string | null; // String
-    note: number; // Int!
-    userId: string; // ID!
+    username: string; // String!
   }
   DateWhereInput: { // input type
     arrayContains?: NexusGenScalars['Date'] | null; // Date
@@ -86,10 +69,10 @@ export interface NexusGenInputs {
     notEqualTo?: NexusGenScalars['Date'] | null; // Date
     notIn?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
   }
-  DeleteUserInput: { // input type
+  DeletePostInput: { // input type
     id: string; // ID!
   }
-  DeleteUserReviewInput: { // input type
+  DeleteUserInput: { // input type
     id: string; // ID!
   }
   FileWhereInput: { // input type
@@ -119,17 +102,26 @@ export interface NexusGenInputs {
     notEqualTo?: number | null; // Int
     notIn?: Array<number | null> | null; // [Int]
   }
-  PersonalityEnumWhereInput: { // input type
-    arrayContains?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-    equalTo?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
+  PostCollectionInput: { // input type
+    createAndAdd?: Array<NexusGenInputs['CreatePostInput'] | null> | null; // [CreatePostInput]
+    delete?: Array<string | null> | null; // [ID]
+    update?: Array<NexusGenInputs['UpdatePostInput'] | null> | null; // [UpdatePostInput]
+  }
+  PostReferenceInput: { // input type
+    createAndLink?: NexusGenInputs['CreatePostInput'] | null; // CreatePostInput
+    link?: string | null; // ID
+  }
+  PostReferenceListInput: { // input type
+    add?: Array<string | null> | null; // [ID]
+    createAndAdd?: Array<NexusGenInputs['CreatePostInput'] | null> | null; // [CreatePostInput]
+    remove?: Array<string | null> | null; // [ID]
+  }
+  PostWhereInput: { // input type
+    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    createdBy?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
     exists?: boolean | null; // Boolean
-    greaterThan?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-    greaterThanOrEqualTo?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-    in?: Array<NexusGenEnums['PersonalityEnum'] | null> | null; // [PersonalityEnum]
-    lessThan?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-    lessThanOrEqualTo?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-    notEqualTo?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-    notIn?: Array<NexusGenEnums['PersonalityEnum'] | null> | null; // [PersonalityEnum]
+    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
+    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
   }
   StringWhereInput: { // input type
     arrayContains?: string | null; // String
@@ -143,36 +135,19 @@ export interface NexusGenInputs {
     notEqualTo?: string | null; // String
     notIn?: Array<string | null> | null; // [String]
   }
+  UpdatePostFieldsInput: { // input type
+    createdBy?: NexusGenInputs['UserReferenceInput'] | null; // UserReferenceInput
+  }
+  UpdatePostInput: { // input type
+    fields: NexusGenInputs['UpdatePostFieldsInput']; // UpdatePostFieldsInput!
+    id: string; // ID!
+  }
   UpdateUserFieldsInput: { // input type
-    description?: string | null; // String
-    email?: string | null; // String
-    firstname?: string | null; // String
-    isOnline?: boolean | null; // Boolean
-    lastname?: string | null; // String
-    liked?: NexusGenInputs['UserReferenceListInput'] | null; // UserReferenceListInput
-    modelInfos?: NexusGenInputs['UpdateUserModelInfoInput'] | null; // UpdateUserModelInfoInput
-    phone?: string | null; // String
-    picture?: NexusGenInputs['UploadFileInput'] | null; // UploadFileInput
-    reviews?: NexusGenInputs['UserReviewCollectionInput'] | null; // UserReviewCollectionInput
-    type?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    viewers?: NexusGenInputs['UserReferenceListInput'] | null; // UserReferenceListInput
+    username?: string | null; // String
   }
   UpdateUserInput: { // input type
     fields: NexusGenInputs['UpdateUserFieldsInput']; // UpdateUserFieldsInput!
     id: string; // ID!
-  }
-  UpdateUserModelInfoInput: { // input type
-    personality?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-  }
-  UpdateUserReviewFieldsInput: { // input type
-    createdBy?: NexusGenInputs['UserReferenceInput'] | null; // UserReferenceInput
-    message?: string | null; // String
-    note?: number | null; // Int
-  }
-  UpdateUserReviewInput: { // input type
-    fields: NexusGenInputs['UpdateUserReviewFieldsInput']; // UpdateUserReviewFieldsInput!
-    id: string; // ID!
-    userId: string; // ID!
   }
   UploadFileInput: { // input type
     link?: NexusGenInputs['UploadFileLinkInput'] | null; // UploadFileLinkInput
@@ -192,10 +167,6 @@ export interface NexusGenInputs {
     delete?: Array<string | null> | null; // [ID]
     update?: Array<NexusGenInputs['UpdateUserInput'] | null> | null; // [UpdateUserInput]
   }
-  UserModelInfoWhereInput: { // input type
-    exists?: boolean | null; // Boolean
-    personality?: NexusGenInputs['PersonalityEnumWhereInput'] | null; // PersonalityEnumWhereInput
-  }
   UserReferenceInput: { // input type
     createAndLink?: NexusGenInputs['CreateUserInput'] | null; // CreateUserInput
     link?: string | null; // ID
@@ -205,58 +176,16 @@ export interface NexusGenInputs {
     createAndAdd?: Array<NexusGenInputs['CreateUserInput'] | null> | null; // [CreateUserInput]
     remove?: Array<string | null> | null; // [ID]
   }
-  UserReviewCollectionInput: { // input type
-    createAndAdd?: Array<NexusGenInputs['CreateUserReviewInput'] | null> | null; // [CreateUserReviewInput]
-    delete?: Array<string | null> | null; // [ID]
-    update?: Array<NexusGenInputs['UpdateUserReviewInput'] | null> | null; // [UpdateUserReviewInput]
-  }
-  UserReviewReferenceInput: { // input type
-    createAndLink?: NexusGenInputs['CreateUserReviewInput'] | null; // CreateUserReviewInput
-    link?: string | null; // ID
-  }
-  UserReviewReferenceListInput: { // input type
-    add?: Array<string | null> | null; // [ID]
-    createAndAdd?: Array<NexusGenInputs['CreateUserReviewInput'] | null> | null; // [CreateUserReviewInput]
-    remove?: Array<string | null> | null; // [ID]
-  }
-  UserReviewWhereInput: { // input type
-    createdBy?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
-    exists?: boolean | null; // Boolean
-    message?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
-    note?: NexusGenInputs['IntWhereInput'] | null; // IntWhereInput
-  }
-  UserTypeEnumWhereInput: { // input type
-    arrayContains?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    equalTo?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    exists?: boolean | null; // Boolean
-    greaterThan?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    greaterThanOrEqualTo?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    in?: Array<NexusGenEnums['UserTypeEnum'] | null> | null; // [UserTypeEnum]
-    lessThan?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    lessThanOrEqualTo?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    notEqualTo?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
-    notIn?: Array<NexusGenEnums['UserTypeEnum'] | null> | null; // [UserTypeEnum]
-  }
   UserWhereInput: { // input type
-    description?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
-    email?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
+    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
     exists?: boolean | null; // Boolean
-    firstname?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
-    isOnline?: NexusGenInputs['BooleanWhereInput'] | null; // BooleanWhereInput
-    lastname?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
-    liked?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
-    modelInfos?: NexusGenInputs['UserModelInfoWhereInput'] | null; // UserModelInfoWhereInput
-    phone?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
-    picture?: NexusGenInputs['FileWhereInput'] | null; // FileWhereInput
-    reviews?: NexusGenInputs['UserReviewWhereInput'] | null; // UserReviewWhereInput
-    type?: NexusGenInputs['UserTypeEnumWhereInput'] | null; // UserTypeEnumWhereInput
-    viewers?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
+    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
+    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    username?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
   }
 }
 
 export interface NexusGenEnums {
-  PersonalityEnum: "artist" | "charmer" | "dreamer" | "enthusiastic" | "epicurean" | "reserved" | "talkative"
-  UserTypeEnum: "brand" | "model" | "partner"
 }
 
 export interface NexusGenScalars {
@@ -283,20 +212,26 @@ export interface NexusGenObjects {
     hasPreviousPage: boolean; // Boolean!
     startCursor?: string | null; // String
   }
+  Post: { // root type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  PostCollection: { // root type
+    count?: number | null; // Int
+    edges?: Array<NexusGenRootTypes['PostEdge'] | null> | null; // [PostEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  PostEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['Post'] | null; // Post
+  }
   Query: {};
   User: { // root type
     createdAt: NexusGenScalars['Date']; // Date!
-    description?: string | null; // String
-    email: string; // String!
-    firstname: string; // String!
     id: string; // ID!
-    isOnline?: boolean | null; // Boolean
-    lastname: string; // String!
-    modelInfos?: NexusGenRootTypes['UserModelInfo'] | null; // UserModelInfo
-    phone: string; // String!
-    picture: NexusGenRootTypes['File']; // File!
-    type?: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
     updatedAt: NexusGenScalars['Date']; // Date!
+    username: string; // String!
   }
   UserCollection: { // root type
     count?: number | null; // Int
@@ -306,26 +241,6 @@ export interface NexusGenObjects {
   UserEdge: { // root type
     cursor: string; // String!
     node?: NexusGenRootTypes['User'] | null; // User
-  }
-  UserModelInfo: { // root type
-    personality?: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-  }
-  UserReview: { // root type
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // ID!
-    message?: string | null; // String
-    note: number; // Int!
-    updatedAt: NexusGenScalars['Date']; // Date!
-    userId: string; // ID!
-  }
-  UserReviewCollection: { // root type
-    count?: number | null; // Int
-    edges?: Array<NexusGenRootTypes['UserReviewEdge'] | null> | null; // [UserReviewEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  UserReviewEdge: { // root type
-    cursor: string; // String!
-    node?: NexusGenRootTypes['UserReview'] | null; // UserReview
   }
 }
 
@@ -337,7 +252,7 @@ export interface NexusGenUnions {
 
 export type NexusGenRootTypes = NexusGenObjects
 
-export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
+export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
   File: { // field return type
@@ -346,10 +261,12 @@ export interface NexusGenFieldTypes {
     url: string | null; // String
   }
   Mutation: { // field return type
+    createPost: NexusGenRootTypes['Post'] | null; // Post
     createUser: NexusGenRootTypes['User'] | null; // User
-    createUserReview: NexusGenRootTypes['UserReview'] | null; // UserReview
+    deletePost: boolean | null; // Boolean
+    deleteUser: boolean | null; // Boolean
+    updatePost: NexusGenRootTypes['Post'] | null; // Post
     updateUser: NexusGenRootTypes['User'] | null; // User
-    updateUserReview: NexusGenRootTypes['UserReview'] | null; // UserReview
   }
   PageInfo: { // field return type
     endCursor: string | null; // String
@@ -357,28 +274,32 @@ export interface NexusGenFieldTypes {
     hasPreviousPage: boolean; // Boolean!
     startCursor: string | null; // String
   }
+  Post: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    createdBy: NexusGenRootTypes['User'] | null; // User
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  PostCollection: { // field return type
+    count: number | null; // Int
+    edges: Array<NexusGenRootTypes['PostEdge'] | null> | null; // [PostEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  PostEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['Post'] | null; // Post
+  }
   Query: { // field return type
+    post: NexusGenRootTypes['Post'] | null; // Post
+    posts: NexusGenRootTypes['PostCollection'] | null; // PostCollection
     user: NexusGenRootTypes['User'] | null; // User
-    userReview: NexusGenRootTypes['UserReview'] | null; // UserReview
-    userReviews: NexusGenRootTypes['UserReviewCollection'] | null; // UserReviewCollection
     users: NexusGenRootTypes['UserCollection'] | null; // UserCollection
   }
   User: { // field return type
     createdAt: NexusGenScalars['Date']; // Date!
-    description: string | null; // String
-    email: string; // String!
-    firstname: string; // String!
     id: string; // ID!
-    isOnline: boolean | null; // Boolean
-    lastname: string; // String!
-    liked: Array<NexusGenRootTypes['User'] | null> | null; // [User]
-    modelInfos: NexusGenRootTypes['UserModelInfo'] | null; // UserModelInfo
-    phone: string; // String!
-    picture: NexusGenRootTypes['File']; // File!
-    reviews: NexusGenRootTypes['UserReviewCollection'] | null; // UserReviewCollection
-    type: NexusGenEnums['UserTypeEnum'] | null; // UserTypeEnum
     updatedAt: NexusGenScalars['Date']; // Date!
-    viewers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
+    username: string; // String!
   }
   UserCollection: { // field return type
     count: number | null; // Int
@@ -389,27 +310,6 @@ export interface NexusGenFieldTypes {
     cursor: string; // String!
     node: NexusGenRootTypes['User'] | null; // User
   }
-  UserModelInfo: { // field return type
-    personality: NexusGenEnums['PersonalityEnum'] | null; // PersonalityEnum
-  }
-  UserReview: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    createdBy: NexusGenRootTypes['User']; // User!
-    id: string; // ID!
-    message: string | null; // String
-    note: number; // Int!
-    updatedAt: NexusGenScalars['Date']; // Date!
-    userId: string; // ID!
-  }
-  UserReviewCollection: { // field return type
-    count: number | null; // Int
-    edges: Array<NexusGenRootTypes['UserReviewEdge'] | null> | null; // [UserReviewEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  UserReviewEdge: { // field return type
-    cursor: string; // String!
-    node: NexusGenRootTypes['UserReview'] | null; // UserReview
-  }
 }
 
 export interface NexusGenFieldTypeNames {
@@ -419,10 +319,12 @@ export interface NexusGenFieldTypeNames {
     url: 'String'
   }
   Mutation: { // field return type name
+    createPost: 'Post'
     createUser: 'User'
-    createUserReview: 'UserReview'
+    deletePost: 'Boolean'
+    deleteUser: 'Boolean'
+    updatePost: 'Post'
     updateUser: 'User'
-    updateUserReview: 'UserReview'
   }
   PageInfo: { // field return type name
     endCursor: 'String'
@@ -430,28 +332,32 @@ export interface NexusGenFieldTypeNames {
     hasPreviousPage: 'Boolean'
     startCursor: 'String'
   }
+  Post: { // field return type name
+    createdAt: 'Date'
+    createdBy: 'User'
+    id: 'ID'
+    updatedAt: 'Date'
+  }
+  PostCollection: { // field return type name
+    count: 'Int'
+    edges: 'PostEdge'
+    pageInfo: 'PageInfo'
+  }
+  PostEdge: { // field return type name
+    cursor: 'String'
+    node: 'Post'
+  }
   Query: { // field return type name
+    post: 'Post'
+    posts: 'PostCollection'
     user: 'User'
-    userReview: 'UserReview'
-    userReviews: 'UserReviewCollection'
     users: 'UserCollection'
   }
   User: { // field return type name
     createdAt: 'Date'
-    description: 'String'
-    email: 'String'
-    firstname: 'String'
     id: 'ID'
-    isOnline: 'Boolean'
-    lastname: 'String'
-    liked: 'User'
-    modelInfos: 'UserModelInfo'
-    phone: 'String'
-    picture: 'File'
-    reviews: 'UserReviewCollection'
-    type: 'UserTypeEnum'
     updatedAt: 'Date'
-    viewers: 'User'
+    username: 'String'
   }
   UserCollection: { // field return type name
     count: 'Int'
@@ -462,69 +368,45 @@ export interface NexusGenFieldTypeNames {
     cursor: 'String'
     node: 'User'
   }
-  UserModelInfo: { // field return type name
-    personality: 'PersonalityEnum'
-  }
-  UserReview: { // field return type name
-    createdAt: 'Date'
-    createdBy: 'User'
-    id: 'ID'
-    message: 'String'
-    note: 'Int'
-    updatedAt: 'Date'
-    userId: 'ID'
-  }
-  UserReviewCollection: { // field return type name
-    count: 'Int'
-    edges: 'UserReviewEdge'
-    pageInfo: 'PageInfo'
-  }
-  UserReviewEdge: { // field return type name
-    cursor: 'String'
-    node: 'UserReview'
-  }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
+    createPost: { // args
+      input: NexusGenInputs['CreatePostInput']; // CreatePostInput!
+    }
     createUser: { // args
       input: NexusGenInputs['CreateUserInput']; // CreateUserInput!
     }
-    createUserReview: { // args
-      input: NexusGenInputs['CreateUserReviewInput']; // CreateUserReviewInput!
+    deletePost: { // args
+      input: NexusGenInputs['DeletePostInput']; // DeletePostInput!
+    }
+    deleteUser: { // args
+      input: NexusGenInputs['DeleteUserInput']; // DeleteUserInput!
+    }
+    updatePost: { // args
+      input: NexusGenInputs['UpdatePostInput']; // UpdatePostInput!
     }
     updateUser: { // args
       input: NexusGenInputs['UpdateUserInput']; // UpdateUserInput!
     }
-    updateUserReview: { // args
-      input: NexusGenInputs['UpdateUserReviewInput']; // UpdateUserReviewInput!
-    }
   }
   Query: {
-    user: { // args
+    post: { // args
       id: string; // ID!
     }
-    userReview: { // args
-      id: string; // ID!
-      userId: string; // ID!
-    }
-    userReviews: { // args
+    posts: { // args
       limit: number | null; // Int
       offset?: number | null; // Int
-      userId: string; // ID!
-      where?: NexusGenInputs['UserReviewWhereInput'] | null; // UserReviewWhereInput
+      where?: NexusGenInputs['PostWhereInput'] | null; // PostWhereInput
+    }
+    user: { // args
+      id: string; // ID!
     }
     users: { // args
       limit: number | null; // Int
       offset?: number | null; // Int
       where?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
-    }
-  }
-  User: {
-    reviews: { // args
-      limit: number | null; // Int
-      offset?: number | null; // Int
-      where?: NexusGenInputs['UserReviewWhereInput'] | null; // UserReviewWhereInput
     }
   }
 }
@@ -539,7 +421,7 @@ export type NexusGenObjectNames = keyof NexusGenObjects;
 
 export type NexusGenInputNames = keyof NexusGenInputs;
 
-export type NexusGenEnumNames = keyof NexusGenEnums;
+export type NexusGenEnumNames = never;
 
 export type NexusGenInterfaceNames = never;
 

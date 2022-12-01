@@ -1,244 +1,114 @@
-import { ApolloServer } from "apollo-server-express";
 import {
-  connectionPlugin,
-  declarativeWrappingPlugin,
+  objectType as nexusObjectType,
+  enumType as nexusEnumType,
+  scalarType as nexusScalarType,
+  NexusEnumTypeConfig,
+  NexusObjectTypeConfig,
+  NexusScalarTypeConfig,
+  makeSchema as NexusMakeSchema,
+  SchemaConfig,
   fieldAuthorizePlugin,
-  makeSchema,
-  arg,
-  objectType,
-} from "nexus";
-import {
-  isNexusEnumTypeDef,
-  isNexusScalarTypeDef,
-  ObjectDefinitionBlock,
+  declarativeWrappingPlugin,
+  connectionPlugin,
 } from "nexus/dist/core";
+import * as Scalars from "./scalars";
+import {
+  getCollectionInput,
+  getCreateInput,
+  getDeleteInput,
+  getObjectUpdateInput,
+  getReferenceInput,
+  getReferenceListInput,
+} from "./inputs";
+import * as fileInput from "./file";
+import { getCreateMutation, getDeleteMutation, getUpdateMutation } from "./mutations";
+import { getAllQuery, getQuery } from "./queries";
+import { getParentIdLabel } from "./utils";
 import {
   createDefaultWhereInputs,
-  getObjectInput,
   getFieldWhereInput,
-  getInputs,
   getWhereInput,
-} from "./inputs";
-import { GraphQLFirebaseOptions } from "./interfaces";
-import { getMutations } from "./mutations";
-import {
-  parseCollections,
-  ParsedCollectionOptions,
-  ParsedCollectionsOptions,
-  ParsedFieldOptions,
-  ParsedFieldsOptions,
-} from "./parser";
-import { getQueries } from "./queries";
-import {
-  capitalize,
-  getParentIds,
-  ObjectEach,
-  ObjectMap,
-  ObjectReduce,
-} from "./utils";
-import * as CustomScalars from "./scalars";
-import { collectionFromFirestore } from "./converter/collection";
-import { UploadFileInput, UploadFileListInput } from "./converter/file";
+} from "./where";
+import { GraphQLFirebasePlugin } from "./plugin";
 
-export let parsedCollections: ParsedCollectionsOptions;
+export { GraphQLFirebasePlugin } from "./plugin";
 
-const getFieldDefinition = (
-  t: ObjectDefinitionBlock<any>,
-  collectionName: string,
-  name: string,
-  options: ParsedFieldOptions
-) => {
-  const { type } = options;
-  switch (type) {
-    case "Collection":
-      t.connectionField(name, {
-        getConnectionName: () =>
-          `${collectionName}${capitalize(name)}Collection`,
-        deprecation: options.deprecation,
-        authorize: options.authorize,
-        description: options.description,
-        // @ts-ignore
-        type: options.target,
-        additionalArgs: {
-          limit: arg({ type: "Int", default: 50 }),
-          offset: arg({ type: "Int", default: 0 }),
-          where: arg({ type: `${options.target}WhereInput` }),
-          orderBy: arg({ type: `${options.target}OrderByInput` }),
-        },
-        resolve: async (root, { where, orderBy, ...input }, ctx, info) =>
-          collectionFromFirestore(
-            options.target,
-            input,
-            where,
-            orderBy,
-            root,
-            info
-          ),
-      });
-      break;
-    case "Relation":
-      // @ts-ignore
-      t.field(name, { ...options, type: options.target, list: true });
-      break;
-    case "Pointer":
-      // @ts-ignore
-      t.field(name, { ...options, type: options.target });
-      break;
-    case "Object":
-      // @ts-ignore
-      const newCollectionName = collectionName + capitalize(name);
-      t.field(name, {
-        ...options,
-        type: objectType({
-          name: newCollectionName,
-          definition: (t) => {
-            getFieldsDefinition(t, newCollectionName, options.fields);
-          },
-        }),
-      });
-      break;
+export const enumType = (options: NexusEnumTypeConfig<string>) => {
+  const type = nexusEnumType(options);
+  const whereInput = getFieldWhereInput(type.name);
 
-    default:
-      if (isNexusEnumTypeDef(type) || isNexusScalarTypeDef(type)) {
-        // @ts-ignore
-        t.field(name, { ...options, type: type.name });
-      } else if (type) {
-        // @ts-ignore
-        t.field(name, { ...options });
-      }
-      break;
-  }
+  return [type, whereInput];
 };
 
-const getFieldsDefinition = (
-  t: ObjectDefinitionBlock<any>,
-  collectionName: string,
-  fields: ParsedFieldsOptions
-) => {
-  ObjectEach(fields, (fieldName, fieldOptions) => {
-    getFieldDefinition(t, collectionName, fieldName, fieldOptions);
-  });
+export const scalarType = (options: NexusScalarTypeConfig<string>) => {
+  const type = nexusScalarType(options);
+  const whereInput = getFieldWhereInput(type.name);
+
+  return [type, whereInput];
 };
 
-const createCollection = (
-  name: string,
-  collection: ParsedCollectionOptions
-) => {
-  const parentIds = getParentIds(collection.parent);
+export const objectType = (options: NexusObjectTypeConfig<string>) => {
+  const type = nexusObjectType(options);
+  const whereInput = getWhereInput(options);
+  const createInput = getCreateInput(options);
+  const updateInput = getObjectUpdateInput(options);
 
-  const type = objectType({
-    name,
-    definition: (t) => {
-      parentIds?.forEach((id) => t.id(id, { required: true }));
-      getFieldsDefinition(t, name, collection.fields);
-    },
-  });
-
-  const inputs = getInputs(name, collection.fields);
-
-  const mutations = getMutations(collection, parentIds);
-  const queries = getQueries(collection);
-
-  return { type, inputs, mutations, queries };
+  return [type, whereInput, createInput, updateInput];
 };
 
-const createAllCollection = () => {
-  return ObjectMap(parsedCollections, (name, collection) => {
-    return createCollection(name, collection);
-  });
-};
+export interface FirestoreTypeOptions extends NexusObjectTypeConfig<string> {
+  parents?: string[];
+}
 
-const flattenObjectType = (name: string, options: ParsedFieldsOptions) => {
-  return ObjectReduce(
-    options,
-    (acc, fieldName, options2) => {
-      const capitalizeName = name + capitalize(fieldName);
-      if (options2.type === "Object") {
-        const underObjects = flattenObjectType(capitalizeName, options2.fields);
-        const objectFields: ParsedFieldsOptions = ObjectReduce(
-          options2.fields,
-          (acc, fieldName2, options2) => {
-            const capitalizeFieldName = capitalizeName + capitalize(fieldName2);
-            if (options2.type === "Object") {
-              return {
-                ...acc,
-                [fieldName2]: {
-                  ...options2,
-                  type: `${capitalizeFieldName}Input`,
-                },
-              };
-            }
-            return { ...acc, [fieldName2]: options2 };
-          },
-          {}
-        );
-        const whereFields: ParsedFieldsOptions = ObjectReduce(
-          options2.fields,
-          (acc, fieldName2, options2) => {
-            const capitalizeFieldName = capitalizeName + capitalize(fieldName2);
-            if (options2.type === "Object") {
-              return {
-                ...acc,
-                [fieldName2]: { ...options2, type: `${capitalizeFieldName}` },
-              };
-            }
-            return { ...acc, [fieldName2]: options2 };
-          },
-          {}
-        );
-        const objectInput = getObjectInput(capitalizeName, objectFields);
-        const objectWhereInput = getWhereInput(capitalizeName, whereFields);
-        return {
-          ...acc,
-          ...underObjects,
-          [capitalizeName]: [objectInput, objectWhereInput],
-        };
-      }
-      if (
-        isNexusEnumTypeDef(options2.type) ||
-        isNexusScalarTypeDef(options2.type)
-      ) {
-        const whereInput = getFieldWhereInput(options2.type.name);
-        return {
-          ...acc,
-          [options2.type.name]: options2.type,
-          [whereInput.name]: whereInput,
-        };
-      }
-      return acc;
-    },
-    {}
-  );
-};
+export const firestoreType = (options: FirestoreTypeOptions) => {
+  const parentIds = getParentIdLabel(options.parents);
 
-const creatAllCustomTypeInput = () => {
-  return ObjectReduce(parsedCollections, (acc, collectionName, collection) => {
-    const typeInputs = flattenObjectType(collectionName, collection.fields);
-
-    return { ...acc, ...typeInputs };
-  });
-};
-
-export const GraphQLFirebase = (options: GraphQLFirebaseOptions) => {
-  parsedCollections = parseCollections(options.collections);
-  const customTypeInputs = creatAllCustomTypeInput();
-  const defaultWhereInputs = createDefaultWhereInputs();
-  const collectionSchemas = createAllCollection();
-
-  const schema = makeSchema({
+  const type = nexusObjectType({
     ...options,
-    types: [
-      options.types,
-      defaultWhereInputs,
-      customTypeInputs,
-      collectionSchemas,
-      CustomScalars,
-      UploadFileListInput,
-      UploadFileInput,
-    ],
+    definition: (t) => {
+      parentIds?.forEach((parentId) => t.id(parentId, { required: true }));
+      t.id("id", { required: true });
+      t.field("createdAt", { type: "Date", required: true });
+      t.field("updatedAt", { type: "Date", required: true });
+      options.definition(t);
+    },
+  });
+
+  const singleQuery = getQuery(options);
+  const allQuery = getAllQuery(options);
+  const whereInput = getWhereInput(type.value);
+  const deleteMutation = getDeleteMutation(options)
+  const createMutation = getCreateMutation(options);
+  const updateMutation = getUpdateMutation(options);
+  const relationInput = getReferenceInput(options.name);
+  const pointerInput = getReferenceListInput(options.name);
+  const collectionInput = getCollectionInput(options.name);
+
+  return [
+    type,
+    deleteMutation,
+    whereInput,
+    allQuery,
+    singleQuery,
+    updateMutation,
+    createMutation,
+    relationInput,
+    pointerInput,
+    collectionInput,
+  ];
+};
+
+export const makeSchema = (config: SchemaConfig) => {
+  const defaultWhere = createDefaultWhereInputs();
+
+  return NexusMakeSchema({
+    ...config,
+    types: [...config.types, defaultWhere, Scalars, fileInput],
     plugins: [
-      ...(options.plugins || []),
+      ...(config.plugins || []),
+      fieldAuthorizePlugin(),
       declarativeWrappingPlugin(),
+      GraphQLFirebasePlugin(),
       connectionPlugin({
         includeNodesField: false,
         disableBackwardPagination: true,
@@ -247,22 +117,8 @@ export const GraphQLFirebase = (options: GraphQLFirebaseOptions) => {
         extendConnection: {
           count: { type: "Int", requireResolver: false },
         },
-        getConnectionName: (fieldName) => `${capitalize(fieldName)}Collection`,
+        getConnectionName: (fieldName) => `${fieldName}Collection`,
       }),
-      fieldAuthorizePlugin(),
     ],
   });
-
-  const server = new ApolloServer({
-    debug: true,
-    csrfPrevention: true,
-    cache: "bounded",
-    introspection: true,
-    ...options,
-    // @ts-ignore
-    schema: schema,
-    plugins: options.apolloPlugins,
-  });
-
-  return server;
 };

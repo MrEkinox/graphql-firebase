@@ -1,56 +1,115 @@
-import * as admin from "firebase-admin";
-import async from "async";
-import { ObjectString } from "../interfaces";
-import { parsedCollections } from "..";
-import { NexusInputObjectTypeDef } from "nexus/dist/core";
+import { GraphQLSchema, isListType, isTypeSubTypeOf } from "graphql";
+import {
+  AllOutputTypes,
+  isNexusEnumTypeDef,
+  isNexusInputObjectTypeDef,
+  isNexusObjectTypeDef,
+  isNexusScalarTypeDef,
+  NexusInputFieldConfigWithName,
+  ObjectDefinitionBlock,
+} from "nexus/dist/core";
+import { UploadFileInput, UploadFileListInput } from "../file";
 
-export const hasType = (
-  typeName: string,
-  values: ObjectString<NexusInputObjectTypeDef<any>>
-) => {
-  return !!Object.keys(values).find((key) => {
-    const value = values[key];
-    return value.name === typeName;
-  });
+export type FirestoreFieldType =
+  | AllOutputTypes
+  | "File"
+  | "FileList"
+  | "Collection"
+  | "Reference"
+  | "ReferenceList"
+  | "Object";
+
+export type FirestoreField = Omit<
+  NexusInputFieldConfigWithName<any, string>,
+  "type"
+> & {
+  type: FirestoreFieldType;
+  target?: string;
 };
 
-export const ObjectReduce = <T, U>(
-  object: ObjectString<T>,
-  callback: (acc: any, key: string, value: T, index: number) => any,
-  initialValue: any = {}
-): U =>
-  Object.keys(object).reduce(
-    (acc, key, index) => callback(acc, key, object[key], index),
-    initialValue
-  );
+type NexusField = NexusInputFieldConfigWithName<any, string>;
 
-export const ObjectMap = <T>(
-  object: ObjectString<T>,
-  callback: (key: string, value: T, index: number) => any
-) => Object.keys(object).map((key, index) => callback(key, object[key], index));
+const getTargetName = (type: NexusField["type"] = "Any"): string => {
+  if (
+    isNexusObjectTypeDef(type) ||
+    isNexusInputObjectTypeDef(type) ||
+    isNexusScalarTypeDef(type) ||
+    isNexusEnumTypeDef(type)
+  ) {
+    return type.name;
+  }
+  return type.toString();
+};
 
-export const ObjectSome = <T>(
-  object: ObjectString<T>,
-  callback: (key: string, value: T, index: number) => boolean
-) =>
-  Object.keys(object).some((key, index) => callback(key, object[key], index));
+export const getDefinitionFields = (
+  definition: (t: ObjectDefinitionBlock<string>) => void
+) => {
+  let fields: FirestoreField[] = [];
 
-export const ObjectEach = <T>(
-  object: ObjectString<T>,
-  callback: (key: string, value: T, index: number) => any
-) =>
-  Object.keys(object).forEach((key, index) =>
-    callback(key, object[key], index)
-  );
+  definition({
+    collection: (name: string, opts?: NexusField | undefined) => {
+      const target = getTargetName(opts?.type);
+      fields.push({
+        ...opts,
+        name,
+        type: "Collection",
+        target,
+        list: undefined,
+      });
+    },
+    ref: (name: string, opts?: NexusField | undefined) => {
+      const target = getTargetName(opts?.type);
+      if (!opts?.list) {
+        fields.push({ ...opts, name, type: "Reference", target });
+        return;
+      }
+      fields.push({
+        ...opts,
+        name,
+        type: "ReferenceList",
+        target,
+        list: undefined,
+      });
+    },
+    object: (name: string, opts?: NexusField | undefined) => {
+      const target = getTargetName(opts?.type);
+      fields.push({ name, ...opts, type: "Object", target });
+    },
+    boolean: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: "Boolean" });
+    },
+    string: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: "String" });
+    },
+    int: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: "Int" });
+    },
+    id: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: "ID" });
+    },
+    file: (name: string, opts?: NexusField | undefined) => {
+      if (!opts?.list) {
+        fields.push({ ...opts, name, type: "File", list: undefined });
+        return;
+      }
+      fields.push({ ...opts, name, type: "FileList", list: undefined });
+    },
+    float: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: "Float" });
+    },
+    field: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: opts?.type as any });
+    },
+    date: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: "Date" });
+    },
+    any: (name: string, opts?: NexusField | undefined) => {
+      fields.push({ name, ...opts, type: "Any" });
+    },
+  } as any);
 
-export const AsyncObjectReduce = <T>(
-  object: ObjectString<T>,
-  callback: (acc: any, key: string, value: T) => any,
-  initialValue?: any
-): any =>
-  async.reduce(Object.keys(object), initialValue, async (acc, key) =>
-    callback(acc, key, object[key])
-  );
+  return fields.filter(({ type }) => type);
+};
 
 export const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -60,74 +119,59 @@ export const firstLowercase = (str: string) => {
   return str.charAt(0).toLowerCase() + str.slice(1);
 };
 
+export const getParentIdLabel = (parentIds?: string[]) =>
+  parentIds?.map((parent) => firstLowercase(`${parent}Id`));
+
 export const plural = (str: string) => {
   if (str.endsWith("y"))
     return str.charAt(0).toLowerCase() + str.substring(1, -1) + "ies";
   return str.charAt(0).toLowerCase() + str.slice(1) + "s";
 };
 
-export const getTarget = (name: string) => {
-  return parsedCollections[name];
-};
-
-const getTargetName = (name: string, parent = "") => {
-  return name.replace(parent, "");
-};
-
-export const getCollectionName = (name: string, parent?: string) => {
-  const targetName = getTargetName(name, parent);
-
-  return plural(targetName);
-};
-
-export const getTargetCollection = (
+export const getSchemaFields = (
   name: string,
-  ids: string[]
-): admin.firestore.CollectionReference => {
-  const target = getTarget(name);
-  const collectionName = getCollectionName(name, target.parent);
+  schema: GraphQLSchema
+): FirestoreField[] => {
+  const schemaObject = schema.getType(name);
+  const schemaInput = schema.getType(`Create${name}Input`);
+  if (!schemaObject || !schemaInput)
+    throw new Error(`can't found type ${name}`);
 
-  const ref = admin.firestore().collection(collectionName);
+  const objectFields = schemaObject?.["_fields"];
+  const inputFields = schemaInput?.["_fields"];
 
-  if (target.parent) {
-    const rightId = ids.pop();
-    if (!rightId) {
-      throw new Error(`no id found for ${target.parent}`);
+  const fields = Object.keys(objectFields).map((key): FirestoreField => {
+    const field = objectFields[key];
+    const input = inputFields[key];
+
+    const isList = isListType(field?.type) as true;
+
+    const objectName = field?.type?.ofType?.name || field?.type?.name;
+    if (!objectName) throw new Error("type not found");
+
+    const typeName = input?.type?.ofType?.name || input?.type?.name;
+
+    if (typeName === UploadFileInput.name) {
+      return { name: key, type: "File" };
+    }
+    if (typeName === UploadFileListInput.name) {
+      return { name: key, type: "FileList" };
+    }
+    if (typeName?.includes("CollectionInput")) {
+      const target = typeName.replace("CollectionInput", "");
+      return { name: key, type: "Collection", target };
+    }
+    if (typeName?.includes("ReferenceInput")) {
+      const target = typeName.replace("ReferenceInput", "");
+      return { name: key, type: "Reference", target };
+    }
+    if (typeName?.includes("ReferenceListInput")) {
+      const target = typeName.replace("ReferenceListInput", "");
+      return { name: key, type: "ReferenceList", target };
     }
 
-    const parentCollection = getTargetCollection(target.parent, ids);
+    return { name: key, type: objectName, list: isList };
+  });
 
-    return parentCollection.doc(rightId).collection(collectionName);
-  }
-
-  return ref;
-};
-
-export const getParentIds = (
-  name?: string,
-  currentIds: string[] = []
-): string[] => {
-  if (!name) return [];
-
-  const target = getTarget(name);
-  const targetName = getTargetName(name, target.parent);
-  const newId = `${firstLowercase(targetName)}Id`;
-
-  currentIds = [...currentIds, newId];
-
-  const inParent = getParentIds(target.parent, currentIds);
-
-  return [...inParent, newId];
-};
-
-export const getParentLabelValues = (
-  labels: string[],
-  callback: (label: string, index: number) => any,
-  initialValue?: ObjectString
-) => {
-  return labels.reduce((acc, label, index) => {
-    const value = callback(label, index);
-    if (value) return { ...acc, [label]: callback(label, index) };
-    return acc;
-  }, initialValue);
+  return fields;
 };

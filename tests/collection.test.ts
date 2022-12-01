@@ -1,30 +1,33 @@
 import { startHttpApolloServer } from "./setup";
-import { CollectionOptions } from "../src/interfaces";
 import { graphQLClient } from "./testHelper";
 import { gql } from "graphql-request";
+import { firestoreType } from "../src";
 
-const collections: CollectionOptions[] = [
-  {
-    name: "Folder",
-    fields: {
-      documents: {
-        type: "Collection",
-        required: true,
-        name: "Document",
-        fields: {
-          name: { type: "String", required: true },
-          file: {
-            type: "Collection",
-            name: "File",
-            fields: {
-              name: { type: "String" },
-            },
-          },
-        },
-      },
-    },
+const FolderDocumentFile = firestoreType({
+  name: "FolderDocumentFile",
+  parents: ["Folder", "FolderDocument"],
+  definition: (t) => {
+    t.string("name", { required: true });
   },
-];
+});
+
+const FolderDocument = firestoreType({
+  name: "FolderDocument",
+  parents: ["Folder"],
+  definition: (t) => {
+    t.string("name", { required: true });
+    // @ts-ignore
+    t.collection("file", { type: "FolderDocumentFile" });
+  },
+});
+
+const Folder = firestoreType({
+  name: "Folder",
+  definition: (t) => {
+    // @ts-ignore
+    t.collection("documents", { type: "FolderDocument" });
+  },
+});
 
 const CREATE_DOCUMENT = gql`
   mutation createFolder($input: CreateFolderInput!) {
@@ -103,7 +106,9 @@ describe("Collection Test", () => {
   let httpApolloServer: Awaited<ReturnType<typeof startHttpApolloServer>>;
 
   beforeAll(async () => {
-    httpApolloServer = await startHttpApolloServer({ collections });
+    httpApolloServer = await startHttpApolloServer({
+      types: [Folder, FolderDocument, FolderDocumentFile],
+    });
   });
 
   afterAll(async () => {
@@ -164,7 +169,6 @@ describe("Collection Test", () => {
     });
 
     const documents = updateFolder?.documents?.edges?.map((edge) => edge?.node);
-
     expect(updateFolder).not.toBeUndefined();
     expect(documents).toHaveLength(3);
     expect(documents[0].name).toEqual("Document1Updated");
@@ -172,7 +176,11 @@ describe("Collection Test", () => {
 
   it("Query with where in subcollection", async () => {
     const { folders } = await graphQLClient.request(QUERY_DOCUMENT, {
-      where: { documents: { file: { name: { equalTo: "File1" } } } },
+      where: {
+        documents: {
+          file: { name: { equalTo: "File1" } },
+        },
+      },
     });
 
     expect(folders).not.toBeUndefined();

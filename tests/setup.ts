@@ -1,4 +1,4 @@
-import { ExpressContext, Config } from "apollo-server-express";
+import { ApolloServer, ExpressContext, Config } from "apollo-server-express";
 import express from "express";
 import * as admin from "firebase-admin";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
@@ -6,8 +6,8 @@ import path from "path";
 import graphqlUploadExpress from "graphql-upload-minimal/public/graphqlUploadExpress.js";
 import http from "http";
 import { cleanUp } from "./testHelper";
-import { CollectionOptions } from "../src/interfaces";
-import { GraphQLFirebase } from "../src";
+import { makeSchema } from "../src";
+import { SchemaConfig } from "nexus/dist/builder";
 
 process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
 process.env.FIREBASE_STORAGE_EMULATOR_HOST = "localhost:9199";
@@ -18,23 +18,29 @@ admin.initializeApp({
   credential: admin.credential.applicationDefault(),
 });
 
-type ServerApolloOptions = Config<ExpressContext> & {
-  collections: CollectionOptions[];
-};
+type ServerApolloOptions = Config<ExpressContext> &
+  Omit<SchemaConfig, "plugins">;
 
 export const serverApollo = (options: ServerApolloOptions) => {
-  const apollo = GraphQLFirebase({
-    collections: options.collections,
-    types: [],
-    nonNullDefaults: { output: false, input: false },
+  const schema = makeSchema({
+    types: options.types,
     outputs: {
       schema: path.join(__dirname, "./generated/schema.graphql"),
-      typegen: path.join(__dirname, "./generated/nexusTypes.d.ts"),
+      typegen: path.join(__dirname, "./nexusTypes.d.ts"),
     },
-    apolloPlugins: options?.plugins,
   });
 
-  return apollo;
+  const server = new ApolloServer({
+    debug: true,
+    csrfPrevention: true,
+    cache: "bounded",
+    introspection: true,
+    // @ts-ignore
+    schema: schema,
+    plugins: options?.plugins,
+  });
+
+  return server;
 };
 
 export const startHttpApolloServer = async (options: ServerApolloOptions) => {
