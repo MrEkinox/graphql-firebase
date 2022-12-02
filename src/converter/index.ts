@@ -50,7 +50,11 @@ export class Converter {
         if (field.type === "Reference" && field.target) {
           fieldData = await this.convertReference(field.target, fieldData);
         } else if (field.type === "ReferenceList" && field.target) {
-          fieldData = await this.convertReferenceList(field.target, fieldData);
+          fieldData = await this.convertReferenceList(
+            field.target,
+            fieldData,
+            lastFieldData
+          );
         } else if (field.type === "Collection" && field.target) {
           await this.convertCollection(field.target, fieldData, parentRef);
           return {};

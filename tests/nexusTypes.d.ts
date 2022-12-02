@@ -51,11 +51,13 @@ export interface NexusGenInputs {
     notEqualTo?: boolean | null; // Boolean
     notIn?: Array<boolean | null> | null; // [Boolean]
   }
-  CreatePostInput: { // input type
-    createdBy?: NexusGenInputs['UserReferenceInput'] | null; // UserReferenceInput
-  }
   CreateUserInput: { // input type
-    username: string; // String!
+    multipleDate?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
+    multipleFile?: NexusGenInputs['UploadFileListInput'] | null; // UploadFileListInput
+    multipleNumber?: Array<number | null> | null; // [Int]
+    singleDate?: NexusGenScalars['Date'] | null; // Date
+    singleFile?: NexusGenInputs['UploadFileInput'] | null; // UploadFileInput
+    singleNumber?: number | null; // Int
   }
   DateWhereInput: { // input type
     arrayContains?: NexusGenScalars['Date'] | null; // Date
@@ -68,9 +70,6 @@ export interface NexusGenInputs {
     lessThanOrEqualTo?: NexusGenScalars['Date'] | null; // Date
     notEqualTo?: NexusGenScalars['Date'] | null; // Date
     notIn?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
-  }
-  DeletePostInput: { // input type
-    id: string; // ID!
   }
   DeleteUserInput: { // input type
     id: string; // ID!
@@ -102,27 +101,6 @@ export interface NexusGenInputs {
     notEqualTo?: number | null; // Int
     notIn?: Array<number | null> | null; // [Int]
   }
-  PostCollectionInput: { // input type
-    createAndAdd?: Array<NexusGenInputs['CreatePostInput'] | null> | null; // [CreatePostInput]
-    delete?: Array<string | null> | null; // [ID]
-    update?: Array<NexusGenInputs['UpdatePostInput'] | null> | null; // [UpdatePostInput]
-  }
-  PostReferenceInput: { // input type
-    createAndLink?: NexusGenInputs['CreatePostInput'] | null; // CreatePostInput
-    link?: string | null; // ID
-  }
-  PostReferenceListInput: { // input type
-    add?: Array<string | null> | null; // [ID]
-    createAndAdd?: Array<NexusGenInputs['CreatePostInput'] | null> | null; // [CreatePostInput]
-    remove?: Array<string | null> | null; // [ID]
-  }
-  PostWhereInput: { // input type
-    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    createdBy?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
-    exists?: boolean | null; // Boolean
-    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
-    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-  }
   StringWhereInput: { // input type
     arrayContains?: string | null; // String
     equalTo?: string | null; // String
@@ -135,15 +113,13 @@ export interface NexusGenInputs {
     notEqualTo?: string | null; // String
     notIn?: Array<string | null> | null; // [String]
   }
-  UpdatePostFieldsInput: { // input type
-    createdBy?: NexusGenInputs['UserReferenceInput'] | null; // UserReferenceInput
-  }
-  UpdatePostInput: { // input type
-    fields: NexusGenInputs['UpdatePostFieldsInput']; // UpdatePostFieldsInput!
-    id: string; // ID!
-  }
   UpdateUserFieldsInput: { // input type
-    username?: string | null; // String
+    multipleDate?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
+    multipleFile?: NexusGenInputs['UploadFileListInput'] | null; // UploadFileListInput
+    multipleNumber?: Array<number | null> | null; // [Int]
+    singleDate?: NexusGenScalars['Date'] | null; // Date
+    singleFile?: NexusGenInputs['UploadFileInput'] | null; // UploadFileInput
+    singleNumber?: number | null; // Int
   }
   UpdateUserInput: { // input type
     fields: NexusGenInputs['UpdateUserFieldsInput']; // UpdateUserFieldsInput!
@@ -180,8 +156,11 @@ export interface NexusGenInputs {
     createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
     exists?: boolean | null; // Boolean
     id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
+    multipleDate?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    multipleNumber?: NexusGenInputs['IntWhereInput'] | null; // IntWhereInput
+    singleDate?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    singleNumber?: NexusGenInputs['IntWhereInput'] | null; // IntWhereInput
     updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    username?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
   }
 }
 
@@ -212,26 +191,17 @@ export interface NexusGenObjects {
     hasPreviousPage: boolean; // Boolean!
     startCursor?: string | null; // String
   }
-  Post: { // root type
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // ID!
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
-  PostCollection: { // root type
-    count?: number | null; // Int
-    edges?: Array<NexusGenRootTypes['PostEdge'] | null> | null; // [PostEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  PostEdge: { // root type
-    cursor: string; // String!
-    node?: NexusGenRootTypes['Post'] | null; // Post
-  }
   Query: {};
   User: { // root type
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // ID!
+    multipleDate?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
+    multipleFile?: Array<NexusGenRootTypes['File'] | null> | null; // [File]
+    multipleNumber?: Array<number | null> | null; // [Int]
+    singleDate?: NexusGenScalars['Date'] | null; // Date
+    singleFile?: NexusGenRootTypes['File'] | null; // File
+    singleNumber?: number | null; // Int
     updatedAt: NexusGenScalars['Date']; // Date!
-    username: string; // String!
   }
   UserCollection: { // root type
     count?: number | null; // Int
@@ -261,11 +231,8 @@ export interface NexusGenFieldTypes {
     url: string | null; // String
   }
   Mutation: { // field return type
-    createPost: NexusGenRootTypes['Post'] | null; // Post
     createUser: NexusGenRootTypes['User'] | null; // User
-    deletePost: boolean | null; // Boolean
     deleteUser: boolean | null; // Boolean
-    updatePost: NexusGenRootTypes['Post'] | null; // Post
     updateUser: NexusGenRootTypes['User'] | null; // User
   }
   PageInfo: { // field return type
@@ -274,32 +241,20 @@ export interface NexusGenFieldTypes {
     hasPreviousPage: boolean; // Boolean!
     startCursor: string | null; // String
   }
-  Post: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    createdBy: NexusGenRootTypes['User'] | null; // User
-    id: string; // ID!
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
-  PostCollection: { // field return type
-    count: number | null; // Int
-    edges: Array<NexusGenRootTypes['PostEdge'] | null> | null; // [PostEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  PostEdge: { // field return type
-    cursor: string; // String!
-    node: NexusGenRootTypes['Post'] | null; // Post
-  }
   Query: { // field return type
-    post: NexusGenRootTypes['Post'] | null; // Post
-    posts: NexusGenRootTypes['PostCollection'] | null; // PostCollection
     user: NexusGenRootTypes['User'] | null; // User
     users: NexusGenRootTypes['UserCollection'] | null; // UserCollection
   }
   User: { // field return type
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // ID!
+    multipleDate: Array<NexusGenScalars['Date'] | null> | null; // [Date]
+    multipleFile: Array<NexusGenRootTypes['File'] | null> | null; // [File]
+    multipleNumber: Array<number | null> | null; // [Int]
+    singleDate: NexusGenScalars['Date'] | null; // Date
+    singleFile: NexusGenRootTypes['File'] | null; // File
+    singleNumber: number | null; // Int
     updatedAt: NexusGenScalars['Date']; // Date!
-    username: string; // String!
   }
   UserCollection: { // field return type
     count: number | null; // Int
@@ -319,11 +274,8 @@ export interface NexusGenFieldTypeNames {
     url: 'String'
   }
   Mutation: { // field return type name
-    createPost: 'Post'
     createUser: 'User'
-    deletePost: 'Boolean'
     deleteUser: 'Boolean'
-    updatePost: 'Post'
     updateUser: 'User'
   }
   PageInfo: { // field return type name
@@ -332,32 +284,20 @@ export interface NexusGenFieldTypeNames {
     hasPreviousPage: 'Boolean'
     startCursor: 'String'
   }
-  Post: { // field return type name
-    createdAt: 'Date'
-    createdBy: 'User'
-    id: 'ID'
-    updatedAt: 'Date'
-  }
-  PostCollection: { // field return type name
-    count: 'Int'
-    edges: 'PostEdge'
-    pageInfo: 'PageInfo'
-  }
-  PostEdge: { // field return type name
-    cursor: 'String'
-    node: 'Post'
-  }
   Query: { // field return type name
-    post: 'Post'
-    posts: 'PostCollection'
     user: 'User'
     users: 'UserCollection'
   }
   User: { // field return type name
     createdAt: 'Date'
     id: 'ID'
+    multipleDate: 'Date'
+    multipleFile: 'File'
+    multipleNumber: 'Int'
+    singleDate: 'Date'
+    singleFile: 'File'
+    singleNumber: 'Int'
     updatedAt: 'Date'
-    username: 'String'
   }
   UserCollection: { // field return type name
     count: 'Int'
@@ -372,34 +312,17 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
-    createPost: { // args
-      input: NexusGenInputs['CreatePostInput']; // CreatePostInput!
-    }
     createUser: { // args
       input: NexusGenInputs['CreateUserInput']; // CreateUserInput!
     }
-    deletePost: { // args
-      input: NexusGenInputs['DeletePostInput']; // DeletePostInput!
-    }
     deleteUser: { // args
       input: NexusGenInputs['DeleteUserInput']; // DeleteUserInput!
-    }
-    updatePost: { // args
-      input: NexusGenInputs['UpdatePostInput']; // UpdatePostInput!
     }
     updateUser: { // args
       input: NexusGenInputs['UpdateUserInput']; // UpdateUserInput!
     }
   }
   Query: {
-    post: { // args
-      id: string; // ID!
-    }
-    posts: { // args
-      limit: number | null; // Int
-      offset?: number | null; // Int
-      where?: NexusGenInputs['PostWhereInput'] | null; // PostWhereInput
-    }
     user: { // args
       id: string; // ID!
     }

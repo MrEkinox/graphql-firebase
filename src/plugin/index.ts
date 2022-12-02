@@ -6,14 +6,14 @@ import { getCollection } from "../mutations";
 import { WhereCollection } from "../where";
 
 export type ReferenceField = Omit<
-  core.NexusOutputFieldConfig<any, string>,
+  core.NexusOutputFieldConfig<string, string>,
   "args"
 >;
 
-export type ObjectField = core.NexusOutputFieldConfig<any, string>;
+export type ObjectField = core.NexusOutputFieldConfig<string, string>;
 
-export type CollectionField = NexusOutputFieldConfig<any, string> &
-  core.connectionPluginCore.ConnectionFieldConfig<any, any>;
+export type CollectionField = NexusOutputFieldConfig<string, string> &
+  core.connectionPluginCore.ConnectionFieldConfig<string, string>;
 
 export const GraphQLFirebasePlugin = () => {
   return plugin({
@@ -36,18 +36,25 @@ export const GraphQLFirebasePlugin = () => {
             const filedName = config.args[0];
             t.field(filedName, {
               ...config.args[1],
-              list: undefined,
               resolve: async (src, args, ctx, info) => {
+                const fields = fieldsList(info);
+                const isOnlyId = fields.length === 1 && fields[0] === "id";
+
                 if (config.args[1].list) {
                   const refs: firestore.DocumentReference[] = src[filedName];
                   if (refs?.length) {
+                    if (isOnlyId) {
+                      return refs.map((ref) => ref.id);
+                    }
                     const snapshot = await firestore().getAll(...refs);
                     return snapshot.map((doc) => doc.data());
                   }
                   return [];
                 }
+
                 const ref: firestore.DocumentReference = src[filedName];
                 if (!ref) return null;
+                if (isOnlyId) return ref.id;
                 const snapshot = await ref.get();
                 return snapshot.data();
               },
@@ -92,7 +99,7 @@ export const GraphQLFirebasePlugin = () => {
                 if (where) {
                   const whereCollection = new WhereCollection(info.schema);
                   const ids = await whereCollection.get(type, where);
-                  if (!ids.length) return { edges: [] };
+                  if (!ids.length) return { count: 0, edges: [] };
                   collection = collection.where("id", "in", ids);
                 }
 
@@ -103,13 +110,16 @@ export const GraphQLFirebasePlugin = () => {
                   collection = collection.offset(offset);
                 }
 
+                const count = await (await collection.count().get()).data()
+                  .count;
+
                 const data = await collection.get();
 
                 const edges = data.docs.map((doc) => ({
                   node: { id: doc.id, ...doc.data() },
                 }));
 
-                return { edges };
+                return { count, edges };
               },
             });
           },

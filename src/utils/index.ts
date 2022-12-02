@@ -1,3 +1,4 @@
+import { GraphQLObjectType } from "graphql";
 import { GraphQLSchema, isListType, isTypeSubTypeOf } from "graphql";
 import {
   AllOutputTypes,
@@ -146,9 +147,6 @@ export const getSchemaFields = (
 
     const isList = isListType(field?.type) as true;
 
-    const objectName = field?.type?.ofType?.name || field?.type?.name;
-    if (!objectName) throw new Error("type not found");
-
     const typeName = input?.type?.ofType?.name || input?.type?.name;
 
     if (typeName === UploadFileInput.name) {
@@ -168,6 +166,16 @@ export const getSchemaFields = (
     if (typeName?.includes("ReferenceListInput")) {
       const target = typeName.replace("ReferenceListInput", "");
       return { name: key, type: "ReferenceList", target };
+    }
+
+    const objectName = field?.type?.ofType?.name || field?.type?.name;
+
+    if (field?.type instanceof GraphQLObjectType) {
+      return { name: key, type: "Object", target: objectName };
+    }
+
+    if (!objectName) {
+      throw new Error(`type not found for field ${key}`);
     }
 
     return { name: key, type: objectName, list: isList };

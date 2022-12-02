@@ -1,10 +1,6 @@
 import { InputDefinitionBlock } from "nexus/dist/core";
 import { inputObjectType } from "nexus";
-import {
-  FirestoreField,
-  getDefinitionFields,
-  getParentIdLabel,
-} from "../utils";
+import { FirestoreField, getDefinitionFields } from "../utils";
 import { FirestoreTypeOptions } from "..";
 
 const getFieldsDefinition = (

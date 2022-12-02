@@ -1,52 +1,66 @@
 import { startHttpApolloServer } from "./setup";
-import { CollectionOptions } from "../src/interfaces";
 import { gql } from "graphql-request";
 import { graphQLClient } from "./testHelper";
-import { enumType } from "nexus";
+import { enumType, firestoreType, objectType } from "../src";
 
 const TestEnum = enumType({ name: "TestEnum", members: ["other"] });
 
-const collections: CollectionOptions[] = [
-  { name: "User", fields: { username: { type: "String", required: true } } },
-  {
-    name: "Like",
-    fields: {
-      users: { type: "Relation", target: "User", required: true },
-      createdBy: { type: "Pointer", target: "User" },
-      meetDate: { type: "Date" },
-      endDate: { type: "Date" },
-      testEnm: { type: TestEnum },
-      testEnm2: { type: TestEnum },
-      boolean: { type: "Boolean" },
-      array: { type: "String", list: true },
-      any: { type: "Any" },
-      viewNumber: { type: "Number", defaultValue: 50 },
-      viewNumber2: { type: "Number", defaultValue: 50 },
-      customObject: {
-        type: "Object",
-        fields: {
-          viewNumber: { type: "Number", defaultValue: 50 },
-          viewNumber2: { type: "Number", defaultValue: 50 },
-          test: { type: "String", required: true },
-          test8: { type: "String" },
-          customObject2: {
-            type: "Object",
-            fields: {
-              test: { type: "String" },
-              test2: { type: "String" },
-              customObject3: {
-                type: "Object",
-                fields: {
-                  test: { type: "String" },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+const User = firestoreType({
+  name: "User",
+  definition: (t) => {
+    t.string("username", { required: true });
   },
-];
+});
+
+const CustomObject = objectType({
+  name: "CustomObject",
+  definition: (t) => {
+    t.int("viewNumber");
+    t.int("viewNumber2");
+    t.string("test", { required: true });
+    t.string("test8");
+    // @ts-ignore
+    t.object("customObject2", { type: "CustomObject2" });
+  },
+});
+
+const CustomObject2 = objectType({
+  name: "CustomObject2",
+  definition: (t) => {
+    t.string("test");
+    t.string("test2");
+    // @ts-ignore
+    t.object("customObject3", { type: "CustomObject3" });
+  },
+});
+
+const CustomObject3 = objectType({
+  name: "CustomObject3",
+  definition: (t) => {
+    t.string("test");
+  },
+});
+
+const Like = firestoreType({
+  name: "Like",
+  definition: (t) => {
+    t.ref("users", { type: "User", list: true, required: true });
+    t.ref("createdBy", { type: "User" });
+    t.date("meetDate");
+    t.date("endDate");
+    t.boolean("boolean");
+    // @ts-ignore
+    t.field("testEnum", { type: "TestEnum" });
+    // @ts-ignore
+    t.field("testEnm2", { type: "TestEnum" });
+    t.string("array", { list: true });
+    t.any("any");
+    t.int("viewNumber");
+    t.int("viewNumber2");
+    // @ts-ignore
+    t.object("customObject", { type: "CustomObject" });
+  },
+});
 
 const CREATE_DOCUMENT = gql`
   mutation createLike($input: CreateLikeInput!) {
@@ -86,7 +100,9 @@ describe("Where Test", () => {
   let likeUsers: any[] = [];
 
   beforeAll(async () => {
-    httpApolloServer = await startHttpApolloServer({ collections });
+    httpApolloServer = await startHttpApolloServer({
+      types: [TestEnum, User, CustomObject, CustomObject2, CustomObject3, Like],
+    });
     const { createLike } = await graphQLClient.request(CREATE_DOCUMENT, {
       input: {
         users: {
@@ -187,7 +203,7 @@ describe("Where Test", () => {
     expect(likes.edges).toHaveLength(0);
   });
 
-  it.only("Query with where date is between", async () => {
+  it("Query with where date is between", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: {
         meetDate: { greaterThan: new Date("2021"), lessThan: new Date("2023") },
@@ -251,7 +267,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(1);
   });
 
@@ -262,7 +277,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(0);
   });
 
@@ -273,7 +287,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(1);
   });
 
@@ -284,7 +297,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(1);
   });
 
@@ -295,7 +307,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(0);
   });
 
@@ -306,7 +317,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(1);
   });
 
@@ -321,7 +331,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(1);
   });
 
@@ -332,7 +341,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(1);
   });
 
@@ -343,45 +351,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
-    expect(likes.edges).toHaveLength(0);
-  });
-
-  it("Query with multiple number object in object where not equal", async () => {
-    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
-      where: {
-        customObject: {
-          viewNumber: {
-            greaterThanOrEqualTo: 0,
-            lessThanOrEqualTo: 100,
-          },
-          viewNumber2: {
-            greaterThanOrEqualTo: 0,
-            lessThanOrEqualTo: 100,
-          },
-        },
-      },
-    });
-
-    console.log(likes);
-    expect(likes.edges).toHaveLength(0);
-  });
-
-  it("Query with multiple number where is between", async () => {
-    const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
-      where: {
-        viewNumber: {
-          greaterThanOrEqualTo: 0,
-          lessThanOrEqualTo: 100,
-        },
-        viewNumber2: {
-          greaterThanOrEqualTo: 0,
-          lessThanOrEqualTo: 100,
-        },
-      },
-    });
-
-    console.log(likes);
     expect(likes.edges).toHaveLength(0);
   });
 
@@ -395,7 +364,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(1);
   });
 
@@ -409,7 +377,6 @@ describe("Where Test", () => {
       },
     });
 
-    console.log(likes);
     expect(likes.edges).toHaveLength(0);
   });
 });

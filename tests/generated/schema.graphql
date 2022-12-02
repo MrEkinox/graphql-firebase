@@ -17,12 +17,13 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
-input CreatePostInput {
-  createdBy: UserReferenceInput
-}
-
 input CreateUserInput {
-  username: String!
+  multipleDate: [Date]
+  multipleFile: UploadFileListInput
+  multipleNumber: [Int]
+  singleDate: Date
+  singleFile: UploadFileInput
+  singleNumber: Int
 }
 
 scalar Date
@@ -38,10 +39,6 @@ input DateWhereInput {
   lessThanOrEqualTo: Date
   notEqualTo: Date
   notIn: [Date]
-}
-
-input DeletePostInput {
-  id: ID!
 }
 
 input DeleteUserInput {
@@ -85,11 +82,8 @@ input IntWhereInput {
 }
 
 type Mutation {
-  createPost(input: CreatePostInput!): Post
   createUser(input: CreateUserInput!): User
-  deletePost(input: DeletePostInput!): Boolean
   deleteUser(input: DeleteUserInput!): Boolean
-  updatePost(input: UpdatePostInput!): Post
   updateUser(input: UpdateUserInput!): User
 }
 
@@ -118,63 +112,7 @@ type PageInfo {
   startCursor: String
 }
 
-type Post {
-  createdAt: Date!
-  createdBy: User
-  id: ID!
-  updatedAt: Date!
-}
-
-type PostCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [PostEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input PostCollectionInput {
-  createAndAdd: [CreatePostInput]
-  delete: [ID]
-  update: [UpdatePostInput]
-}
-
-type PostEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Post
-}
-
-input PostReferenceInput {
-  createAndLink: CreatePostInput
-  link: ID
-}
-
-input PostReferenceListInput {
-  add: [ID]
-  createAndAdd: [CreatePostInput]
-  remove: [ID]
-}
-
-input PostWhereInput {
-  createdAt: DateWhereInput
-  createdBy: UserWhereInput
-  exists: Boolean
-  id: IDWhereInput
-  updatedAt: DateWhereInput
-}
-
 type Query {
-  post(id: ID!): Post
-  posts(limit: Int = 50, offset: Int = 0, where: PostWhereInput): PostCollection
   user(id: ID!): User
   users(limit: Int = 50, offset: Int = 0, where: UserWhereInput): UserCollection
 }
@@ -192,17 +130,13 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdatePostFieldsInput {
-  createdBy: UserReferenceInput
-}
-
-input UpdatePostInput {
-  fields: UpdatePostFieldsInput!
-  id: ID!
-}
-
 input UpdateUserFieldsInput {
-  username: String
+  multipleDate: [Date]
+  multipleFile: UploadFileListInput
+  multipleNumber: [Int]
+  singleDate: Date
+  singleFile: UploadFileInput
+  singleNumber: Int
 }
 
 input UpdateUserInput {
@@ -232,8 +166,13 @@ input UploadFileListInput {
 type User {
   createdAt: Date!
   id: ID!
+  multipleDate: [Date]
+  multipleFile: [File]
+  multipleNumber: [Int]
+  singleDate: Date
+  singleFile: File
+  singleNumber: Int
   updatedAt: Date!
-  username: String!
 }
 
 type UserCollection {
@@ -279,6 +218,9 @@ input UserWhereInput {
   createdAt: DateWhereInput
   exists: Boolean
   id: IDWhereInput
+  multipleDate: DateWhereInput
+  multipleNumber: IntWhereInput
+  singleDate: DateWhereInput
+  singleNumber: IntWhereInput
   updatedAt: DateWhereInput
-  username: StringWhereInput
 }
