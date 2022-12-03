@@ -22,7 +22,9 @@ export const getQuery = ({ name, ...options }: FirestoreTypeOptions) => {
 
       const ref = collection.doc(id);
 
-      return ref.get();
+      const snapshot = await ref.get();
+
+      return snapshot.data();
     },
   });
 };
