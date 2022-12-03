@@ -40,7 +40,8 @@ export const getAllQuery = ({ name, ...options }: FirestoreTypeOptions) => {
       ...options,
       // @ts-ignore
       type: name,
-      additionalArgs: { ...parentIdArgs },
+      parents: options.parents,
+      additionalArgs: parentIdArgs,
     });
   });
 };

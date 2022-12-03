@@ -1,6 +1,6 @@
 import { InputDefinitionBlock } from "nexus/dist/core";
 import { inputObjectType } from "nexus";
-import { FirestoreField, getDefinitionFields } from "../utils";
+import { FirestoreField, FirestoreFieldType, getDefinitionFields } from "../utils";
 import { FirestoreTypeOptions } from "..";
 
 const getFieldsDefinition = (
@@ -134,3 +134,87 @@ export const getCollectionInput = (name: string) =>
       t.field("update", { type: `Update${name}Input`, list: true });
     },
   });
+
+export const getFieldWhereInput = (type: FirestoreFieldType | string) =>
+  inputObjectType({
+    name: `${type}WhereInput`,
+    definition: (t) => {
+      t.boolean("exists");
+
+      if (type === "File") return;
+      if (type === "FileList") return;
+      if (type === "Reference") return;
+      if (type === "ReferenceList") return;
+      if (type === "Any") return;
+      if (type === "Object") return;
+
+      // @ts-ignore
+      t.field("equalTo", { type });
+      // @ts-ignore
+      t.field("notEqualTo", { type });
+      // @ts-ignore
+      t.field("arrayContains", { type });
+      // @ts-ignore
+      t.field("lessThan", { type });
+      // @ts-ignore
+      t.field("lessThanOrEqualTo", { type });
+      // @ts-ignore
+      t.field("greaterThan", { type });
+      // @ts-ignore
+      t.field("greaterThanOrEqualTo", { type });
+      // @ts-ignore
+      t.field("in", { type, list: true });
+      // @ts-ignore
+      t.field("notIn", { type, list: true });
+    },
+  });
+
+export const createDefaultWhereInputs = () => {
+  const stringWhereInput = getFieldWhereInput("String");
+  const booleanWhereInput = getFieldWhereInput("Boolean");
+  const idWhereInput = getFieldWhereInput("ID");
+  const dateWhereInput = getFieldWhereInput("Date");
+  const fileWhereInput = getFieldWhereInput("File");
+  const intWhereInput = getFieldWhereInput("Int");
+
+  return {
+    intWhereInput,
+    stringWhereInput,
+    booleanWhereInput,
+    idWhereInput,
+    dateWhereInput,
+    fileWhereInput,
+  };
+};
+
+export const getWhereInput = (options: FirestoreTypeOptions) => {
+  const fields = getDefinitionFields(options.definition);
+
+  return inputObjectType({
+    name: `${options.name}WhereInput`,
+    definition(t) {
+      t.boolean("exists");
+      fields.map((field) => {
+        switch (field.type) {
+          case "File":
+          case "FileList":
+            return;
+          case "Reference":
+          case "ReferenceList":
+          case "Collection":
+          case "Object":
+            // @ts-ignore
+            t.field(field.name, { type: `${field.target}WhereInput` });
+            return;
+          case "Any":
+            t.field(field.name, { type: "Any" });
+            return;
+
+          default:
+            // @ts-ignore
+            t.field(field.name, { type: `${field.type}WhereInput` });
+        }
+      });
+    },
+  });
+};

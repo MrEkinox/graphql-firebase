@@ -1,16 +1,9 @@
 import { firestore } from "firebase-admin";
-import { CollectionReference, WhereFilterOp } from "firebase-admin/firestore";
+import { WhereFilterOp } from "firebase-admin/firestore";
 import { GraphQLSchema } from "graphql";
-import { inputObjectType } from "nexus";
-import { FirestoreTypeOptions } from "..";
 import { getCollection } from "../mutations";
-import {
-  FirestoreField,
-  FirestoreFieldType,
-  getDefinitionFields,
-  getSchemaFields,
-  plural,
-} from "../utils";
+import chunk from "lodash/chunk";
+import { FirestoreField, getSchemaFields, plural } from "../utils";
 
 interface CollectionWhereInput {
   name: string;
@@ -64,11 +57,77 @@ export class WhereCollection {
     this.schema = schema;
   }
 
-  async get(name: string, input: Record<string, any>) {
-    const whereInput = this.getWhereInput(name, input);
-    const ids = await this.getCollectionWhere(whereInput);
-    return ids;
+  private async chunkQuery(collection: firestore.Query, ids: string[]) {
+    const chunkIds = chunk(ids, 10);
+
+    const allData = await Promise.all(
+      chunkIds.map(async (id) => {
+        const newCollection = collection.where("id", "in", id);
+        return this.getData(newCollection);
+      })
+    );
+
+    return allData.reduce(
+      (acc, cur) => {
+        const newCount = acc.count + cur.count;
+        const newEdges = [...acc.edges, ...cur.edges];
+        return { count: newCount, edges: newEdges };
+      },
+      { count: 0, edges: [] }
+    );
   }
+
+  private async getData(collection: firestore.Query) {
+    const count = (await collection.count().get()).data().count;
+
+    const data = await collection.get();
+
+    const edges = data.docs.map((doc) => ({
+      node: { id: doc.id, ...doc.data() },
+    }));
+
+    return { count, edges };
+  }
+
+  async get(whereInput: CollectionWhereInput[], collection: firestore.Query) {
+    const ids = await this.getCollectionWhere(whereInput);
+
+    if (ids.length) {
+      if (ids.length <= 10) {
+        const newCollection = collection.where("id", "in", ids);
+        return this.getData(newCollection);
+      }
+
+      return this.chunkQuery(collection, ids);
+    }
+    return { count: 0, edges: [] };
+  }
+
+  getWhereInput = (
+    name: string,
+    input?: Record<string, any>,
+    parent?: string
+  ): CollectionWhereInput[] => {
+    const fields = getSchemaFields(name, this.schema);
+    const newInput = this.removeCollectionFields(name, input, parent);
+    const newParent = newInput ? name : parent;
+
+    return fields.reduce(
+      (acc, field) => {
+        const fieldInput = input?.[field.name];
+        if (field.type === "Collection" && field.target && fieldInput) {
+          const inField = this.getWhereInput(
+            field.target,
+            fieldInput,
+            newParent
+          );
+          return [...acc, ...inField];
+        }
+        return acc;
+      },
+      newInput ? [newInput] : []
+    );
+  };
 
   private removeCollectionFields(
     name: string,
@@ -92,27 +151,6 @@ export class WhereCollection {
     }
     return undefined;
   }
-
-  private getWhereInput = (
-    name: string,
-    input?: Record<string, any>,
-    parent?: string
-  ): CollectionWhereInput[] => {
-    const fields = getSchemaFields(name, this.schema);
-    const newInput = this.removeCollectionFields(name, input, parent);
-
-    return fields.reduce(
-      (acc, field) => {
-        const fieldInput = input?.[field.name];
-        if (field.type === "Collection" && field.target && fieldInput) {
-          const inField = this.getWhereInput(field.target, fieldInput, parent);
-          return [...acc, ...inField];
-        }
-        return acc;
-      },
-      newInput ? [newInput] : []
-    );
-  };
 
   private whereReferenceId = (
     field: FirestoreField,
@@ -222,15 +260,17 @@ export class WhereCollection {
     }, collection);
   };
 
-  private whereCollection = (
-    name: string,
-    collection: firestore.CollectionReference | firestore.CollectionGroup,
-    input?: Record<string, any>
+  whereCollection = (
+    whereInput: CollectionWhereInput,
+    collection:
+      | firestore.CollectionReference
+      | firestore.CollectionGroup
+      | firestore.Query
   ) => {
-    const fields = getSchemaFields(name, this.schema);
+    const fields = getSchemaFields(whereInput.name, this.schema);
 
     return fields.reduce((acc, field) => {
-      const fieldInput = input?.[field.name];
+      const fieldInput = whereInput.input?.[field.name];
       if (!fieldInput) return acc;
       if (field.type === "Collection") return acc;
 
@@ -246,11 +286,7 @@ export class WhereCollection {
     if (!where) return ids;
 
     const collectionGroup = firestore().collectionGroup(plural(where.name));
-    let collection = this.whereCollection(
-      where.name,
-      collectionGroup,
-      where.input
-    );
+    let collection = this.whereCollection(where, collectionGroup);
 
     if (ids.length) {
       collection = collection.where("id", "in", ids);
@@ -259,98 +295,19 @@ export class WhereCollection {
 
     const snapIds = snapshot.docs.map((doc) => {
       const path = doc.ref.path.split("/");
-      const index = where.parent ? path.indexOf(plural(where.parent)) : 0;
+      const index = where.parent
+        ? path.indexOf(plural(where.parent))
+        : path.indexOf(plural(where.name));
       return path.at(index + 1) || "";
     });
 
     if (snapIds.length) {
-      const newIds = [...ids, ...snapIds];
+      const newIds = [...ids, ...snapIds].reduce((acc, id) => {
+        if (acc.find((id2) => id2 === id)) return acc;
+        return [...acc, id];
+      }, [] as string[]);
       return this.getCollectionWhere(whereInput, newIds);
     }
     return ids;
   }
 }
-
-export const getFieldWhereInput = (type: FirestoreFieldType | string) =>
-  inputObjectType({
-    name: `${type}WhereInput`,
-    definition: (t) => {
-      t.boolean("exists");
-
-      if (type === "File") return;
-      if (type === "FileList") return;
-      if (type === "Reference") return;
-      if (type === "ReferenceList") return;
-      if (type === "Any") return;
-      if (type === "Object") return;
-
-      // @ts-ignore
-      t.field("equalTo", { type });
-      // @ts-ignore
-      t.field("notEqualTo", { type });
-      // @ts-ignore
-      t.field("arrayContains", { type });
-      // @ts-ignore
-      t.field("lessThan", { type });
-      // @ts-ignore
-      t.field("lessThanOrEqualTo", { type });
-      // @ts-ignore
-      t.field("greaterThan", { type });
-      // @ts-ignore
-      t.field("greaterThanOrEqualTo", { type });
-      // @ts-ignore
-      t.field("in", { type, list: true });
-      // @ts-ignore
-      t.field("notIn", { type, list: true });
-    },
-  });
-
-export const createDefaultWhereInputs = () => {
-  const stringWhereInput = getFieldWhereInput("String");
-  const booleanWhereInput = getFieldWhereInput("Boolean");
-  const idWhereInput = getFieldWhereInput("ID");
-  const dateWhereInput = getFieldWhereInput("Date");
-  const fileWhereInput = getFieldWhereInput("File");
-  const intWhereInput = getFieldWhereInput("Int");
-
-  return {
-    intWhereInput,
-    stringWhereInput,
-    booleanWhereInput,
-    idWhereInput,
-    dateWhereInput,
-    fileWhereInput,
-  };
-};
-
-export const getWhereInput = (options: FirestoreTypeOptions) => {
-  const fields = getDefinitionFields(options.definition);
-
-  return inputObjectType({
-    name: `${options.name}WhereInput`,
-    definition(t) {
-      t.boolean("exists");
-      fields.map((field) => {
-        switch (field.type) {
-          case "File":
-          case "FileList":
-            return;
-          case "Reference":
-          case "ReferenceList":
-          case "Collection":
-          case "Object":
-            // @ts-ignore
-            t.field(field.name, { type: `${field.target}WhereInput` });
-            return;
-          case "Any":
-            t.field(field.name, { type: "Any" });
-            return;
-
-          default:
-            // @ts-ignore
-            t.field(field.name, { type: `${field.type}WhereInput` });
-        }
-      });
-    },
-  });
-};

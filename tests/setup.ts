@@ -24,6 +24,7 @@ type ServerApolloOptions = Config<ExpressContext> &
 export const serverApollo = (options: ServerApolloOptions) => {
   const schema = makeSchema({
     types: options.types,
+    debug: false,
     outputs: {
       schema: path.join(__dirname, "./generated/schema.graphql"),
       typegen: path.join(__dirname, "./nexusTypes.d.ts"),

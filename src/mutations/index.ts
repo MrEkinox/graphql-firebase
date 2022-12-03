@@ -1,4 +1,5 @@
 import { firestore } from "firebase-admin";
+import { GraphQLResolveInfo } from "graphql";
 import { arg, idArg, mutationField } from "nexus";
 import { FirestoreTypeOptions } from "..";
 import { Converter } from "../converter";
@@ -21,7 +22,7 @@ export const getCollection = (
 
   const parentCollection = getCollection(lastParent.name, parentIds);
 
-  return parentCollection.doc(lastParent?.id).collection(pluralName);
+  return parentCollection.doc(lastParent.id).collection(pluralName);
 };
 
 export const getParentIds = (parents?: string[], input?: Record<string, any>) =>

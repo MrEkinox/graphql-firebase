@@ -17,13 +17,18 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
-input CreateUserInput {
-  multipleDate: [Date]
-  multipleFile: UploadFileListInput
-  multipleNumber: [Int]
-  singleDate: Date
-  singleFile: UploadFileInput
-  singleNumber: Int
+input CreateFolderDocumentFileInput {
+  name: String!
+}
+
+input CreateFolderDocumentInput {
+  file: FolderDocumentFileCollectionInput
+  name: String!
+}
+
+input CreateFolderInput {
+  documents: FolderDocumentCollectionInput
+  name: String!
 }
 
 scalar Date
@@ -41,7 +46,15 @@ input DateWhereInput {
   notIn: [Date]
 }
 
-input DeleteUserInput {
+input DeleteFolderDocumentFileInput {
+  id: ID!
+}
+
+input DeleteFolderDocumentInput {
+  id: ID!
+}
+
+input DeleteFolderInput {
   id: ID!
 }
 
@@ -53,6 +66,178 @@ type File {
 
 input FileWhereInput {
   exists: Boolean
+}
+
+type Folder {
+  createdAt: Date!
+  documents(limit: Int = 50, offset: Int = 0, where: FolderDocumentWhereInput): FolderDocumentCollection
+  id: ID!
+  name: String!
+  updatedAt: Date!
+}
+
+type FolderCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [FolderEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input FolderCollectionInput {
+  createAndAdd: [CreateFolderInput]
+  delete: [ID]
+  update: [UpdateFolderInput]
+}
+
+type FolderDocument {
+  createdAt: Date!
+  file(limit: Int = 50, offset: Int = 0, where: FolderDocumentFileWhereInput): FolderDocumentFileCollection
+  folderId: ID!
+  id: ID!
+  name: String!
+  updatedAt: Date!
+}
+
+type FolderDocumentCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [FolderDocumentEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input FolderDocumentCollectionInput {
+  createAndAdd: [CreateFolderDocumentInput]
+  delete: [ID]
+  update: [UpdateFolderDocumentInput]
+}
+
+type FolderDocumentEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: FolderDocument
+}
+
+type FolderDocumentFile {
+  createdAt: Date!
+  folderDocumentId: ID!
+  folderId: ID!
+  id: ID!
+  name: String!
+  updatedAt: Date!
+}
+
+type FolderDocumentFileCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [FolderDocumentFileEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input FolderDocumentFileCollectionInput {
+  createAndAdd: [CreateFolderDocumentFileInput]
+  delete: [ID]
+  update: [UpdateFolderDocumentFileInput]
+}
+
+type FolderDocumentFileEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: FolderDocumentFile
+}
+
+input FolderDocumentFileReferenceInput {
+  createAndLink: CreateFolderDocumentFileInput
+  link: ID
+}
+
+input FolderDocumentFileReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateFolderDocumentFileInput]
+  remove: [ID]
+}
+
+input FolderDocumentFileWhereInput {
+  createdAt: DateWhereInput
+  exists: Boolean
+  folderDocumentId: IDWhereInput
+  folderId: IDWhereInput
+  id: IDWhereInput
+  name: StringWhereInput
+  updatedAt: DateWhereInput
+}
+
+input FolderDocumentReferenceInput {
+  createAndLink: CreateFolderDocumentInput
+  link: ID
+}
+
+input FolderDocumentReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateFolderDocumentInput]
+  remove: [ID]
+}
+
+input FolderDocumentWhereInput {
+  createdAt: DateWhereInput
+  exists: Boolean
+  file: FolderDocumentFileWhereInput
+  folderId: IDWhereInput
+  id: IDWhereInput
+  name: StringWhereInput
+  updatedAt: DateWhereInput
+}
+
+type FolderEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Folder
+}
+
+input FolderReferenceInput {
+  createAndLink: CreateFolderInput
+  link: ID
+}
+
+input FolderReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateFolderInput]
+  remove: [ID]
+}
+
+input FolderWhereInput {
+  createdAt: DateWhereInput
+  documents: FolderDocumentWhereInput
+  exists: Boolean
+  id: IDWhereInput
+  name: StringWhereInput
+  updatedAt: DateWhereInput
 }
 
 input IDWhereInput {
@@ -82,9 +267,15 @@ input IntWhereInput {
 }
 
 type Mutation {
-  createUser(input: CreateUserInput!): User
-  deleteUser(input: DeleteUserInput!): Boolean
-  updateUser(input: UpdateUserInput!): User
+  createFolder(input: CreateFolderInput!): Folder
+  createFolderDocument(folderId: ID!, input: CreateFolderDocumentInput!): FolderDocument
+  createFolderDocumentFile(folderDocumentId: ID!, folderId: ID!, input: CreateFolderDocumentFileInput!): FolderDocumentFile
+  deleteFolder(input: DeleteFolderInput!): Boolean
+  deleteFolderDocument(folderId: ID!, input: DeleteFolderDocumentInput!): Boolean
+  deleteFolderDocumentFile(folderDocumentId: ID!, folderId: ID!, input: DeleteFolderDocumentFileInput!): Boolean
+  updateFolder(input: UpdateFolderInput!): Folder
+  updateFolderDocument(folderId: ID!, input: UpdateFolderDocumentInput!): FolderDocument
+  updateFolderDocumentFile(folderDocumentId: ID!, folderId: ID!, input: UpdateFolderDocumentFileInput!): FolderDocumentFile
 }
 
 """
@@ -113,8 +304,12 @@ type PageInfo {
 }
 
 type Query {
-  user(id: ID!): User
-  users(limit: Int = 50, offset: Int = 0, where: UserWhereInput): UserCollection
+  folder(id: ID!): Folder
+  folderDocument(folderId: ID!, id: ID!): FolderDocument
+  folderDocumentFile(folderDocumentId: ID!, folderId: ID!, id: ID!): FolderDocumentFile
+  folderDocumentFiles(folderDocumentId: ID!, folderId: ID!, limit: Int = 50, offset: Int = 0, where: FolderDocumentFileWhereInput): FolderDocumentFileCollection
+  folderDocuments(folderId: ID!, limit: Int = 50, offset: Int = 0, where: FolderDocumentWhereInput): FolderDocumentCollection
+  folders(limit: Int = 50, offset: Int = 0, where: FolderWhereInput): FolderCollection
 }
 
 input StringWhereInput {
@@ -130,17 +325,32 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdateUserFieldsInput {
-  multipleDate: [Date]
-  multipleFile: UploadFileListInput
-  multipleNumber: [Int]
-  singleDate: Date
-  singleFile: UploadFileInput
-  singleNumber: Int
+input UpdateFolderDocumentFieldsInput {
+  file: FolderDocumentFileCollectionInput
+  name: String
 }
 
-input UpdateUserInput {
-  fields: UpdateUserFieldsInput!
+input UpdateFolderDocumentFileFieldsInput {
+  name: String
+}
+
+input UpdateFolderDocumentFileInput {
+  fields: UpdateFolderDocumentFileFieldsInput!
+  id: ID!
+}
+
+input UpdateFolderDocumentInput {
+  fields: UpdateFolderDocumentFieldsInput!
+  id: ID!
+}
+
+input UpdateFolderFieldsInput {
+  documents: FolderDocumentCollectionInput
+  name: String
+}
+
+input UpdateFolderInput {
+  fields: UpdateFolderFieldsInput!
   id: ID!
 }
 
@@ -161,66 +371,4 @@ input UploadFileListInput {
   add: [Upload]
   link: [UploadFileLinkInput]
   remove: [String]
-}
-
-type User {
-  createdAt: Date!
-  id: ID!
-  multipleDate: [Date]
-  multipleFile: [File]
-  multipleNumber: [Int]
-  singleDate: Date
-  singleFile: File
-  singleNumber: Int
-  updatedAt: Date!
-}
-
-type UserCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [UserEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input UserCollectionInput {
-  createAndAdd: [CreateUserInput]
-  delete: [ID]
-  update: [UpdateUserInput]
-}
-
-type UserEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: User
-}
-
-input UserReferenceInput {
-  createAndLink: CreateUserInput
-  link: ID
-}
-
-input UserReferenceListInput {
-  add: [ID]
-  createAndAdd: [CreateUserInput]
-  remove: [ID]
-}
-
-input UserWhereInput {
-  createdAt: DateWhereInput
-  exists: Boolean
-  id: IDWhereInput
-  multipleDate: DateWhereInput
-  multipleNumber: IntWhereInput
-  singleDate: DateWhereInput
-  singleNumber: IntWhereInput
-  updatedAt: DateWhereInput
 }

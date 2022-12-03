@@ -15,21 +15,22 @@ import * as Scalars from "./scalars";
 import {
   getCollectionInput,
   getCreateInput,
-  getDeleteInput,
   getObjectUpdateInput,
   getReferenceInput,
   getReferenceListInput,
-} from "./inputs";
-import * as fileInput from "./file";
-import { getCreateMutation, getDeleteMutation, getUpdateMutation } from "./mutations";
-import { getAllQuery, getQuery } from "./queries";
-import { getParentIdLabel } from "./utils";
-import {
   createDefaultWhereInputs,
   getFieldWhereInput,
   getWhereInput,
-} from "./where";
-import { GraphQLFirebasePlugin } from "./plugin";
+} from "./inputs";
+import * as fileInput from "./file";
+import {
+  getCreateMutation,
+  getDeleteMutation,
+  getUpdateMutation,
+} from "./mutations";
+import { getAllQuery, getQuery } from "./queries";
+import { getDefinitionFields, getParentIdLabel } from "./utils";
+import { GraphQLFirebasePlugin, LogTimePlugin } from "./plugin";
 
 export { GraphQLFirebasePlugin } from "./plugin";
 
@@ -62,6 +63,9 @@ export interface FirestoreTypeOptions extends NexusObjectTypeConfig<string> {
 
 export const firestoreType = (options: FirestoreTypeOptions) => {
   const parentIds = getParentIdLabel(options.parents);
+  const fields = getDefinitionFields(options.definition);
+
+  const parents = [...(options.parents || []), options.name];
 
   const type = nexusObjectType({
     ...options,
@@ -71,13 +75,19 @@ export const firestoreType = (options: FirestoreTypeOptions) => {
       t.field("createdAt", { type: "Date", required: true });
       t.field("updatedAt", { type: "Date", required: true });
       options.definition(t);
+      fields.forEach((field) => {
+        const type = field.target || field.type;
+        if (field.type === "Collection" && field.target)
+          // @ts-ignore
+          return t.collection(field.name, { ...field, type, parents });
+      });
     },
   });
 
   const singleQuery = getQuery(options);
   const allQuery = getAllQuery(options);
   const whereInput = getWhereInput(type.value);
-  const deleteMutation = getDeleteMutation(options)
+  const deleteMutation = getDeleteMutation(options);
   const createMutation = getCreateMutation(options);
   const updateMutation = getUpdateMutation(options);
   const relationInput = getReferenceInput(options.name);
@@ -98,7 +108,7 @@ export const firestoreType = (options: FirestoreTypeOptions) => {
   ];
 };
 
-export const makeSchema = (config: SchemaConfig) => {
+export const makeSchema = (config: SchemaConfig & { debug?: boolean }) => {
   const defaultWhere = createDefaultWhereInputs();
 
   return NexusMakeSchema({
@@ -119,6 +129,7 @@ export const makeSchema = (config: SchemaConfig) => {
         },
         getConnectionName: (fieldName) => `${fieldName}Collection`,
       }),
+      LogTimePlugin(config.debug),
     ],
   });
 };

@@ -29,7 +29,7 @@ const Folder = firestoreType({
   },
 });
 
-const CREATE_DOCUMENT = gql`
+const CREATE_FOLDER_DOCUMENT = gql`
   mutation createFolder($input: CreateFolderInput!) {
     createFolder(input: $input) {
       id
@@ -48,6 +48,23 @@ const CREATE_DOCUMENT = gql`
           }
         }
       }
+    }
+  }
+`;
+
+const CREATE_FOLDER_FILE_DOCUMENT = gql`
+  mutation createFolderFile(
+    $folderId: ID!
+    $folderDocumentId: ID!
+    $input: CreateFolderDocumentFileInput!
+  ) {
+    createFolderDocumentFile(
+      folderId: $folderId
+      folderDocumentId: $folderDocumentId
+      input: $input
+    ) {
+      id
+      name
     }
   }
 `;
@@ -118,10 +135,13 @@ describe("Collection Test", () => {
   let folderId = "";
   let folderDocuments: any[] = [];
 
-  it("Single Create And Add", async () => {
-    const { createFolder } = await graphQLClient.request(CREATE_DOCUMENT, {
-      input: { documents: { createAndAdd: [{ name: "Document1" }] } },
-    });
+  it("Single folder Create And Add", async () => {
+    const { createFolder } = await graphQLClient.request(
+      CREATE_FOLDER_DOCUMENT,
+      {
+        input: { documents: { createAndAdd: [{ name: "Document1" }] } },
+      }
+    );
 
     const documents = createFolder?.documents?.edges?.map((edge) => edge?.node);
 
@@ -132,7 +152,7 @@ describe("Collection Test", () => {
     folderId = createFolder.id;
   });
 
-  it("Multiple Create And Add", async () => {
+  it("Multiple folder Create And Add", async () => {
     const { updateFolder } = await graphQLClient.request(UPDATE_DOCUMENT, {
       id: folderId,
       fields: {
@@ -172,6 +192,34 @@ describe("Collection Test", () => {
     expect(updateFolder).not.toBeUndefined();
     expect(documents).toHaveLength(3);
     expect(documents[0].name).toEqual("Document1Updated");
+  });
+
+  it("Query with where in subcollection", async () => {
+    const { folders } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: {
+        documents: {
+          name: { equalTo: "Document1Updated" },
+          file: { name: { equalTo: "File1" } },
+        },
+      },
+    });
+
+    expect(folders).not.toBeUndefined();
+    expect(folders.edges).toHaveLength(1);
+  });
+
+  it("Query with where in subcollection", async () => {
+    const { folders } = await graphQLClient.request(QUERY_DOCUMENT, {
+      where: {
+        documents: {
+          name: { equalTo: "DocumentUnknow" },
+          file: { name: { equalTo: "File1" } },
+        },
+      },
+    });
+
+    expect(folders).not.toBeUndefined();
+    expect(folders.edges).toHaveLength(0);
   });
 
   it("Query with where in subcollection", async () => {
@@ -219,6 +267,19 @@ describe("Collection Test", () => {
 
     expect(folders).not.toBeUndefined();
     expect(folders.edges).toHaveLength(1);
+  });
+
+  it("Single folder file Create And Add", async () => {
+    const { createFolderDocumentFile } = await graphQLClient.request(
+      CREATE_FOLDER_FILE_DOCUMENT,
+      {
+        folderId,
+        folderDocumentId: folderDocuments[0].id,
+        input: { name: "Document Filleee" },
+      }
+    );
+
+    expect(createFolderDocumentFile).not.toBeUndefined();
   });
 
   it("delete single", async () => {

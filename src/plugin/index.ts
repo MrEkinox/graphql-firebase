@@ -1,9 +1,13 @@
 import { firestore } from "firebase-admin";
 import { fieldsList } from "graphql-fields-list";
 import { plugin, arg, dynamicOutputMethod, core } from "nexus";
-import { NexusOutputFieldConfig } from "nexus/dist/core";
-import { getCollection } from "../mutations";
+import { idArg, NexusOutputFieldConfig } from "nexus/dist/core";
+import { getCollection, getParentIds } from "../mutations";
 import { WhereCollection } from "../where";
+import chunk from "lodash/chunk";
+import { firstLowercase, getParentIdLabel } from "../utils";
+import { collectionResolver } from "../collection";
+import { referenceResolver } from "../reference";
 
 export type ReferenceField = Omit<
   core.NexusOutputFieldConfig<string, string>,
@@ -14,6 +18,26 @@ export type ObjectField = core.NexusOutputFieldConfig<string, string>;
 
 export type CollectionField = NexusOutputFieldConfig<string, string> &
   core.connectionPluginCore.ConnectionFieldConfig<string, string>;
+
+export const LogTimePlugin = (enabled?: boolean) =>
+  plugin({
+    name: "LogTimePlugin",
+    onCreateFieldResolver(config) {
+      if (enabled)
+        return async (root, args, ctx, info, next) => {
+          const startTimeMs = new Date().valueOf();
+          const value = await next(root, args, ctx, info);
+          const endTimeMs = new Date().valueOf();
+          console.log(
+            `${config.parentTypeConfig.name} ${
+              info.operation.name?.value
+            } took ${endTimeMs - startTimeMs} ms`
+          );
+          return value;
+        };
+      return undefined;
+    },
+  });
 
 export const GraphQLFirebasePlugin = () => {
   return plugin({
@@ -33,30 +57,12 @@ export const GraphQLFirebasePlugin = () => {
           name: "ref",
           typeDefinition: `<FieldName extends string>(name: FieldName, config: ReferenceField): void`,
           factory: ({ typeName, typeDef: t, ...config }) => {
-            const filedName = config.args[0];
-            t.field(filedName, {
+            const fieldName = config.args[0];
+            const isList = config.args[1].list;
+            t.field(fieldName, {
               ...config.args[1],
               resolve: async (src, args, ctx, info) => {
-                const fields = fieldsList(info);
-                const isOnlyId = fields.length === 1 && fields[0] === "id";
-
-                if (config.args[1].list) {
-                  const refs: firestore.DocumentReference[] = src[filedName];
-                  if (refs?.length) {
-                    if (isOnlyId) {
-                      return refs.map((ref) => ref.id);
-                    }
-                    const snapshot = await firestore().getAll(...refs);
-                    return snapshot.map((doc) => doc.data());
-                  }
-                  return [];
-                }
-
-                const ref: firestore.DocumentReference = src[filedName];
-                if (!ref) return null;
-                if (isOnlyId) return ref.id;
-                const snapshot = await ref.get();
-                return snapshot.data();
+                return referenceResolver(fieldName, isList, src, info);
               },
             });
           },
@@ -79,6 +85,8 @@ export const GraphQLFirebasePlugin = () => {
           factory: ({ typeName, typeDef: t, ...config }) => {
             const filedName = config.args[0];
             const type = config.args[1].type;
+            const parents = config.args[1]?.parents || [];
+
             t.connectionField(filedName, {
               ...config.args[1],
               getConnectionName: () => `${type}Collection`,
@@ -89,37 +97,8 @@ export const GraphQLFirebasePlugin = () => {
                 offset: arg({ type: "Int", default: 0 }),
                 where: arg({ type: `${type}WhereInput` }),
               },
-              resolve: async (src, { where, limit, offset }, ctx, info) => {
-                const fields = fieldsList(info, { path: "edges.node" });
-                let collection = getCollection(
-                  type,
-                  src && [{ name: info.parentType.name, id: src.id }]
-                ).select(...fields);
-
-                if (where) {
-                  const whereCollection = new WhereCollection(info.schema);
-                  const ids = await whereCollection.get(type, where);
-                  if (!ids.length) return { count: 0, edges: [] };
-                  collection = collection.where("id", "in", ids);
-                }
-
-                if (typeof limit === "number") {
-                  collection = collection.limit(limit);
-                }
-                if (typeof offset === "number") {
-                  collection = collection.offset(offset);
-                }
-
-                const count = await (await collection.count().get()).data()
-                  .count;
-
-                const data = await collection.get();
-
-                const edges = data.docs.map((doc) => ({
-                  node: { id: doc.id, ...doc.data() },
-                }));
-
-                return { count, edges };
+              resolve: async (src, input, ctx, info) => {
+                return collectionResolver(type, parents, src, input, info);
               },
             });
           },
