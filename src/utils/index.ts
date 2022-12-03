@@ -168,10 +168,13 @@ export const getSchemaFields = (
       return { name: key, type: "ReferenceList", target };
     }
 
-    const objectName = field?.type?.ofType?.name || field?.type?.name;
+    const objectName =
+      field?.type?.ofType?.name ||
+      field?.type?.ofType?.ofType?.name ||
+      field?.type?.name;
 
     if (field?.type instanceof GraphQLObjectType) {
-      return { name: key, type: "Object", target: objectName };
+      return { name: key, type: "Object", target: objectName, list: isList };
     }
 
     if (!objectName) {

@@ -17,18 +17,81 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
-input CreateFolderDocumentFileInput {
-  name: String!
+input CreateCustomObject2Input {
+  customObject3: CreateCustomObject3Input
+  test: String
+  test2: String
 }
 
-input CreateFolderDocumentInput {
-  file: FolderDocumentFileCollectionInput
-  name: String!
+input CreateCustomObject3Input {
+  test: String
 }
 
-input CreateFolderInput {
-  documents: FolderDocumentCollectionInput
-  name: String!
+input CreateCustomObjectInput {
+  customObject2: CreateCustomObject2Input
+  test: String!
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+input CreateLikeInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdBy: UserReferenceInput
+  customObject: CreateCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm2: TestEnum
+  testEnum: TestEnum
+  testEnum3: [TestEnum!]
+  users: UserReferenceListInput!
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+input CreateUserInput {
+  username: String!
+}
+
+type CustomObject {
+  customObject2: CustomObject2
+  test: String!
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+type CustomObject2 {
+  customObject3: CustomObject3
+  test: String
+  test2: String
+}
+
+input CustomObject2WhereInput {
+  customObject3: CustomObject3WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test2: StringWhereInput
+}
+
+type CustomObject3 {
+  test: String
+}
+
+input CustomObject3WhereInput {
+  exists: Boolean
+  test: StringWhereInput
+}
+
+input CustomObjectWhereInput {
+  customObject2: CustomObject2WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test8: StringWhereInput
+  viewNumber: IntWhereInput
+  viewNumber2: IntWhereInput
 }
 
 scalar Date
@@ -46,15 +109,11 @@ input DateWhereInput {
   notIn: [Date]
 }
 
-input DeleteFolderDocumentFileInput {
+input DeleteLikeInput {
   id: ID!
 }
 
-input DeleteFolderDocumentInput {
-  id: ID!
-}
-
-input DeleteFolderInput {
+input DeleteUserInput {
   id: ID!
 }
 
@@ -66,178 +125,6 @@ type File {
 
 input FileWhereInput {
   exists: Boolean
-}
-
-type Folder {
-  createdAt: Date!
-  documents(limit: Int = 50, offset: Int = 0, where: FolderDocumentWhereInput): FolderDocumentCollection
-  id: ID!
-  name: String!
-  updatedAt: Date!
-}
-
-type FolderCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FolderEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input FolderCollectionInput {
-  createAndAdd: [CreateFolderInput]
-  delete: [ID]
-  update: [UpdateFolderInput]
-}
-
-type FolderDocument {
-  createdAt: Date!
-  file(limit: Int = 50, offset: Int = 0, where: FolderDocumentFileWhereInput): FolderDocumentFileCollection
-  folderId: ID!
-  id: ID!
-  name: String!
-  updatedAt: Date!
-}
-
-type FolderDocumentCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FolderDocumentEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input FolderDocumentCollectionInput {
-  createAndAdd: [CreateFolderDocumentInput]
-  delete: [ID]
-  update: [UpdateFolderDocumentInput]
-}
-
-type FolderDocumentEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: FolderDocument
-}
-
-type FolderDocumentFile {
-  createdAt: Date!
-  folderDocumentId: ID!
-  folderId: ID!
-  id: ID!
-  name: String!
-  updatedAt: Date!
-}
-
-type FolderDocumentFileCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FolderDocumentFileEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input FolderDocumentFileCollectionInput {
-  createAndAdd: [CreateFolderDocumentFileInput]
-  delete: [ID]
-  update: [UpdateFolderDocumentFileInput]
-}
-
-type FolderDocumentFileEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: FolderDocumentFile
-}
-
-input FolderDocumentFileReferenceInput {
-  createAndLink: CreateFolderDocumentFileInput
-  link: ID
-}
-
-input FolderDocumentFileReferenceListInput {
-  add: [ID]
-  createAndAdd: [CreateFolderDocumentFileInput]
-  remove: [ID]
-}
-
-input FolderDocumentFileWhereInput {
-  createdAt: DateWhereInput
-  exists: Boolean
-  folderDocumentId: IDWhereInput
-  folderId: IDWhereInput
-  id: IDWhereInput
-  name: StringWhereInput
-  updatedAt: DateWhereInput
-}
-
-input FolderDocumentReferenceInput {
-  createAndLink: CreateFolderDocumentInput
-  link: ID
-}
-
-input FolderDocumentReferenceListInput {
-  add: [ID]
-  createAndAdd: [CreateFolderDocumentInput]
-  remove: [ID]
-}
-
-input FolderDocumentWhereInput {
-  createdAt: DateWhereInput
-  exists: Boolean
-  file: FolderDocumentFileWhereInput
-  folderId: IDWhereInput
-  id: IDWhereInput
-  name: StringWhereInput
-  updatedAt: DateWhereInput
-}
-
-type FolderEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Folder
-}
-
-input FolderReferenceInput {
-  createAndLink: CreateFolderInput
-  link: ID
-}
-
-input FolderReferenceListInput {
-  add: [ID]
-  createAndAdd: [CreateFolderInput]
-  remove: [ID]
-}
-
-input FolderWhereInput {
-  createdAt: DateWhereInput
-  documents: FolderDocumentWhereInput
-  exists: Boolean
-  id: IDWhereInput
-  name: StringWhereInput
-  updatedAt: DateWhereInput
 }
 
 input IDWhereInput {
@@ -266,16 +153,91 @@ input IntWhereInput {
   notIn: [Int]
 }
 
+type Like {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdAt: Date!
+  createdBy: User
+  customObject: CustomObject
+  endDate: Date
+  id: ID!
+  meetDate: Date
+  testEnm2: TestEnum
+  testEnum: TestEnum
+  testEnum3: [TestEnum!]
+  updatedAt: Date!
+  users: [User!]!
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+type LikeCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [LikeEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input LikeCollectionInput {
+  createAndAdd: [CreateLikeInput]
+  delete: [ID]
+  update: [UpdateLikeInput]
+}
+
+type LikeEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Like
+}
+
+input LikeReferenceInput {
+  createAndLink: CreateLikeInput
+  link: ID
+}
+
+input LikeReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateLikeInput]
+  remove: [ID]
+}
+
+input LikeWhereInput {
+  any: Any
+  array: StringWhereInput
+  boolean: BooleanWhereInput
+  createdAt: DateWhereInput
+  createdBy: UserWhereInput
+  customObject: CustomObjectWhereInput
+  endDate: DateWhereInput
+  exists: Boolean
+  id: IDWhereInput
+  meetDate: DateWhereInput
+  testEnm2: TestEnumWhereInput
+  testEnum: TestEnumWhereInput
+  testEnum3: TestEnumWhereInput
+  updatedAt: DateWhereInput
+  users: UserWhereInput
+  viewNumber: IntWhereInput
+  viewNumber2: IntWhereInput
+}
+
 type Mutation {
-  createFolder(input: CreateFolderInput!): Folder
-  createFolderDocument(folderId: ID!, input: CreateFolderDocumentInput!): FolderDocument
-  createFolderDocumentFile(folderDocumentId: ID!, folderId: ID!, input: CreateFolderDocumentFileInput!): FolderDocumentFile
-  deleteFolder(input: DeleteFolderInput!): Boolean
-  deleteFolderDocument(folderId: ID!, input: DeleteFolderDocumentInput!): Boolean
-  deleteFolderDocumentFile(folderDocumentId: ID!, folderId: ID!, input: DeleteFolderDocumentFileInput!): Boolean
-  updateFolder(input: UpdateFolderInput!): Folder
-  updateFolderDocument(folderId: ID!, input: UpdateFolderDocumentInput!): FolderDocument
-  updateFolderDocumentFile(folderDocumentId: ID!, folderId: ID!, input: UpdateFolderDocumentFileInput!): FolderDocumentFile
+  createLike(input: CreateLikeInput!): Like
+  createUser(input: CreateUserInput!): User
+  deleteLike(input: DeleteLikeInput!): Boolean
+  deleteUser(input: DeleteUserInput!): Boolean
+  updateLike(force: Boolean, input: UpdateLikeInput!): Like
+  updateUser(force: Boolean, input: UpdateUserInput!): User
 }
 
 """
@@ -304,12 +266,10 @@ type PageInfo {
 }
 
 type Query {
-  folder(id: ID!): Folder
-  folderDocument(folderId: ID!, id: ID!): FolderDocument
-  folderDocumentFile(folderDocumentId: ID!, folderId: ID!, id: ID!): FolderDocumentFile
-  folderDocumentFiles(folderDocumentId: ID!, folderId: ID!, limit: Int = 50, offset: Int = 0, where: FolderDocumentFileWhereInput): FolderDocumentFileCollection
-  folderDocuments(folderId: ID!, limit: Int = 50, offset: Int = 0, where: FolderDocumentWhereInput): FolderDocumentCollection
-  folders(limit: Int = 50, offset: Int = 0, where: FolderWhereInput): FolderCollection
+  like(id: ID!): Like
+  likes(limit: Int = 50, offset: Int = 0, where: LikeWhereInput): LikeCollection
+  user(id: ID!): User
+  users(limit: Int = 50, offset: Int = 0, where: UserWhereInput): UserCollection
 }
 
 input StringWhereInput {
@@ -325,32 +285,68 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdateFolderDocumentFieldsInput {
-  file: FolderDocumentFileCollectionInput
-  name: String
+enum TestEnum {
+  other
 }
 
-input UpdateFolderDocumentFileFieldsInput {
-  name: String
+input TestEnumWhereInput {
+  arrayContains: TestEnum
+  equalTo: TestEnum
+  exists: Boolean
+  greaterThan: TestEnum
+  greaterThanOrEqualTo: TestEnum
+  in: [TestEnum]
+  lessThan: TestEnum
+  lessThanOrEqualTo: TestEnum
+  notEqualTo: TestEnum
+  notIn: [TestEnum]
 }
 
-input UpdateFolderDocumentFileInput {
-  fields: UpdateFolderDocumentFileFieldsInput!
+input UpdateCustomObject2Input {
+  customObject3: UpdateCustomObject3Input
+  test: String
+  test2: String
+}
+
+input UpdateCustomObject3Input {
+  test: String
+}
+
+input UpdateCustomObjectInput {
+  customObject2: UpdateCustomObject2Input
+  test: String
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+input UpdateLikeFieldsInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdBy: UserReferenceInput
+  customObject: UpdateCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm2: TestEnum
+  testEnum: TestEnum
+  testEnum3: [TestEnum!]
+  users: UserReferenceListInput
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+input UpdateLikeInput {
+  fields: UpdateLikeFieldsInput!
   id: ID!
 }
 
-input UpdateFolderDocumentInput {
-  fields: UpdateFolderDocumentFieldsInput!
-  id: ID!
+input UpdateUserFieldsInput {
+  username: String
 }
 
-input UpdateFolderFieldsInput {
-  documents: FolderDocumentCollectionInput
-  name: String
-}
-
-input UpdateFolderInput {
-  fields: UpdateFolderFieldsInput!
+input UpdateUserInput {
+  fields: UpdateUserFieldsInput!
   id: ID!
 }
 
@@ -371,4 +367,58 @@ input UploadFileListInput {
   add: [Upload]
   link: [UploadFileLinkInput]
   remove: [String]
+}
+
+type User {
+  createdAt: Date!
+  id: ID!
+  updatedAt: Date!
+  username: String!
+}
+
+type UserCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [UserEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input UserCollectionInput {
+  createAndAdd: [CreateUserInput]
+  delete: [ID]
+  update: [UpdateUserInput]
+}
+
+type UserEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: User
+}
+
+input UserReferenceInput {
+  createAndLink: CreateUserInput
+  link: ID
+}
+
+input UserReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateUserInput]
+  remove: [ID]
+}
+
+input UserWhereInput {
+  createdAt: DateWhereInput
+  exists: Boolean
+  id: IDWhereInput
+  updatedAt: DateWhereInput
+  username: StringWhereInput
 }

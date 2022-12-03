@@ -131,7 +131,7 @@ describe("Where Test", () => {
     await httpApolloServer.stop();
   });
 
-  it("Query with where boolean equal", async () => {
+  it.only("Query with where boolean equal", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { boolean: { equalTo: true } },
     });
