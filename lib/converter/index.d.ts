@@ -1,6 +1,27 @@
-import { FieldObjectOptions, ObjectString } from "../interfaces";
 import { firestore } from "firebase-admin";
-import { ParsedCollectionOptions } from "../parser";
-import { WhereInput } from "../where";
-export declare const targetToFirestore: ({ fields }: ParsedCollectionOptions | FieldObjectOptions, data: ObjectString<any>, batch: firestore.WriteBatch, parentRef: firestore.DocumentReference, snapshot?: firestore.DocumentSnapshot) => any;
-export declare const targetFromFirestore: ({ fields }: ParsedCollectionOptions | FieldObjectOptions, currentData: any, whereInput?: WhereInput, parentIds?: ObjectString) => Promise<any>;
+import { GraphQLSchema } from "graphql";
+export interface ReferenceInput {
+    link?: string | null;
+    createAndLink?: Record<string, any> | null;
+}
+export interface ReferenceListInput {
+    add?: string[] | null;
+    createAndAdd?: Record<string, any>[] | null;
+    remove?: string[] | null;
+}
+export interface CollectionInput {
+    createAndAdd?: Record<string, any>[] | null;
+    update?: Record<string, any>[] | null;
+    delete?: string[] | null;
+}
+export declare class Converter {
+    private schema;
+    private batch;
+    constructor(schema: GraphQLSchema, batch: firestore.WriteBatch);
+    toFirebase(name: string, newData: Record<string, any>, parentRef: firestore.DocumentReference, snapshot?: firestore.DocumentSnapshot): Promise<{
+        [x: string]: any;
+    }>;
+    private convertCollection;
+    private convertReference;
+    private convertReferenceList;
+}

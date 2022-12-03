@@ -1,17 +1,13 @@
-import * as admin from "firebase-admin";
-import { ObjectString } from "../interfaces";
-import { NexusInputObjectTypeDef } from "nexus/dist/core";
-export declare const hasType: (typeName: string, values: ObjectString<NexusInputObjectTypeDef<any>>) => boolean;
-export declare const ObjectReduce: <T, U>(object: ObjectString<T>, callback: (acc: any, key: string, value: T, index: number) => any, initialValue?: any) => U;
-export declare const ObjectMap: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => any) => any[];
-export declare const ObjectSome: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => boolean) => boolean;
-export declare const ObjectEach: <T>(object: ObjectString<T>, callback: (key: string, value: T, index: number) => any) => void;
-export declare const AsyncObjectReduce: <T>(object: ObjectString<T>, callback: (acc: any, key: string, value: T) => any, initialValue?: any) => any;
+import { GraphQLSchema } from "graphql";
+import { AllOutputTypes, NexusInputFieldConfigWithName, ObjectDefinitionBlock } from "nexus/dist/core";
+export declare type FirestoreFieldType = AllOutputTypes | "File" | "FileList" | "Collection" | "Reference" | "ReferenceList" | "Object";
+export declare type FirestoreField = Omit<NexusInputFieldConfigWithName<any, string>, "type"> & {
+    type: FirestoreFieldType;
+    target?: string;
+};
+export declare const getDefinitionFields: (definition: (t: ObjectDefinitionBlock<string>) => void) => FirestoreField[];
 export declare const capitalize: (str: string) => string;
 export declare const firstLowercase: (str: string) => string;
+export declare const getParentIdLabel: (parentIds?: string[]) => string[] | undefined;
 export declare const plural: (str: string) => string;
-export declare const getTarget: (name: string) => import("../parser").ParsedCollectionOptions;
-export declare const getCollectionName: (name: string, parent?: string) => string;
-export declare const getTargetCollection: (name: string, ids: string[]) => admin.firestore.CollectionReference;
-export declare const getParentIds: (name?: string, currentIds?: string[]) => string[];
-export declare const getParentLabelValues: (labels: string[], callback: (label: string, index: number) => any, initialValue?: ObjectString) => ObjectString<string> | undefined;
+export declare const getSchemaFields: (name: string, schema: GraphQLSchema) => FirestoreField[];

@@ -1,6 +1,10 @@
-import { CollectionReference } from "firebase-admin/firestore";
-import { ObjectString } from "../interfaces";
-import { ParsedCollectionOptions } from "../parser";
+import { firestore } from "firebase-admin";
+import { GraphQLSchema } from "graphql";
+interface CollectionWhereInput {
+    name: string;
+    parent?: string;
+    input: Record<string, any>;
+}
 export declare type WhereInputOperator = {
     exists?: boolean;
     equalTo?: any;
@@ -13,7 +17,26 @@ export declare type WhereInputOperator = {
     in?: any[];
     notIn?: any[];
 };
-export declare type WhereFieldsInput = ObjectString<ObjectString<any>> | ObjectString<any>;
-export declare type WhereInput = WhereFieldsInput;
-export declare const whereFilterEquality: (whereInput: WhereInput, data: any) => any;
-export declare const whereCollection: (target: ParsedCollectionOptions, collection: CollectionReference | FirebaseFirestore.Query, whereInput?: WhereInput, withoutID?: boolean) => FirebaseFirestore.Query;
+export declare class WhereCollection {
+    private schema;
+    constructor(schema: GraphQLSchema);
+    private chunkQuery;
+    private getData;
+    get(whereInput: CollectionWhereInput[], collection: firestore.Query): Promise<{
+        count: number;
+        edges: {
+            node: {
+                id: string;
+            };
+        }[];
+    }>;
+    getWhereInput: (name: string, input?: Record<string, any>, parent?: string) => CollectionWhereInput[];
+    private removeCollectionFields;
+    private whereReferenceId;
+    private whereReferenceListId;
+    private whereObject;
+    private whereFieldCollection;
+    whereCollection: (whereInput: CollectionWhereInput, collection: firestore.CollectionReference | firestore.CollectionGroup | firestore.Query) => firestore.Query<firestore.DocumentData>;
+    private getCollectionWhere;
+}
+export {};
