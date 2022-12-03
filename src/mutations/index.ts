@@ -1,6 +1,6 @@
 import { firestore } from "firebase-admin";
 import { GraphQLResolveInfo } from "graphql";
-import { arg, idArg, mutationField } from "nexus";
+import { arg, booleanArg, idArg, mutationField } from "nexus";
 import { FirestoreTypeOptions } from "..";
 import { Converter } from "../converter";
 import { getCreateInput, getDeleteInput, getUpdateInput } from "../inputs";
@@ -77,8 +77,17 @@ export const getUpdateMutation = (options: FirestoreTypeOptions) => {
     ...field,
     // @ts-ignore
     type: name,
-    args: { ...idsArgs, input: arg({ type: updateInput, required: true }) },
-    resolve: async (src, { input: { id, fields }, ...ids }, ctx, info) => {
+    args: {
+      ...idsArgs,
+      input: arg({ type: updateInput, required: true }),
+      force: booleanArg(),
+    },
+    resolve: async (
+      src,
+      { force, input: { id, fields }, ...ids },
+      ctx,
+      info
+    ) => {
       const parentIds = getParentIds(options.parents, ids);
       const collection = getCollection(name, parentIds);
 
@@ -86,10 +95,14 @@ export const getUpdateMutation = (options: FirestoreTypeOptions) => {
       const batch = firestore().batch();
       const snapshot = await ref.get();
 
+      if (!snapshot.exists && !force) {
+        throw new Error("Object not found");
+      }
+
       const converter = new Converter(info.schema, batch);
       const newData = await converter.toFirebase(name, fields, ref, snapshot);
 
-      batch.update(ref, newData);
+      batch.set(ref, newData, { merge: true });
 
       await batch.commit();
 

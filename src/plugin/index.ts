@@ -17,7 +17,10 @@ export type ReferenceField = Omit<
 export type ObjectField = core.NexusOutputFieldConfig<string, string>;
 
 export type CollectionField = NexusOutputFieldConfig<string, string> &
-  core.connectionPluginCore.ConnectionFieldConfig<string, string>;
+  Omit<
+    core.connectionPluginCore.ConnectionFieldConfig<string, string>,
+    "resolve"
+  >;
 
 export const LogTimePlugin = (enabled?: boolean) =>
   plugin({
@@ -60,10 +63,10 @@ export const GraphQLFirebasePlugin = () => {
             const fieldName = config.args[0];
             const isList = config.args[1].list;
             t.field(fieldName, {
-              ...config.args[1],
               resolve: async (src, args, ctx, info) => {
                 return referenceResolver(fieldName, isList, src, info);
               },
+              ...config.args[1],
             });
           },
         })
@@ -88,17 +91,17 @@ export const GraphQLFirebasePlugin = () => {
             const parents = config.args[1]?.parents || [];
 
             t.connectionField(filedName, {
-              ...config.args[1],
               getConnectionName: () => `${type}Collection`,
+              resolve: async (src, input, ctx, info) => {
+                return collectionResolver(type, parents, src, input, info);
+              },
+              ...config.args[1],
               type,
               additionalArgs: {
                 ...config.args[1].additionalArgs,
                 limit: arg({ type: "Int", default: 50 }),
                 offset: arg({ type: "Int", default: 0 }),
                 where: arg({ type: `${type}WhereInput` }),
-              },
-              resolve: async (src, input, ctx, info) => {
-                return collectionResolver(type, parents, src, input, info);
               },
             });
           },
