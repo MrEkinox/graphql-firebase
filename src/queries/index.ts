@@ -1,6 +1,6 @@
 import { queryField, idArg } from "nexus";
 import { FirestoreTypeOptions } from "..";
-import { getCollection, getParentIds } from "../mutations";
+import { getCollection, getParents } from "../mutations";
 import { firstLowercase, getParentIdLabel, plural } from "../utils";
 
 export const getQuery = ({ name, ...options }: FirestoreTypeOptions) => {
@@ -17,8 +17,8 @@ export const getQuery = ({ name, ...options }: FirestoreTypeOptions) => {
     type: name,
     args: { ...parentIdArgs, id: idArg({ required: true }) },
     resolve: async (_, { id, ...input }, ctx, info) => {
-      const parentIds = getParentIds(options.parents, input);
-      const collection = getCollection(name, parentIds);
+      const parents = getParents(name, options.parents, info.schema, input);
+      const collection = getCollection(parents);
 
       const ref = collection.doc(id);
 

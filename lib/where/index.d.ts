@@ -2,7 +2,8 @@ import { firestore } from "firebase-admin";
 import { GraphQLSchema } from "graphql";
 interface CollectionWhereInput {
     name: string;
-    parent?: string;
+    fieldName: string;
+    parentFieldName?: string;
     input: Record<string, any>;
 }
 export declare type WhereInputOperator = {
@@ -19,7 +20,8 @@ export declare type WhereInputOperator = {
 };
 export declare class WhereCollection {
     private schema;
-    constructor(schema: GraphQLSchema);
+    private parentsIds;
+    constructor(schema: GraphQLSchema, parentsIds: Record<string, string>);
     private chunkQuery;
     private getData;
     get(whereInput: CollectionWhereInput[], collection: firestore.Query): Promise<{
@@ -30,7 +32,7 @@ export declare class WhereCollection {
             };
         }[];
     }>;
-    getWhereInput: (name: string, input?: Record<string, any>, parent?: string) => CollectionWhereInput[];
+    getWhereInput: (type: string, input?: Record<string, any>, parentFieldName?: string, fieldName?: string) => CollectionWhereInput[];
     private removeCollectionFields;
     private whereReferenceId;
     private whereReferenceListId;

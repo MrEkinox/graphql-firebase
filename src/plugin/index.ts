@@ -1,11 +1,5 @@
-import { firestore } from "firebase-admin";
-import { fieldsList } from "graphql-fields-list";
 import { plugin, arg, dynamicOutputMethod, core } from "nexus";
-import { idArg, NexusOutputFieldConfig } from "nexus/dist/core";
-import { getCollection, getParentIds } from "../mutations";
-import { WhereCollection } from "../where";
-import chunk from "lodash/chunk";
-import { firstLowercase, getParentIdLabel } from "../utils";
+import { NexusOutputFieldConfig } from "nexus/dist/core";
 import { collectionResolver } from "../collection";
 import { referenceResolver } from "../reference";
 
@@ -93,7 +87,7 @@ export const GraphQLFirebasePlugin = () => {
             t.connectionField(filedName, {
               getConnectionName: () => `${type}Collection`,
               resolve: async (src, input, ctx, info) => {
-                return collectionResolver(type, parents, src, input, info);
+                return collectionResolver(type, filedName, parents, src, input, info);
               },
               ...config.args[1],
               type,

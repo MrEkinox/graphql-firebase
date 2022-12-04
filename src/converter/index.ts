@@ -2,8 +2,8 @@ import { firestore } from "firebase-admin";
 import { GraphQLSchema } from "graphql";
 import { fileListToFirestore, fileToFirestore } from "../file";
 import async from "async";
-import { getSchemaFields, plural } from "../utils";
-import { getCollection } from "../mutations";
+import { FirestoreField, getSchemaFields } from "../utils";
+import { getCollection, getParents } from "../mutations";
 
 export interface ReferenceInput {
   link?: string | null;
@@ -47,16 +47,16 @@ export class Converter {
 
         if (typeof fieldData === "undefined") return {};
 
-        if (field.type === "Reference" && field.target) {
-          fieldData = await this.convertReference(field.target, fieldData);
-        } else if (field.type === "ReferenceList" && field.target) {
+        if (field.type === "Reference") {
+          fieldData = await this.convertReference(field, fieldData);
+        } else if (field.type === "ReferenceList") {
           fieldData = await this.convertReferenceList(
-            field.target,
+            field,
             fieldData,
             lastFieldData
           );
-        } else if (field.type === "Collection" && field.target) {
-          await this.convertCollection(field.target, fieldData, parentRef);
+        } else if (field.type === "Collection") {
+          await this.convertCollection(field, fieldData, parentRef);
           return {};
         } else if (field.type === "File") {
           fieldData = await fileToFirestore(fieldData, lastFieldData);
@@ -76,23 +76,30 @@ export class Converter {
   }
 
   private async convertCollection(
-    name: string,
+    field: FirestoreField,
     input: CollectionInput,
     parentRef: firestore.DocumentReference
   ) {
-    const ref = parentRef.collection(plural(name));
+    const ref = parentRef.collection(field.name);
 
     await async.map(input?.createAndAdd || [], async (data2) => {
+      if (!field.target) return;
       const docRef = ref.doc();
-      const data = await this.toFirebase(name, data2, docRef);
+      const data = await this.toFirebase(field.target, data2, docRef);
       this.batch.set(docRef, data);
       return docRef;
     });
 
     await async.map(input?.update || [], async (data2) => {
+      if (!field.target) return;
       const docRef = ref.doc(data2.id);
       const snapshot = await docRef.get();
-      const data = await this.toFirebase(name, data2.fields, docRef, snapshot);
+      const data = await this.toFirebase(
+        field.target,
+        data2.fields,
+        docRef,
+        snapshot
+      );
       this.batch.update(docRef, data);
       return docRef;
     });
@@ -104,12 +111,17 @@ export class Converter {
     });
   }
 
-  private async convertReference(name: string, input: ReferenceInput | null) {
-    const collection = getCollection(name);
+  private async convertReference(
+    { target }: FirestoreField,
+    input: ReferenceInput | null
+  ) {
+    if (!target) return null;
+    const parents = getParents(target, [], this.schema);
+    const collection = getCollection(parents);
 
     if (input?.createAndLink) {
       const docRef = collection.doc();
-      const data = await this.toFirebase(name, input.createAndLink, docRef);
+      const data = await this.toFirebase(target, input.createAndLink, docRef);
       this.batch.set(docRef, data);
       return docRef;
     }
@@ -120,15 +132,17 @@ export class Converter {
   }
 
   private async convertReferenceList(
-    name: string,
+    { target }: FirestoreField,
     input: ReferenceListInput,
     lastData: firestore.DocumentReference[] = []
   ) {
-    const collection = getCollection(name);
+    if (!target) return [];
+    const parents = getParents(target, [], this.schema);
+    const collection = getCollection(parents);
 
     const created = await async.map(input.createAndAdd || [], async (data2) => {
       const ref = collection.doc();
-      const data = await this.toFirebase(name, data2, ref);
+      const data = await this.toFirebase(target, data2, ref);
       this.batch.set(ref, data);
 
       return ref;

@@ -1,13 +1,14 @@
 import { firestore } from "firebase-admin";
 import { WhereFilterOp } from "firebase-admin/firestore";
 import { GraphQLSchema } from "graphql";
-import { getCollection } from "../mutations";
+import { getCollection, getParents } from "../mutations";
 import chunk from "lodash/chunk";
 import { FirestoreField, getSchemaFields, plural } from "../utils";
 
 interface CollectionWhereInput {
   name: string;
-  parent?: string;
+  fieldName: string;
+  parentFieldName?: string;
   input: Record<string, any>;
 }
 
@@ -52,9 +53,11 @@ const getWhereType = (
 
 export class WhereCollection {
   private schema: GraphQLSchema;
+  private parentsIds: Record<string, string>;
 
-  constructor(schema: GraphQLSchema) {
+  constructor(schema: GraphQLSchema, parentsIds: Record<string, string>) {
     this.schema = schema;
+    this.parentsIds = parentsIds;
   }
 
   private async chunkQuery(collection: firestore.Query, ids: string[]) {
@@ -83,7 +86,7 @@ export class WhereCollection {
     const data = await collection.get();
 
     const edges = data.docs.map((doc) => ({
-      node: { id: doc.id, ...doc.data() },
+      node: { id: doc.id, ...this.parentsIds, ...doc.data() },
     }));
 
     return { count, edges };
@@ -104,22 +107,29 @@ export class WhereCollection {
   }
 
   getWhereInput = (
-    name: string,
+    type: string,
     input?: Record<string, any>,
-    parent?: string
+    parentFieldName?: string,
+    fieldName?: string
   ): CollectionWhereInput[] => {
-    const fields = getSchemaFields(name, this.schema);
-    const newInput = this.removeCollectionFields(name, input, parent);
-    const newParent = newInput ? name : parent;
+    const fields = getSchemaFields(type, this.schema);
+    const newInput = this.removeCollectionFields(
+      type,
+      input,
+      fieldName,
+      parentFieldName
+    );
 
     return fields.reduce(
       (acc, field) => {
         const fieldInput = input?.[field.name];
         if (field.type === "Collection" && field.target && fieldInput) {
+          const newParent = newInput ? fieldName : parentFieldName;
           const inField = this.getWhereInput(
             field.target,
             fieldInput,
-            newParent
+            newParent,
+            field.name
           );
           return [...acc, ...inField];
         }
@@ -132,7 +142,8 @@ export class WhereCollection {
   private removeCollectionFields(
     name: string,
     input?: Record<string, any>,
-    parent?: string
+    fieldName?: string,
+    parentFieldName?: string
   ): CollectionWhereInput | undefined {
     const fields = getSchemaFields(name, this.schema);
 
@@ -147,7 +158,12 @@ export class WhereCollection {
     }, {});
 
     if (Object.keys(newFields).length) {
-      return { name, input: newFields, parent };
+      return {
+        name,
+        input: newFields,
+        parentFieldName,
+        fieldName: fieldName || plural(name),
+      };
     }
     return undefined;
   }
@@ -165,7 +181,8 @@ export class WhereCollection {
     if (!whereField || !whereOperator || !field.target || !whereID)
       return collection;
 
-    const targetCollection = getCollection(field.target, []);
+    const parents = getParents(field.target, [], this.schema);
+    const targetCollection = getCollection(parents);
 
     if (whereField === "in" && whereID instanceof Array) {
       const targetDocs = whereID.map((id) => targetCollection.doc(id));
@@ -190,7 +207,8 @@ export class WhereCollection {
     if (!whereField || !whereOperator || !field.target || !whereID)
       return collection;
 
-    const targetCollection = getCollection(field.target, []);
+    const parents = getParents(field.target, [], this.schema);
+    const targetCollection = getCollection(parents);
 
     if (whereField === "in" && whereID instanceof Array) {
       const targetDocs = whereID.map((id) => targetCollection.doc(id));
@@ -285,7 +303,7 @@ export class WhereCollection {
     const where = whereInput.shift();
     if (!where) return ids;
 
-    const collectionGroup = firestore().collectionGroup(plural(where.name));
+    const collectionGroup = firestore().collectionGroup(where.fieldName);
     let collection = this.whereCollection(where, collectionGroup);
 
     if (ids.length) {
@@ -295,9 +313,9 @@ export class WhereCollection {
 
     const snapIds = snapshot.docs.map((doc) => {
       const path = doc.ref.path.split("/");
-      const index = where.parent
-        ? path.indexOf(plural(where.parent))
-        : path.indexOf(plural(where.name));
+      const index = where.parentFieldName
+        ? path.indexOf(where.parentFieldName)
+        : path.indexOf(where.fieldName);
       return path.at(index + 1) || "";
     });
 

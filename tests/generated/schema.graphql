@@ -17,13 +17,80 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
+input CreateCustomObject2Input {
+  customObject3: CreateCustomObject3Input
+  test: String
+  test2: String
+}
+
+input CreateCustomObject3Input {
+  test: String
+}
+
+input CreateCustomObjectInput {
+  customObject2: CreateCustomObject2Input
+  test: String!
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+input CreateLikeInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdBy: UserReferenceInput
+  customObject: CreateCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm2: TestEnum
+  testEnum: TestEnum
+  users: UserReferenceListInput!
+  viewNumber: Int
+  viewNumber2: Int
+}
+
 input CreateUserInput {
-  multipleDate: [Date]
-  multipleFile: UploadFileListInput
-  multipleNumber: [Int]
-  singleDate: Date
-  singleFile: UploadFileInput
-  singleNumber: Int
+  username: String!
+}
+
+type CustomObject {
+  customObject2: CustomObject2
+  test: String!
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+type CustomObject2 {
+  customObject3: CustomObject3
+  test: String
+  test2: String
+}
+
+input CustomObject2WhereInput {
+  customObject3: CustomObject3WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test2: StringWhereInput
+}
+
+type CustomObject3 {
+  test: String
+}
+
+input CustomObject3WhereInput {
+  exists: Boolean
+  test: StringWhereInput
+}
+
+input CustomObjectWhereInput {
+  customObject2: CustomObject2WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test8: StringWhereInput
+  viewNumber: IntWhereInput
+  viewNumber2: IntWhereInput
 }
 
 scalar Date
@@ -39,6 +106,10 @@ input DateWhereInput {
   lessThanOrEqualTo: Date
   notEqualTo: Date
   notIn: [Date]
+}
+
+input DeleteLikeInput {
+  id: ID!
 }
 
 input DeleteUserInput {
@@ -81,9 +152,88 @@ input IntWhereInput {
   notIn: [Int]
 }
 
+type Like {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdAt: Date!
+  createdBy: User
+  customObject: CustomObject
+  endDate: Date
+  id: ID!
+  meetDate: Date
+  testEnm2: TestEnum
+  testEnum: TestEnum
+  updatedAt: Date!
+  users: [User!]!
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+type LikeCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [LikeEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input LikeCollectionInput {
+  createAndAdd: [CreateLikeInput]
+  delete: [ID]
+  update: [UpdateLikeInput]
+}
+
+type LikeEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Like
+}
+
+input LikeReferenceInput {
+  createAndLink: CreateLikeInput
+  link: ID
+}
+
+input LikeReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateLikeInput]
+  remove: [ID]
+}
+
+input LikeWhereInput {
+  any: Any
+  array: StringWhereInput
+  boolean: BooleanWhereInput
+  createdAt: DateWhereInput
+  createdBy: UserWhereInput
+  customObject: CustomObjectWhereInput
+  endDate: DateWhereInput
+  exists: Boolean
+  id: IDWhereInput
+  meetDate: DateWhereInput
+  testEnm2: TestEnumWhereInput
+  testEnum: TestEnumWhereInput
+  updatedAt: DateWhereInput
+  users: UserWhereInput
+  viewNumber: IntWhereInput
+  viewNumber2: IntWhereInput
+}
+
 type Mutation {
+  createLike(input: CreateLikeInput!): Like
   createUser(input: CreateUserInput!): User
+  deleteLike(input: DeleteLikeInput!): Boolean
   deleteUser(input: DeleteUserInput!): Boolean
+  updateLike(force: Boolean, input: UpdateLikeInput!): Like
   updateUser(force: Boolean, input: UpdateUserInput!): User
 }
 
@@ -113,6 +263,8 @@ type PageInfo {
 }
 
 type Query {
+  like(id: ID!): Like
+  likes(limit: Int = 50, offset: Int = 0, where: LikeWhereInput): LikeCollection
   user(id: ID!): User
   users(limit: Int = 50, offset: Int = 0, where: UserWhereInput): UserCollection
 }
@@ -130,13 +282,63 @@ input StringWhereInput {
   notIn: [String]
 }
 
+enum TestEnum {
+  other
+}
+
+input TestEnumWhereInput {
+  arrayContains: TestEnum
+  equalTo: TestEnum
+  exists: Boolean
+  greaterThan: TestEnum
+  greaterThanOrEqualTo: TestEnum
+  in: [TestEnum]
+  lessThan: TestEnum
+  lessThanOrEqualTo: TestEnum
+  notEqualTo: TestEnum
+  notIn: [TestEnum]
+}
+
+input UpdateCustomObject2Input {
+  customObject3: UpdateCustomObject3Input
+  test: String
+  test2: String
+}
+
+input UpdateCustomObject3Input {
+  test: String
+}
+
+input UpdateCustomObjectInput {
+  customObject2: UpdateCustomObject2Input
+  test: String
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+input UpdateLikeFieldsInput {
+  any: Any
+  array: [String]
+  boolean: Boolean
+  createdBy: UserReferenceInput
+  customObject: UpdateCustomObjectInput
+  endDate: Date
+  meetDate: Date
+  testEnm2: TestEnum
+  testEnum: TestEnum
+  users: UserReferenceListInput
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+input UpdateLikeInput {
+  fields: UpdateLikeFieldsInput!
+  id: ID!
+}
+
 input UpdateUserFieldsInput {
-  multipleDate: [Date]
-  multipleFile: UploadFileListInput
-  multipleNumber: [Int]
-  singleDate: Date
-  singleFile: UploadFileInput
-  singleNumber: Int
+  username: String
 }
 
 input UpdateUserInput {
@@ -166,13 +368,8 @@ input UploadFileListInput {
 type User {
   createdAt: Date!
   id: ID!
-  multipleDate: [Date]
-  multipleFile: [File]
-  multipleNumber: [Int]
-  singleDate: Date
-  singleFile: File
-  singleNumber: Int
   updatedAt: Date!
+  username: String!
 }
 
 type UserCollection {
@@ -218,9 +415,6 @@ input UserWhereInput {
   createdAt: DateWhereInput
   exists: Boolean
   id: IDWhereInput
-  multipleDate: DateWhereInput
-  multipleNumber: IntWhereInput
-  singleDate: DateWhereInput
-  singleNumber: IntWhereInput
   updatedAt: DateWhereInput
+  username: StringWhereInput
 }

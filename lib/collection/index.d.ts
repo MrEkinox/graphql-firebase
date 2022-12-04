@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo } from "graphql";
-export declare const collectionResolver: (type: string, parents: string[], src: any, { where, limit, offset, ...input }: {
+export declare const collectionResolver: (type: string, fieldName: string, parents: string[], src: any, { where, limit, offset, ...input }: {
     [x: string]: any;
     where: any;
     limit: any;
@@ -7,6 +7,8 @@ export declare const collectionResolver: (type: string, parents: string[], src: 
 }, info: GraphQLResolveInfo) => Promise<{
     count: number;
     edges: {
-        node: any;
+        node: {
+            id: string;
+        };
     }[];
 }>;
