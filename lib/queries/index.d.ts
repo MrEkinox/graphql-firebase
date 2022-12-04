@@ -1,5 +1,3 @@
-import { ParsedCollectionOptions } from "../parser";
-export declare const getQueries: (collection: ParsedCollectionOptions) => {
-    query: import("nexus/dist/core").NexusExtendTypeDef<"Query">;
-    allQuery: import("nexus/dist/core").NexusExtendTypeDef<"Query">;
-};
+import { FirestoreTypeOptions } from "..";
+export declare const getQuery: ({ name, ...options }: FirestoreTypeOptions) => import("nexus/dist/core").NexusExtendTypeDef<"Query">;
+export declare const getAllQuery: ({ name, ...options }: FirestoreTypeOptions) => import("nexus/dist/core").NexusExtendTypeDef<"Query">;

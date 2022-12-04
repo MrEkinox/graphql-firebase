@@ -1,20 +1,24 @@
 import { startHttpApolloServer } from "./setup";
-import { CollectionOptions } from "../src/interfaces";
 import { graphQLClient } from "./testHelper";
 import { gql } from "graphql-request";
+import { firestoreType } from "../src";
 
-const collections: CollectionOptions[] = [
-  { name: "User", fields: { username: { type: "String", required: true } } },
-  {
-    name: "Post",
-    fields: {
-      createdBy: { type: "Pointer", target: "User" },
-    },
+const User = firestoreType({
+  name: "User",
+  definition: (t) => {
+    t.string("username", { required: true });
   },
-];
+});
+
+const Post = firestoreType({
+  name: "Post",
+  definition: (t) => {
+    t.ref("createdBy", { type: "User" });
+  },
+});
 
 const CREATE_DOCUMENT = gql`
-  mutation createPost($createdBy: UserPointerInput!) {
+  mutation createPost($createdBy: UserReferenceInput!) {
     createPost(input: { createdBy: $createdBy }) {
       id
       createdBy {
@@ -26,7 +30,7 @@ const CREATE_DOCUMENT = gql`
 `;
 
 const UPDATE_DOCUMENT = gql`
-  mutation updatePost($id: ID!, $createdBy: UserPointerInput) {
+  mutation updatePost($id: ID!, $createdBy: UserReferenceInput) {
     updatePost(input: { id: $id, fields: { createdBy: $createdBy } }) {
       id
       createdBy {
@@ -57,7 +61,7 @@ describe("Pointer Test", () => {
   let httpApolloServer: Awaited<ReturnType<typeof startHttpApolloServer>>;
 
   beforeAll(async () => {
-    httpApolloServer = await startHttpApolloServer({ collections });
+    httpApolloServer = await startHttpApolloServer({ types: [User, Post] });
   });
 
   afterAll(async () => {
@@ -67,7 +71,7 @@ describe("Pointer Test", () => {
   let postId = "";
   let createdById = "";
 
-  it.only("Create And Link", async () => {
+  it("Create And Link", async () => {
     const { createPost } = await graphQLClient.request(CREATE_DOCUMENT, {
       createdBy: { createAndLink: { username: "User1" } },
     });
@@ -79,7 +83,7 @@ describe("Pointer Test", () => {
     createdById = createPost.createdBy.id;
   });
 
-  it.only("Unlink", async () => {
+  it("Unlink", async () => {
     const { updatePost } = await graphQLClient.request(UPDATE_DOCUMENT, {
       id: postId,
       createdBy: null,
@@ -160,12 +164,12 @@ describe("Pointer Test", () => {
     expect(posts.edges[0].node.createdBy.id).toEqual(createdById);
   });
 
-  it.only("Query with not equal where", async () => {
+  it("Query with not equal where", async () => {
     const { posts } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { createdBy: { id: { notEqualTo: createdById } } },
     });
 
     expect(posts).not.toBeUndefined();
-    expect(posts.edges).toHaveLength(1);
+    expect(posts.edges).toHaveLength(0);
   });
 });

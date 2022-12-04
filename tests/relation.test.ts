@@ -1,20 +1,24 @@
 import { startHttpApolloServer } from "./setup";
-import { CollectionOptions } from "../src/interfaces";
 import { graphQLClient } from "./testHelper";
 import { gql } from "graphql-request";
+import { firestoreType } from "../src";
 
-const collections: CollectionOptions[] = [
-  { name: "User", fields: { username: { type: "String", required: true } } },
-  {
-    name: "Like",
-    fields: {
-      users: { type: "Relation", target: "User", required: true },
-    },
+const User = firestoreType({
+  name: "User",
+  definition: (t) => {
+    t.string("username", { required: true });
   },
-];
+});
+
+const Like = firestoreType({
+  name: "Like",
+  definition: (t) => {
+    t.ref("users", { type: "User", list: true, required: true });
+  },
+});
 
 const CREATE_LIKE_DOCUMENT = gql`
-  mutation createLike($users: UserRelationInput!) {
+  mutation createLike($users: UserReferenceListInput!) {
     createLike(input: { users: $users }) {
       id
       users {
@@ -26,7 +30,7 @@ const CREATE_LIKE_DOCUMENT = gql`
 `;
 
 const UPDATE_LIKE_DOCUMENT = gql`
-  mutation updateLike($id: ID!, $users: UserRelationInput!) {
+  mutation updateLike($id: ID!, $users: UserReferenceListInput!) {
     updateLike(input: { id: $id, fields: { users: $users } }) {
       id
       users {
@@ -57,7 +61,7 @@ describe("Relation Test", () => {
   let httpApolloServer: Awaited<ReturnType<typeof startHttpApolloServer>>;
 
   beforeAll(async () => {
-    httpApolloServer = await startHttpApolloServer({ collections });
+    httpApolloServer = await startHttpApolloServer({ types: [User, Like] });
   });
 
   afterAll(async () => {
@@ -136,8 +140,6 @@ describe("Relation Test", () => {
       id: likeId,
       users: { add: [likeUsers[1].id, likeUsers[2].id] },
     });
-
-    console.log(updateLike.users)
 
     expect(updateLike).not.toBeUndefined();
     expect(updateLike.users).toHaveLength(3);

@@ -1,99 +1,49 @@
-import { queryField, idArg, arg } from "nexus";
-import {
-  firstLowercase,
-  getParentIds,
-  getParentLabelValues,
-  getTarget,
-  getTargetCollection,
-  plural,
-} from "../utils";
-import {
-  collectionFromFirestore,
-  collectionTargetFromFirestore,
-} from "../converter/collection";
-import { ParsedCollectionOptions } from "../parser";
+import { queryField, idArg } from "nexus";
+import { FirestoreTypeOptions } from "..";
+import { getCollection, getParents } from "../mutations";
+import { firstLowercase, getParentIdLabel, plural } from "../utils";
 
-const getQuery = (collection: ParsedCollectionOptions) => {
-  const parentLabelIds = getParentIds(collection.parent);
+export const getQuery = ({ name, ...options }: FirestoreTypeOptions) => {
+  const parentIds = getParentIdLabel(options.parents);
 
-  const parentIdArgs = getParentLabelValues(parentLabelIds, () =>
-    idArg({ required: true })
+  const parentIdArgs = parentIds?.reduce(
+    (acc, id) => ({ ...acc, [id]: idArg({ required: true }) }),
+    {}
   );
 
-  return queryField(firstLowercase(collection.name), {
-    deprecation: collection.deprecation,
-    authorize: collection.authorize,
-    description: collection.description,
+  return queryField(firstLowercase(name), {
+    ...options,
     // @ts-ignore
-    type: collection.name,
+    type: name,
     args: { ...parentIdArgs, id: idArg({ required: true }) },
-    resolve: async (_, { id, ...input }) => {
-      const ids: string[] = parentLabelIds.map((label) => input[label]);
+    resolve: async (_, { id, ...input }, ctx, info) => {
+      const parents = getParents(name, options.parents, info.schema, input);
+      const collection = getCollection(parents);
 
-      const parentIdsValue = getParentLabelValues(
-        parentLabelIds,
-        (_, index) => ids[index]
-      );
+      const ref = collection.doc(id);
 
-      const target = getTarget(collection.name);
-      const targetCollection = getTargetCollection(collection.name, ids);
+      const snapshot = await ref.get();
 
-      const targetRef = targetCollection.doc(id);
-
-      const document = await targetRef.get();
-
-      if (!document.exists) {
-        throw new Error(`${collection.name} not found`);
-      }
-
-      return collectionTargetFromFirestore(
-        document,
-        target,
-        undefined,
-        parentIdsValue
-      );
+      return snapshot.data();
     },
   });
 };
 
-const getAllQuery = (collection: ParsedCollectionOptions) => {
-  const { parent } = getTarget(collection.name);
-  const parentLabelIds = getParentIds(parent);
+export const getAllQuery = ({ name, ...options }: FirestoreTypeOptions) => {
+  const parentIds = getParentIdLabel(options.parents);
 
-  const parentIdArgs = getParentLabelValues(parentLabelIds, () =>
-    idArg({ required: true })
+  const parentIdArgs = parentIds?.reduce(
+    (acc, id) => ({ ...acc, [id]: idArg({ required: true }) }),
+    {}
   );
 
   return queryField((t) => {
-    t.connectionField(plural(collection.name), {
-      deprecation: collection.deprecation,
-      authorize: collection.authorize,
-      description: collection.description,
+    t.collection(plural(name), {
+      ...options,
       // @ts-ignore
-      type: collection.name,
-      additionalArgs: {
-        ...parentIdArgs,
-        limit: arg({ type: "Int" }),
-        offset: arg({ type: "Int" }),
-        where: arg({ type: `${collection.name}WhereInput` }),
-        orderBy: arg({ type: `${collection.name}OrderByInput` }),
-      },
-      resolve: async (root, { where, orderBy, ...input }, ctx, info) =>
-        collectionFromFirestore(
-          collection.name,
-          input,
-          where,
-          orderBy,
-          root,
-          info
-        ),
+      type: name,
+      parents: options.parents,
+      additionalArgs: parentIdArgs,
     });
   });
-};
-
-export const getQueries = (collection: ParsedCollectionOptions) => {
-  const query = getQuery(collection);
-  const allQuery = getAllQuery(collection);
-
-  return { query, allQuery };
 };

@@ -15,5 +15,5 @@
   },
   "compileOnSave": true,
   "exclude": ["node_modules", "lib"],
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts", "nexusTypes.d.ts"]
 }

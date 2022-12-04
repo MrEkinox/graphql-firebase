@@ -1,182 +1,185 @@
-import { mutationField, arg, idArg, booleanArg } from "nexus";
 import { firestore } from "firebase-admin";
-import { targetToFirestore } from "../converter";
-import { getParentLabelValues, getTarget, getTargetCollection } from "../utils";
-import { ParsedCollectionOptions } from "../parser";
-import { collectionTargetFromFirestore } from "../converter/collection";
+import { GraphQLSchema } from "graphql";
+import { arg, booleanArg, idArg, mutationField } from "nexus";
+import { FirestoreTypeOptions } from "..";
+import { Converter } from "../converter";
+import { getCreateInput, getDeleteInput, getUpdateInput } from "../inputs";
+import {
+  firstLowercase,
+  getParentIdLabel,
+  getSchemaFields,
+  plural,
+} from "../utils";
 
-const getCreateMutation = (
-  collection: ParsedCollectionOptions,
-  parentLabelIds: string[] = []
+export const getCollection = (
+  parents?: Array<{ name: string; id: string; fieldName: string }>,
+  lastDoc?: firestore.DocumentReference
+): firestore.CollectionReference => {
+  const firstParent = parents?.[0];
+
+  if (!firstParent) throw new Error("no parent found");
+
+  if (firstParent.id) {
+    const ref = firestore()
+      .collection(firstParent.fieldName)
+      .doc(firstParent.id);
+    const newParents = parents.slice(1);
+    return getCollection(newParents, ref);
+  } else {
+    if (lastDoc) {
+      return lastDoc.collection(firstParent.fieldName);
+    }
+    return firestore().collection(firstParent.fieldName);
+  }
+};
+
+export type CollectionParent = { name: string; id: string; fieldName: string };
+
+export const getParents = (
+  searchType: string,
+  parents: string[] = [],
+  schema: GraphQLSchema,
+  input?: Record<string, any>
 ) => {
-  const parentIdArgs = getParentLabelValues(parentLabelIds, () =>
-    idArg({ required: true })
+  if (!parents.length)
+    return [{ name: searchType, id: "", fieldName: plural(searchType) }];
+  return parents.reduce((acc, cur, index) => {
+    const nextParent = parents[index + 1];
+    const fields = getSchemaFields(cur, schema);
+    const search = nextParent || searchType;
+    const exists = fields.find((field) => field.target === search);
+
+    if (exists) {
+      const id = input?.[firstLowercase(`${search}Id`)];
+      const newParent = { name: search, id, fieldName: exists.name };
+      if (acc.length) {
+        return [...acc, newParent];
+      }
+      const parentId = input?.[firstLowercase(`${cur}Id`)];
+      const firstParent = { name: cur, id: parentId, fieldName: plural(cur) };
+      return [...acc, firstParent, newParent];
+    }
+
+    return acc;
+  }, [] as CollectionParent[]);
+};
+
+export const getParentIds = (parents: CollectionParent[]) => {
+  return parents
+    .filter((cur) => cur.id)
+    .reduce(
+      (acc, cur) => ({ ...acc, [firstLowercase(`${cur.name}Id`)]: cur.id }),
+      {}
+    );
+};
+
+export const getCreateMutation = (options: FirestoreTypeOptions) => {
+  const { name, ...field } = options;
+  const createInput = getCreateInput(options);
+  const parentIds = getParentIdLabel(options.parents);
+  const idsArgs = parentIds?.reduce(
+    (acc, cur) => ({ ...acc, [cur]: idArg({ required: true }) }),
+    {}
   );
 
-  return mutationField(`create${collection.name}`, {
-    deprecation: collection.deprecation,
-    authorize: collection.authorize,
-    description: collection.description,
+  return mutationField(`create${name}`, {
+    ...field,
     // @ts-ignore
-    type: collection.name,
-    args: {
-      ...parentIdArgs,
-      input: arg({ type: `Create${collection.name}Input`, required: true }),
-    },
-    resolve: async (_, { input, ...idsValue }) => {
-      const ids: string[] = parentLabelIds.map((label) => idsValue[label]);
-      await collection.beforeCreate?.(input, ids);
+    type: name,
+    args: { ...idsArgs, input: arg({ type: createInput, required: true }) },
+    resolve: async (src, { input, ...ids }, ctx, info) => {
+      const parents = getParents(name, options.parents, info.schema, ids);
+      const collection = getCollection(parents);
 
-      const parentIdsValue = getParentLabelValues(
-        parentLabelIds,
-        (_, index) => ids[index]
-      );
-
-      const target = getTarget(collection.name);
-      const targetCollection = getTargetCollection(collection.name, ids);
-      const targetRef = targetCollection.doc();
-
+      const ref = collection.doc();
       const batch = firestore().batch();
 
-      const convertedData = await targetToFirestore(
-        target,
-        input,
-        batch,
-        targetRef
-      );
-
-      batch.set(targetRef, {
-        id: targetRef.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ...convertedData,
-      });
+      const converter = new Converter(info.schema, batch);
+      const newData = await converter.toFirebase(name, input, ref);
+      batch.set(ref, newData);
 
       await batch.commit();
+      const snapshot = await ref.get();
 
-      const snapshot = await targetRef.get();
-
-      return collectionTargetFromFirestore(
-        snapshot,
-        target,
-        undefined,
-        parentIdsValue
-      );
+      return snapshot.data();
     },
   });
 };
 
-const getUpdateMutation = (
-  collection: ParsedCollectionOptions,
-  parentLabelIds: string[] = []
-) => {
-  const parentIdArgs = getParentLabelValues(parentLabelIds, () =>
-    idArg({ required: true })
+export const getUpdateMutation = (options: FirestoreTypeOptions) => {
+  const { name, ...field } = options;
+  const updateInput = getUpdateInput(options);
+  const parentIds = getParentIdLabel(options.parents);
+  const idsArgs = parentIds?.reduce(
+    (acc, cur) => ({ ...acc, [cur]: idArg({ required: true }) }),
+    {}
   );
 
-  return mutationField(`update${collection.name}`, {
-    deprecation: collection.deprecation,
-    authorize: collection.authorize,
-    description: collection.description,
+  return mutationField(`update${name}`, {
+    ...field,
     // @ts-ignore
-    type: collection.name,
+    type: name,
     args: {
-      ...parentIdArgs,
-      input: arg({ type: `Update${collection.name}Input`, required: true }),
+      ...idsArgs,
+      input: arg({ type: updateInput, required: true }),
       force: booleanArg(),
     },
-    resolve: async (_, { input, force, ...idsValue }) => {
-      const ids: string[] = parentLabelIds.map((label) => idsValue[label]);
-      await collection.beforeUpdate?.(input.id, input.fields, ids);
+    resolve: async (
+      src,
+      { force, input: { id, fields }, ...ids },
+      ctx,
+      info
+    ) => {
+      const parents = getParents(name, options.parents, info.schema, ids);
+      const collection = getCollection(parents);
 
-      const parentIdsValue = getParentLabelValues(
-        parentLabelIds,
-        (_, index) => ids[index]
-      );
+      const ref = collection.doc(id);
+      const batch = firestore().batch();
+      const snapshot = await ref.get();
 
-      const target = getTarget(collection.name);
-      const targetCollection = getTargetCollection(collection.name, ids);
-      const targetRef = targetCollection.doc(input.id);
-
-      const firstSnapshot = await targetRef.get();
-
-      if (!firstSnapshot.exists && !force) {
+      if (!snapshot.exists && !force) {
         throw new Error("Object not found");
       }
 
-      const batch = firestore().batch();
+      const converter = new Converter(info.schema, batch);
+      const newData = await converter.toFirebase(name, fields, ref, snapshot);
 
-      const convertedData = await targetToFirestore(
-        target,
-        input.fields,
-        batch,
-        targetRef,
-        firstSnapshot
-      );
-
-      batch.set(
-        targetRef,
-        {
-          id: targetRef.id,
-          createdAt: new Date(),
-          ...convertedData,
-          updatedAt: new Date(),
-        },
-        { merge: true }
-      );
+      batch.set(ref, newData, { merge: true });
 
       await batch.commit();
 
-      const lastSnapshot = await targetRef.get();
-
-      return collectionTargetFromFirestore(
-        lastSnapshot,
-        target,
-        undefined,
-        parentIdsValue
-      );
+      const newSnapshot = await ref.get();
+      return newSnapshot.data();
     },
   });
 };
 
-const getDeleteMutation = (
-  collection: ParsedCollectionOptions,
-  parentLabelIds: string[] = []
-) => {
-  const parentIdArgs = getParentLabelValues(parentLabelIds, () =>
-    idArg({ required: true })
+export const getDeleteMutation = (options: FirestoreTypeOptions) => {
+  const { name, ...field } = options;
+  const parentIds = getParentIdLabel(options.parents);
+  const idsArgs = parentIds?.reduce(
+    (acc, cur) => ({ ...acc, [cur]: idArg({ required: true }) }),
+    {}
   );
 
-  return mutationField(`delete${collection.name}`, {
-    deprecation: collection.deprecation,
-    authorize: collection.authorize,
-    description: collection.description,
+  const deleteInput = getDeleteInput(name);
+
+  return mutationField(`delete${name}`, {
+    ...field,
     type: "Boolean",
     args: {
-      ...parentIdArgs,
-      input: arg({ type: `Delete${collection.name}Input`, required: true }),
+      ...idsArgs,
+      input: arg({ type: deleteInput, required: true }),
     },
-    resolve: async (_, { input, ...idsValue }) => {
-      const ids: string[] = parentLabelIds.map((label) => idsValue[label]);
-      await collection.beforeDelete?.(input.id, ids);
+    resolve: async (_, { input, ...ids }, ctx, info) => {
+      const parents = getParents(name, options.parents, info.schema, ids);
+      const collection = getCollection(parents);
 
-      const targetCollection = getTargetCollection(collection.name, ids);
-      const targetRef = targetCollection.doc(input.id);
+      const targetRef = collection.doc(input.id);
 
       await targetRef.delete();
 
       return true;
     },
   });
-};
-
-export const getMutations = (
-  collection: ParsedCollectionOptions,
-  parentIds: string[] = []
-) => {
-  const createMutation = getCreateMutation(collection, parentIds);
-  const updateMutation = getUpdateMutation(collection, parentIds);
-  const deleteMutation = getDeleteMutation(collection, parentIds);
-
-  return { createMutation, updateMutation, deleteMutation };
 };

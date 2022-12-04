@@ -1,150 +1,163 @@
-import { FieldObjectOptions, ObjectString } from "../interfaces";
 import { firestore } from "firebase-admin";
-import { AsyncObjectReduce } from "../utils";
-import { fileListToFireStore, fileToFirestore } from "./file/";
-import { pointerToFirestore, pointerFromFirestore } from "./pointer/";
-import { relationToFirestore, relationFromFirestore } from "./relation/";
-import {
-  collectionToFirestore,
-  collectionWhereFromFirestore,
-} from "./collection/";
-import { ParsedCollectionOptions } from "../parser";
-import { WhereInput } from "../where";
+import { GraphQLSchema } from "graphql";
+import { fileListToFirestore, fileToFirestore } from "../file";
 import async from "async";
+import { FirestoreField, getSchemaFields } from "../utils";
+import { getCollection, getParents } from "../mutations";
 
-export const targetToFirestore = (
-  { fields }: ParsedCollectionOptions | FieldObjectOptions,
-  data: ObjectString<any>,
-  batch: firestore.WriteBatch,
-  parentRef: firestore.DocumentReference,
-  snapshot?: firestore.DocumentSnapshot
-) => {
-  const currentData = snapshot?.data();
+export interface ReferenceInput {
+  link?: string | null;
+  createAndLink?: Record<string, any> | null;
+}
 
-  return AsyncObjectReduce(fields, async (acc, fieldName, fieldOptions) => {
-    let fieldData = data?.[fieldName];
-    const fieldLastData = currentData?.[fieldName];
+export interface ReferenceListInput {
+  add?: string[] | null;
+  createAndAdd?: Record<string, any>[] | null;
+  remove?: string[] | null;
+}
 
-    const { type } = fieldOptions;
+export interface CollectionInput {
+  createAndAdd?: Record<string, any>[] | null;
+  update?: Record<string, any>[] | null;
+  delete?: string[] | null;
+}
 
-    if (typeof fieldData === "undefined") {
-      if (!currentData && typeof fieldOptions["defaultValue"] !== "undefined")
-        return { ...acc, [fieldName]: fieldOptions["defaultValue"] };
-      if (!currentData && type === "Pointer")
-        return { ...acc, [fieldName]: "" };
-      return acc;
-    }
+export class Converter {
+  private schema: GraphQLSchema;
+  private batch: firestore.WriteBatch;
 
-    if (type === "Pointer") {
-      const { target } = fieldOptions;
-      fieldData = await pointerToFirestore(fieldData, target, batch);
+  constructor(schema: GraphQLSchema, batch: firestore.WriteBatch) {
+    this.schema = schema;
+    this.batch = batch;
+  }
 
-      return { ...acc, [fieldName]: fieldData || "" };
-    }
+  async toFirebase(
+    name: string,
+    newData: Record<string, any>,
+    parentRef: firestore.DocumentReference,
+    snapshot?: firestore.DocumentSnapshot
+  ) {
+    const lastData = snapshot?.data();
+    const fields = getSchemaFields(name, this.schema);
 
-    if (type === "File") {
-      if (fieldOptions.list)
-        fieldData = await fileListToFireStore(fieldData, fieldLastData);
-      else fieldData = await fileToFirestore(fieldData, fieldLastData);
+    const resultArray = await Promise.all(
+      fields.map(async (field) => {
+        let fieldData = newData[field.name];
+        const lastFieldData = lastData?.[field.name];
 
-      return { ...acc, [fieldName]: fieldData };
-    }
+        if (typeof fieldData === "undefined") return {};
 
-    if (type === "Object") {
-      if (fieldData instanceof Array) {
-        fieldData = await async.map(fieldData, async (data) =>
-          targetToFirestore(fieldOptions, data, batch, parentRef, snapshot)
-        );
-      } else {
-        fieldData = await targetToFirestore(
-          fieldOptions,
-          fieldData,
-          batch,
-          parentRef,
-          snapshot
-        );
-      }
-    }
-
-    if (type === "Relation") {
-      const { target } = fieldOptions;
-      fieldData = await relationToFirestore(
-        fieldData,
-        target,
-        batch,
-        fieldLastData
-      );
-    }
-    if (type === "Collection") {
-      const { target } = fieldOptions;
-      await collectionToFirestore(fieldData, target, batch, parentRef);
-
-      return acc;
-    }
-
-    if (type === "Boolean" || type === "String" || type === "Number") {
-      return { ...acc, [fieldName]: fieldData };
-    }
-
-    return { ...acc, [fieldName]: fieldData || null };
-  });
-};
-
-export const targetFromFirestore = async (
-  { fields }: ParsedCollectionOptions | FieldObjectOptions,
-  currentData: any,
-  whereInput?: WhereInput,
-  parentIds: ObjectString = {}
-) => {
-  return AsyncObjectReduce(
-    fields,
-    async (acc, fieldName, fieldOptions) => {
-      const { type } = fieldOptions;
-      const whereFieldsInput = whereInput?.[fieldName];
-
-      if (type === "Collection" && whereFieldsInput) {
-        const { target } = fieldOptions;
-        await collectionWhereFromFirestore(target, parentIds, whereFieldsInput);
-      }
-
-      let fieldData = currentData?.[fieldName];
-      if (typeof fieldData === "undefined") return acc;
-
-      if (type === "Pointer") {
-        const { target } = fieldOptions;
-        fieldData = await pointerFromFirestore(
-          fieldData,
-          target,
-          whereFieldsInput
-        );
-      }
-
-      if (type === "Object") {
-        if (fieldData instanceof Array) {
-          fieldData = await async.map(fieldData, async (data) =>
-            targetFromFirestore(fieldOptions, data, whereInput, parentIds)
-          );
-        } else {
-          fieldData = await targetFromFirestore(
-            fieldOptions,
+        if (field.type === "Reference") {
+          fieldData = await this.convertReference(field, fieldData);
+        } else if (field.type === "ReferenceList") {
+          fieldData = await this.convertReferenceList(
+            field,
             fieldData,
-            whereInput,
-            parentIds
+            lastFieldData
           );
+        } else if (field.type === "Collection") {
+          await this.convertCollection(field, fieldData, parentRef);
+          return {};
+        } else if (field.type === "File") {
+          fieldData = await fileToFirestore(fieldData, lastFieldData);
+        } else if (field.type === "FileList") {
+          fieldData = await fileListToFirestore(fieldData, lastFieldData);
         }
-      }
 
-      if (type === "Relation") {
-        const { target } = fieldOptions;
-        fieldData = await relationFromFirestore(
-          fieldData,
-          target,
-          whereFieldsInput
-        );
-      }
+        return { [field.name]: fieldData };
+      })
+    );
 
-      return { ...acc, [fieldName]: fieldData };
-    },
-    {}
-  );
-};
+    return resultArray.reduce((acc, cur) => ({ ...acc, ...cur }), {
+      id: parentRef.id,
+      updatedAt: new Date(),
+      ...(!lastData && { createdAt: new Date() }),
+    });
+  }
+
+  private async convertCollection(
+    field: FirestoreField,
+    input: CollectionInput,
+    parentRef: firestore.DocumentReference
+  ) {
+    const ref = parentRef.collection(field.name);
+
+    await async.map(input?.createAndAdd || [], async (data2) => {
+      if (!field.target) return;
+      const docRef = ref.doc();
+      const data = await this.toFirebase(field.target, data2, docRef);
+      this.batch.set(docRef, data);
+      return docRef;
+    });
+
+    await async.map(input?.update || [], async (data2) => {
+      if (!field.target) return;
+      const docRef = ref.doc(data2.id);
+      const snapshot = await docRef.get();
+      const data = await this.toFirebase(
+        field.target,
+        data2.fields,
+        docRef,
+        snapshot
+      );
+      this.batch.update(docRef, data);
+      return docRef;
+    });
+
+    await async.map(input?.delete || [], async (id) => {
+      const docRef = ref.doc(id);
+      this.batch.delete(docRef);
+      return docRef;
+    });
+  }
+
+  private async convertReference(
+    { target }: FirestoreField,
+    input: ReferenceInput | null
+  ) {
+    if (!target) return null;
+    const parents = getParents(target, [], this.schema);
+    const collection = getCollection(parents);
+
+    if (input?.createAndLink) {
+      const docRef = collection.doc();
+      const data = await this.toFirebase(target, input.createAndLink, docRef);
+      this.batch.set(docRef, data);
+      return docRef;
+    }
+    if (input?.link) {
+      return collection.doc(input.link);
+    }
+    return null;
+  }
+
+  private async convertReferenceList(
+    { target }: FirestoreField,
+    input: ReferenceListInput,
+    lastData: firestore.DocumentReference[] = []
+  ) {
+    if (!target) return [];
+    const parents = getParents(target, [], this.schema);
+    const collection = getCollection(parents);
+
+    const created = await async.map(input.createAndAdd || [], async (data2) => {
+      const ref = collection.doc();
+      const data = await this.toFirebase(target, data2, ref);
+      this.batch.set(ref, data);
+
+      return ref;
+    });
+
+    const addRef = (input.add || []).map((id) => collection.doc(id));
+
+    const newCurrentData = lastData
+      .filter((data) => !input.remove?.includes(data.id))
+      .concat(created)
+      .concat(addRef);
+
+    return newCurrentData.reduce((acc, cur) => {
+      if (acc.find((c) => c.id === cur.id)) return acc;
+      return [...acc, cur];
+    }, [] as typeof lastData);
+  }
+}

@@ -17,39 +17,80 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
-"""A country code as defined by ISO 3166-1 alpha-2"""
-scalar Country
+input CreateCustomObject2Input {
+  customObject3: CreateCustomObject3Input
+  test: String
+  test2: String
+}
 
-input CountryWhereInput {
-  arrayContains: Country
-  equalTo: Country
-  exists: Boolean
-  greaterThan: Country
-  greaterThanOrEqualTo: Country
-  in: [Country]
-  lessThan: Country
-  lessThanOrEqualTo: Country
-  notEqualTo: Country
-  notIn: [Country]
+input CreateCustomObject3Input {
+  test: String
+}
+
+input CreateCustomObjectInput {
+  customObject2: CreateCustomObject2Input
+  test: String!
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
 }
 
 input CreateLikeInput {
   any: Any
   array: [String]
   boolean: Boolean
-  createdBy: UserPointerInput
-  customObject: LikeCustomObjectInput
+  createdBy: UserReferenceInput
+  customObject: CreateCustomObjectInput
   endDate: Date
   meetDate: Date
-  testEnm: TestEnum
   testEnm2: TestEnum
-  users: UserRelationInput!
-  viewNumber: Number
-  viewNumber2: Number
+  testEnum: TestEnum
+  users: UserReferenceListInput!
+  viewNumber: Int
+  viewNumber2: Int
 }
 
 input CreateUserInput {
   username: String!
+}
+
+type CustomObject {
+  customObject2: CustomObject2
+  test: String!
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
+type CustomObject2 {
+  customObject3: CustomObject3
+  test: String
+  test2: String
+}
+
+input CustomObject2WhereInput {
+  customObject3: CustomObject3WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test2: StringWhereInput
+}
+
+type CustomObject3 {
+  test: String
+}
+
+input CustomObject3WhereInput {
+  exists: Boolean
+  test: StringWhereInput
+}
+
+input CustomObjectWhereInput {
+  customObject2: CustomObject2WhereInput
+  exists: Boolean
+  test: StringWhereInput
+  test8: StringWhereInput
+  viewNumber: IntWhereInput
+  viewNumber2: IntWhereInput
 }
 
 scalar Date
@@ -75,24 +116,6 @@ input DeleteUserInput {
   id: ID!
 }
 
-"""
-A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/.
-"""
-scalar Email @specifiedBy(url: "https://www.w3.org/Protocols/rfc822/")
-
-input EmailWhereInput {
-  arrayContains: Email
-  equalTo: Email
-  exists: Boolean
-  greaterThan: Email
-  greaterThanOrEqualTo: Email
-  in: [Email]
-  lessThan: Email
-  lessThanOrEqualTo: Email
-  notEqualTo: Email
-  notIn: [Email]
-}
-
 type File {
   isLinked: Boolean
   name: String
@@ -116,144 +139,38 @@ input IDWhereInput {
   notIn: [ID]
 }
 
+input IntWhereInput {
+  arrayContains: Int
+  equalTo: Int
+  exists: Boolean
+  greaterThan: Int
+  greaterThanOrEqualTo: Int
+  in: [Int]
+  lessThan: Int
+  lessThanOrEqualTo: Int
+  notEqualTo: Int
+  notIn: [Int]
+}
+
 type Like {
   any: Any
   array: [String]
   boolean: Boolean
   createdAt: Date!
   createdBy: User
-  customObject: LikeCustomObject
+  customObject: CustomObject
   endDate: Date
   id: ID!
   meetDate: Date
-  testEnm: TestEnum
   testEnm2: TestEnum
+  testEnum: TestEnum
   updatedAt: Date!
   users: [User!]!
-  viewNumber: Number
-  viewNumber2: Number
+  viewNumber: Int
+  viewNumber2: Int
 }
 
-input LikeCollectionInput {
-  createAndAdd: [CreateLikeInput]
-  delete: [ID]
-  update: [UpdateLikeInput]
-}
-
-type LikeCustomObject {
-  customObject2: LikeCustomObjectCustomObject2
-  test: String!
-  test8: String
-  viewNumber: Number
-  viewNumber2: Number
-}
-
-type LikeCustomObjectCustomObject2 {
-  customObject3: LikeCustomObjectCustomObject2CustomObject3
-  test: String
-  test2: String
-}
-
-type LikeCustomObjectCustomObject2CustomObject3 {
-  test: String
-}
-
-input LikeCustomObjectCustomObject2CustomObject3Input {
-  test: String
-}
-
-input LikeCustomObjectCustomObject2CustomObject3WhereInput {
-  exists: Boolean
-  test: StringWhereInput
-}
-
-input LikeCustomObjectCustomObject2Input {
-  customObject3: LikeCustomObjectCustomObject2CustomObject3Input
-  test: String
-  test2: String
-}
-
-input LikeCustomObjectCustomObject2WhereInput {
-  customObject3: LikeCustomObjectCustomObject2CustomObject3WhereInput
-  exists: Boolean
-  test: StringWhereInput
-  test2: StringWhereInput
-}
-
-input LikeCustomObjectInput {
-  customObject2: LikeCustomObjectCustomObject2Input
-  test: String!
-  test8: String
-  viewNumber: Number
-  viewNumber2: Number
-}
-
-input LikeCustomObjectWhereInput {
-  customObject2: LikeCustomObjectCustomObject2WhereInput
-  exists: Boolean
-  test: StringWhereInput
-  test8: StringWhereInput
-  viewNumber: NumberWhereInput
-  viewNumber2: NumberWhereInput
-}
-
-type LikeEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Like
-}
-
-input LikeOrderByInput {
-  any: OrderByEnum
-  array: OrderByEnum
-  boolean: OrderByEnum
-  createdAt: OrderByEnum
-  createdBy: OrderByEnum
-  customObject: OrderByEnum
-  endDate: OrderByEnum
-  id: OrderByEnum
-  meetDate: OrderByEnum
-  testEnm: OrderByEnum
-  testEnm2: OrderByEnum
-  updatedAt: OrderByEnum
-  users: OrderByEnum
-  viewNumber: OrderByEnum
-  viewNumber2: OrderByEnum
-}
-
-input LikePointerInput {
-  createAndLink: CreateLikeInput
-  link: ID
-}
-
-input LikeRelationInput {
-  add: [ID]
-  createAndAdd: [CreateLikeInput]
-  remove: [ID]
-}
-
-input LikeWhereInput {
-  any: Any
-  array: StringWhereInput
-  boolean: BooleanWhereInput
-  createdAt: DateWhereInput
-  createdBy: UserWhereInput
-  customObject: LikeCustomObjectWhereInput
-  endDate: DateWhereInput
-  exists: Boolean
-  id: IDWhereInput
-  meetDate: DateWhereInput
-  testEnm: TestEnumWhereInput
-  testEnm2: TestEnumWhereInput
-  updatedAt: DateWhereInput
-  users: UserWhereInput
-  viewNumber: NumberWhereInput
-  viewNumber2: NumberWhereInput
-}
-
-type LikesCollection {
+type LikeCollection {
   count: Int
 
   """
@@ -267,6 +184,50 @@ type LikesCollection {
   pageInfo: PageInfo!
 }
 
+input LikeCollectionInput {
+  createAndAdd: [CreateLikeInput]
+  delete: [ID]
+  update: [UpdateLikeInput]
+}
+
+type LikeEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Like
+}
+
+input LikeReferenceInput {
+  createAndLink: CreateLikeInput
+  link: ID
+}
+
+input LikeReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateLikeInput]
+  remove: [ID]
+}
+
+input LikeWhereInput {
+  any: Any
+  array: StringWhereInput
+  boolean: BooleanWhereInput
+  createdAt: DateWhereInput
+  createdBy: UserWhereInput
+  customObject: CustomObjectWhereInput
+  endDate: DateWhereInput
+  exists: Boolean
+  id: IDWhereInput
+  meetDate: DateWhereInput
+  testEnm2: TestEnumWhereInput
+  testEnum: TestEnumWhereInput
+  updatedAt: DateWhereInput
+  users: UserWhereInput
+  viewNumber: IntWhereInput
+  viewNumber2: IntWhereInput
+}
+
 type Mutation {
   createLike(input: CreateLikeInput!): Like
   createUser(input: CreateUserInput!): User
@@ -274,26 +235,6 @@ type Mutation {
   deleteUser(input: DeleteUserInput!): Boolean
   updateLike(force: Boolean, input: UpdateLikeInput!): Like
   updateUser(force: Boolean, input: UpdateUserInput!): User
-}
-
-scalar Number
-
-input NumberWhereInput {
-  arrayContains: Number
-  equalTo: Number
-  exists: Boolean
-  greaterThan: Number
-  greaterThanOrEqualTo: Number
-  in: [Number]
-  lessThan: Number
-  lessThanOrEqualTo: Number
-  notEqualTo: Number
-  notIn: [Number]
-}
-
-enum OrderByEnum {
-  asc
-  desc
 }
 
 """
@@ -321,29 +262,11 @@ type PageInfo {
   startCursor: String
 }
 
-"""
-A field whose value conforms to the standard E.164 format as specified in: https://en.wikipedia.org/wiki/E.164. Basically this is +17895551234.
-"""
-scalar Phone
-
-input PhoneWhereInput {
-  arrayContains: Phone
-  equalTo: Phone
-  exists: Boolean
-  greaterThan: Phone
-  greaterThanOrEqualTo: Phone
-  in: [Phone]
-  lessThan: Phone
-  lessThanOrEqualTo: Phone
-  notEqualTo: Phone
-  notIn: [Phone]
-}
-
 type Query {
   like(id: ID!): Like
-  likes(limit: Int, offset: Int, orderBy: LikeOrderByInput, where: LikeWhereInput): LikesCollection
+  likes(limit: Int = 50, offset: Int = 0, where: LikeWhereInput): LikeCollection
   user(id: ID!): User
-  users(limit: Int, offset: Int, orderBy: UserOrderByInput, where: UserWhereInput): UsersCollection
+  users(limit: Int = 50, offset: Int = 0, where: UserWhereInput): UserCollection
 }
 
 input StringWhereInput {
@@ -376,19 +299,37 @@ input TestEnumWhereInput {
   notIn: [TestEnum]
 }
 
+input UpdateCustomObject2Input {
+  customObject3: UpdateCustomObject3Input
+  test: String
+  test2: String
+}
+
+input UpdateCustomObject3Input {
+  test: String
+}
+
+input UpdateCustomObjectInput {
+  customObject2: UpdateCustomObject2Input
+  test: String
+  test8: String
+  viewNumber: Int
+  viewNumber2: Int
+}
+
 input UpdateLikeFieldsInput {
   any: Any
   array: [String]
   boolean: Boolean
-  createdBy: UserPointerInput
-  customObject: LikeCustomObjectInput
+  createdBy: UserReferenceInput
+  customObject: UpdateCustomObjectInput
   endDate: Date
   meetDate: Date
-  testEnm: TestEnum
   testEnm2: TestEnum
-  users: UserRelationInput
-  viewNumber: Number
-  viewNumber2: Number
+  testEnum: TestEnum
+  users: UserReferenceListInput
+  viewNumber: Int
+  viewNumber2: Int
 }
 
 input UpdateLikeInput {
@@ -431,6 +372,20 @@ type User {
   username: String!
 }
 
+type UserCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [UserEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
 input UserCollectionInput {
   createAndAdd: [CreateUserInput]
   delete: [ID]
@@ -445,19 +400,12 @@ type UserEdge {
   node: User
 }
 
-input UserOrderByInput {
-  createdAt: OrderByEnum
-  id: OrderByEnum
-  updatedAt: OrderByEnum
-  username: OrderByEnum
-}
-
-input UserPointerInput {
+input UserReferenceInput {
   createAndLink: CreateUserInput
   link: ID
 }
 
-input UserRelationInput {
+input UserReferenceListInput {
   add: [ID]
   createAndAdd: [CreateUserInput]
   remove: [ID]
@@ -469,18 +417,4 @@ input UserWhereInput {
   id: IDWhereInput
   updatedAt: DateWhereInput
   username: StringWhereInput
-}
-
-type UsersCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [UserEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
 }

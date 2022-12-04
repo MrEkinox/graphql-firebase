@@ -1,13 +1,8 @@
-import { FileUpload, Upload } from "graphql-upload-minimal";
-import {
-  FileInfoType,
-  UploadFileInput as UploadFileInputType,
-  UploadFileListInput as UploadFileListInputType,
-} from "../../interfaces";
 import { storage } from "firebase-admin";
+import { FileUpload } from "graphql-upload-minimal";
+import { inputObjectType } from "nexus";
 import async from "async";
 import { Stream } from "stream";
-import { inputObjectType } from "nexus";
 
 export const UploadFileLinkInput = inputObjectType({
   name: "UploadFileLinkInput",
@@ -34,11 +29,26 @@ export const UploadFileListInput = inputObjectType({
   },
 });
 
+export interface FileInfoType {
+  url: string;
+  name: string;
+  isLinked?: boolean;
+}
+
+export interface UploadFileInputType {
+  upload?: Promise<FileUpload>;
+  link?: FileInfoType;
+}
+
+export interface UploadFileListInputType {
+  add?: Promise<FileUpload>[];
+  link?: FileInfoType[];
+  remove?: string[];
+}
+
 const uploadFile = async (input: Promise<FileUpload>) => {
   const { createReadStream, filename } = await input;
-
   const stream: Stream = createReadStream();
-
   const file = storage().bucket().file(filename);
 
   await new Promise((resolve, reject) => {
@@ -48,14 +58,9 @@ const uploadFile = async (input: Promise<FileUpload>) => {
     });
 
     writeStream.on("finish", resolve);
-
     writeStream.on("error", reject);
-
-    stream.on("error", (error) => {
-      writeStream.destroy(error);
-      reject(error);
-    });
-
+    stream.on("error", writeStream.destroy);
+    stream.on("error", reject);
     stream.pipe(writeStream);
   });
 
@@ -64,25 +69,27 @@ const uploadFile = async (input: Promise<FileUpload>) => {
   return { name: filename, url: publicUrl, isLinked: false };
 };
 
-export const fileListToFireStore = async (
-  input: UploadFileListInputType | null,
-  currentData?: FileInfoType[] | null
+export const fileListToFirestore = async (
+  input: UploadFileListInputType,
+  currentData: FileInfoType[] = []
 ) => {
-  const addedFiles: any[] = await async.map(input?.add || [], uploadFile);
-  const linked = (input?.link || []).map((link) => ({
-    ...link,
-    isLinked: true,
-  }));
+  const { link = [], add = [], remove = [] } = input;
+  const addedFiles = await async.map(add || [], uploadFile);
+  const linked = link.map((link) => ({ ...link, isLinked: true }));
 
-  await async.map(input?.remove || [], async (name) => {
-    const curFile = currentData?.find((cur) => cur.name === name);
-    if (!curFile) return;
-    await storage().bucket().file(curFile.name).delete();
+  const newCurrentData = await async.filter(currentData, async (file) => {
+    if (remove.includes(file.name)) {
+      try {
+        if (!file.isLinked) await storage().bucket().file(file.name).delete();
+        return false;
+      } catch (error) {
+        return true;
+      }
+    }
+    return true;
   });
 
-  return [...(currentData || []), ...addedFiles, ...linked].filter(
-    (file) => !input?.remove?.includes(file.name)
-  );
+  return newCurrentData.concat(addedFiles).concat(linked);
 };
 
 export const fileToFirestore = async (
@@ -92,14 +99,11 @@ export const fileToFirestore = async (
   if (currentData && input?.upload && input.link && !currentData.isLinked) {
     await storage().bucket().file(currentData.name).delete();
   }
-
   if (input?.upload) {
     return uploadFile(input.upload);
   }
-
   if (input?.link) {
     return { ...input.link, isLinked: true };
   }
-
   return null;
 };

@@ -1,11 +1,16 @@
-import {
-  Timestamp,
-  WhereFilterOp,
-  CollectionReference,
-} from "firebase-admin/firestore";
-import { ObjectString } from "../interfaces";
-import { ParsedCollectionOptions } from "../parser";
-import { getTargetCollection, ObjectReduce } from "../utils";
+import { firestore } from "firebase-admin";
+import { WhereFilterOp } from "firebase-admin/firestore";
+import { GraphQLSchema } from "graphql";
+import { getCollection, getParents } from "../mutations";
+import chunk from "lodash/chunk";
+import { FirestoreField, getSchemaFields, plural } from "../utils";
+
+interface CollectionWhereInput {
+  name: string;
+  fieldName: string;
+  parentFieldName?: string;
+  input: Record<string, any>;
+}
 
 export type WhereInputOperator = {
   exists?: boolean;
@@ -19,12 +24,6 @@ export type WhereInputOperator = {
   in?: any[];
   notIn?: any[];
 };
-
-export type WhereFieldsInput =
-  | ObjectString<ObjectString<any>>
-  | ObjectString<any>;
-
-export type WhereInput = WhereFieldsInput;
 
 const getWhereType = (
   type?: keyof WhereInputOperator | string
@@ -52,157 +51,281 @@ const getWhereType = (
   return undefined;
 };
 
-const isEqualityFilter = (type?: keyof WhereInputOperator | string) => {
-  return (
-    !!type &&
-    [
-      "lessThanOrEqualTo",
-      "greaterThanOrEqualTo",
-      "greaterThan",
-      "lessThan",
-    ].includes(type)
-  );
-};
+export class WhereCollection {
+  private schema: GraphQLSchema;
+  private parentsIds: Record<string, string>;
 
-export const whereFilterEquality = (whereInput: WhereInput, data: any) => {
-  return ObjectReduce(
-    whereInput,
-    (acc, fieldName, value) => {
-      if (acc === false) return false;
-      const parsedData = data instanceof Timestamp ? data.toMillis() : data;
-      const parsedValue = value instanceof Timestamp ? value.toMillis() : value;
-      if (typeof parsedValue === "object" && !(parsedValue instanceof Array)) {
-        const curData = data?.[fieldName];
-        return whereFilterEquality(value, curData);
-      }
-      if (fieldName === "greaterThanOrEqualTo") {
-        return parsedData >= parsedValue;
-      }
-      if (fieldName === "lessThanOrEqualTo") {
-        return parsedData <= parsedValue;
-      }
-      if (fieldName === "lessThan") {
-        return parsedData < parsedValue;
-      }
-      if (fieldName === "greaterThan") {
-        return parsedData > parsedValue;
-      }
-      return acc;
-    },
-    true
-  );
-};
+  constructor(schema: GraphQLSchema, parentsIds: Record<string, string>) {
+    this.schema = schema;
+    this.parentsIds = parentsIds;
+  }
 
-const whereObjectCollection = (
-  parentName: string,
-  fieldName: string,
-  whereInput: WhereInput,
-  collection: CollectionReference | FirebaseFirestore.Query
-) => {
-  return ObjectReduce(
-    whereInput,
-    (acc, operator, whereFieldInput) => {
-      if (isEqualityFilter(operator)) return acc;
-      if (whereFieldInput instanceof Array) {
-        if (!whereFieldInput.length) return acc;
-      } else if (whereFieldInput && typeof whereFieldInput === "object") {
-        return whereObjectCollection(
-          `${parentName}.${fieldName}`,
-          operator,
-          whereFieldInput,
-          acc
-        );
+  private async chunkQuery(collection: firestore.Query, ids: string[]) {
+    const chunkIds = chunk(ids, 10);
+
+    const allData = await Promise.all(
+      chunkIds.map(async (id) => {
+        const newCollection = collection.where("id", "in", id);
+        return this.getData(newCollection);
+      })
+    );
+
+    return allData.reduce(
+      (acc, cur) => {
+        const newCount = acc.count + cur.count;
+        const newEdges = [...acc.edges, ...cur.edges];
+        return { count: newCount, edges: newEdges };
+      },
+      { count: 0, edges: [] }
+    );
+  }
+
+  private async getData(collection: firestore.Query) {
+    const count = (await collection.count().get()).data().count;
+
+    const data = await collection.get();
+
+    const edges = data.docs.map((doc) => ({
+      node: { id: doc.id, ...this.parentsIds, ...doc.data() },
+    }));
+
+    return { count, edges };
+  }
+
+  async get(whereInput: CollectionWhereInput[], collection: firestore.Query) {
+    const ids = await this.getCollectionWhere(whereInput);
+
+    if (ids.length) {
+      if (ids.length <= 10) {
+        const newCollection = collection.where("id", "in", ids);
+        return this.getData(newCollection);
       }
 
+      return this.chunkQuery(collection, ids);
+    }
+    return { count: 0, edges: [] };
+  }
+
+  getWhereInput = (
+    type: string,
+    input?: Record<string, any>,
+    parentFieldName?: string,
+    fieldName?: string
+  ): CollectionWhereInput[] => {
+    const fields = getSchemaFields(type, this.schema);
+    const newInput = this.removeCollectionFields(
+      type,
+      input,
+      fieldName,
+      parentFieldName
+    );
+
+    return fields.reduce(
+      (acc, field) => {
+        const fieldInput = input?.[field.name];
+        if (field.type === "Collection" && field.target && fieldInput) {
+          const newParent = newInput ? fieldName : parentFieldName;
+          const inField = this.getWhereInput(
+            field.target,
+            fieldInput,
+            newParent,
+            field.name
+          );
+          return [...acc, ...inField];
+        }
+        return acc;
+      },
+      newInput ? [newInput] : []
+    );
+  };
+
+  private removeCollectionFields(
+    name: string,
+    input?: Record<string, any>,
+    fieldName?: string,
+    parentFieldName?: string
+  ): CollectionWhereInput | undefined {
+    const fields = getSchemaFields(name, this.schema);
+
+    const newFields = fields.reduce((acc, field) => {
+      const fieldInput = input?.[field.name];
+      if (!fieldInput) return acc;
+
+      if (field.type === "Collection" && field.target) {
+        return acc;
+      }
+      return { ...acc, [field.name]: fieldInput };
+    }, {});
+
+    if (Object.keys(newFields).length) {
+      return {
+        name,
+        input: newFields,
+        parentFieldName,
+        fieldName: fieldName || plural(name),
+      };
+    }
+    return undefined;
+  }
+
+  private whereReferenceId = (
+    field: FirestoreField,
+    input: any,
+    collection: firestore.Query
+  ) => {
+    const whereField = Object.keys(input).at(0);
+    const whereOperator = getWhereType(whereField);
+
+    const whereID = whereField && input[whereField];
+
+    if (!whereField || !whereOperator || !field.target || !whereID)
+      return collection;
+
+    const parents = getParents(field.target, [], this.schema);
+    const targetCollection = getCollection(parents);
+
+    if (whereField === "in" && whereID instanceof Array) {
+      const targetDocs = whereID.map((id) => targetCollection.doc(id));
+      return collection.where(field.name, "in", targetDocs);
+    }
+
+    const targetDoc = targetCollection.doc(whereID);
+
+    return collection.where(field.name, whereOperator, targetDoc);
+  };
+
+  private whereReferenceListId = (
+    field: FirestoreField,
+    input: any,
+    collection: firestore.Query
+  ) => {
+    const whereField = Object.keys(input).at(0);
+    const whereOperator = getWhereType(whereField);
+
+    const whereID = whereField && input[whereField];
+
+    if (!whereField || !whereOperator || !field.target || !whereID)
+      return collection;
+
+    const parents = getParents(field.target, [], this.schema);
+    const targetCollection = getCollection(parents);
+
+    if (whereField === "in" && whereID instanceof Array) {
+      const targetDocs = whereID.map((id) => targetCollection.doc(id));
+      const isIn = Array.from(targetDocs).reverse();
+      return collection.where(field.name, "in", [targetDocs, isIn]);
+    }
+
+    const targetDoc = targetCollection.doc(whereID);
+
+    if (whereField === "equalTo") {
+      return collection.where(field.name, "array-contains", targetDoc);
+    }
+    return collection;
+  };
+
+  private whereObject = (
+    parentName: string,
+    fieldName: string,
+    input: Record<string, any>,
+    collection: firestore.Query
+  ) => {
+    return Object.keys(input).reduce((acc, operator) => {
+      const inputValue = input[operator];
+      const field = `${parentName}.${fieldName}`;
+      if (typeof inputValue === "undefined") return acc;
+
+      if (inputValue instanceof Array) {
+        if (!inputValue.length) return acc;
+      } else if (inputValue && typeof inputValue === "object") {
+        return this.whereObject(field, operator, inputValue, acc);
+      }
+
+      if (operator === "exists") {
+        return acc.where(field, inputValue ? "!=" : "==", null);
+      }
       const whereOperator = getWhereType(operator);
-      return acc.where(
-        `${parentName}.${fieldName}`,
-        whereOperator,
-        whereFieldInput
-      );
-    },
-    collection
-  );
-};
+      if (!whereOperator) return acc;
+      return acc.where(field, whereOperator, inputValue);
+    }, collection);
+  };
 
-export const whereCollection = (
-  target: ParsedCollectionOptions,
-  collection: CollectionReference | FirebaseFirestore.Query,
-  whereInput?: WhereInput,
-  withoutID = false
-): FirebaseFirestore.Query => {
-  if (!whereInput) return collection;
-  let curCollection = collection;
+  private whereFieldCollection = (
+    field: FirestoreField,
+    collection: firestore.Query,
+    input: Record<string, WhereInputOperator>
+  ): firestore.Query => {
+    return Object.keys(input).reduce((acc, operator) => {
+      const inputValue = input[operator];
+      if (typeof inputValue === "undefined") return acc;
 
-  return ObjectReduce(
-    whereInput,
-    (acc, fieldName, whereFieldInput) => {
-      if (!whereFieldInput) return acc;
+      if (operator === "exists") {
+        return acc.where(field.name, inputValue ? "!=" : "==", null);
+      }
+      if (field.type === "Object" || field.type === "Any") {
+        return this.whereObject(field.name, operator, inputValue, acc);
+      }
+      if (field.type === "Reference" && operator === "id") {
+        return this.whereReferenceId(field, inputValue, acc);
+      }
+      if (field.type === "ReferenceList" && operator === "id") {
+        return this.whereReferenceListId(field, inputValue, acc);
+      }
+      const whereOperator = getWhereType(operator);
+      if (!whereOperator) return acc;
 
-      const field = target.fields[fieldName];
+      return acc.where(field.name, whereOperator, inputValue);
+    }, collection);
+  };
 
-      return ObjectReduce(
-        whereFieldInput,
-        (acc2, operator, value) => {
-          if (typeof value === "undefined" || value === null) return acc2;
-          if (value instanceof Array && !value.length) return acc2;
-          if (isEqualityFilter(operator)) return acc2;
+  whereCollection = (
+    whereInput: CollectionWhereInput,
+    collection:
+      | firestore.CollectionReference
+      | firestore.CollectionGroup
+      | firestore.Query
+  ) => {
+    const fields = getSchemaFields(whereInput.name, this.schema);
 
-          if (field.type === "Object" && typeof value === "object") {
-            return whereObjectCollection(fieldName, operator, value, acc2);
-          }
-          if (field.type === "Any" && typeof value === "object") {
-            return whereObjectCollection(fieldName, operator, value, acc2);
-          }
-          if (typeof value === "object" && operator === "id") {
-            const whereField = Object.keys(value).at(0);
-            const whereID = Object.values(value).at(0);
-            const whereOperator = getWhereType(whereField);
-            if (!whereID) return acc2;
+    return fields.reduce((acc, field) => {
+      const fieldInput = whereInput.input?.[field.name];
+      if (!fieldInput) return acc;
+      if (field.type === "Collection") return acc;
 
-            if (field.type === "Pointer" && whereOperator) {
-              const targetCollection = getTargetCollection(field.target, []);
-              const targetDoc = targetCollection.doc(whereID);
+      return this.whereFieldCollection(field, acc, fieldInput);
+    }, collection as firestore.Query);
+  };
 
-              return acc2.where(fieldName, whereOperator, targetDoc);
-            }
-            if (field.type === "Relation") {
-              const targetCollection = getTargetCollection(field.target, []);
+  private async getCollectionWhere(
+    whereInput: CollectionWhereInput[],
+    ids: string[] = []
+  ): Promise<string[]> {
+    const where = whereInput.shift();
+    if (!where) return ids;
 
-              if (whereField === "equalTo") {
-                const targetDoc = targetCollection.doc(whereID);
-                return acc2.where(fieldName, "array-contains", targetDoc);
-              }
-              if (whereField === "in" && whereID instanceof Array) {
-                const targetDocs = whereID.map((id) =>
-                  targetCollection.doc(id)
-                );
-                return acc2.where(fieldName, "in", [
-                  targetDocs,
-                  Array.from(targetDocs).reverse(),
-                ]);
-              }
-            }
-          }
-          if (operator === "exists") {
-            if (field.type === "Pointer") {
-              return acc2.where(fieldName, value ? "!=" : "==", "");
-            }
-            return acc2.where(fieldName, value ? "!=" : "==", null);
-          }
+    const collectionGroup = firestore().collectionGroup(where.fieldName);
+    let collection = this.whereCollection(where, collectionGroup);
 
-          const whereOperator = getWhereType(operator);
-          if (!whereOperator) return acc2;
+    if (ids.length) {
+      collection = collection.where("id", "in", ids);
+    }
+    const snapshot = await collection.get();
 
-          if (fieldName === "id") {
-            if (withoutID) return acc2;
-            return acc2.where("__name__", whereOperator, value);
-          }
-          return acc2.where(fieldName, whereOperator, value);
-        },
-        acc
-      );
-    },
-    curCollection
-  );
-};
+    const snapIds = snapshot.docs.map((doc) => {
+      const path = doc.ref.path.split("/");
+      const index = where.parentFieldName
+        ? path.indexOf(where.parentFieldName)
+        : path.indexOf(where.fieldName);
+      return path.at(index + 1) || "";
+    });
+
+    if (snapIds.length) {
+      const newIds = [...ids, ...snapIds].reduce((acc, id) => {
+        if (acc.find((id2) => id2 === id)) return acc;
+        return [...acc, id];
+      }, [] as string[]);
+      return this.getCollectionWhere(whereInput, newIds);
+    }
+    return ids;
+  }
+}
