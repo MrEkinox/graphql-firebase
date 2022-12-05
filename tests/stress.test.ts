@@ -39,6 +39,13 @@ const CREATE_FOLDER_DOCUMENT = gql`
           node {
             id
             name
+            file {
+              edges {
+                node {
+                  id
+                }
+              }
+            }
           }
         }
       }
@@ -53,6 +60,13 @@ const QUERY_DOCUMENT = gql`
         node {
           id
           name
+          file {
+            edges {
+              node {
+                id
+              }
+            }
+          }
         }
       }
     }
@@ -106,6 +120,7 @@ describe("Stress Test", () => {
 
     expect(folderDocuments).not.toBeUndefined();
     expect(folderDocuments.edges).toHaveLength(15);
+    expect(folderDocuments.edges[0].node.file.edges).toHaveLength(1);
   });
 
   it("Query with where in subcollection", async () => {

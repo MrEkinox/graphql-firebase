@@ -171,6 +171,7 @@ export const getSchemaFields = (
     const objectName =
       field?.type?.ofType?.name ||
       field?.type?.ofType?.ofType?.name ||
+      field?.type?.ofType?.ofType?.ofType?.name ||
       field?.type?.name;
 
     if (field?.type instanceof GraphQLObjectType) {

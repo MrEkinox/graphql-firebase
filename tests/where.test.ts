@@ -44,7 +44,11 @@ const CustomObject3 = objectType({
 const Like = firestoreType({
   name: "Like",
   definition: (t) => {
+    // @ts-ignore
+    t.field("target", { type: "TestEnum", required: true, list: [true] });
+    // @ts-ignore
     t.ref("users", { type: "User", list: true, required: true });
+    // @ts-ignore
     t.ref("createdBy", { type: "User" });
     t.date("meetDate");
     t.date("endDate");
@@ -105,6 +109,7 @@ describe("Where Test", () => {
     });
     const { createLike } = await graphQLClient.request(CREATE_DOCUMENT, {
       input: {
+        target: ["other"],
         users: {
           createAndAdd: [{ username: "User1" }, { username: "User2" }],
         },
@@ -131,7 +136,7 @@ describe("Where Test", () => {
     await httpApolloServer.stop();
   });
 
-  it("Query with where boolean equal", async () => {
+  it.only("Query with where boolean equal", async () => {
     const { likes } = await graphQLClient.request(QUERY_DOCUMENT, {
       where: { boolean: { equalTo: true } },
     });

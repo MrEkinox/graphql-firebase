@@ -28,7 +28,6 @@ input CreateFolderDocumentInput {
 
 input CreateFolderInput {
   documents: FolderDocumentCollectionInput
-  name: String!
 }
 
 scalar Date
@@ -72,7 +71,6 @@ type Folder {
   createdAt: Date!
   documents(limit: Int = 50, offset: Int = 0, where: FolderDocumentWhereInput): FolderDocumentCollection
   id: ID!
-  name: String!
   updatedAt: Date!
 }
 
@@ -236,7 +234,6 @@ input FolderWhereInput {
   documents: FolderDocumentWhereInput
   exists: Boolean
   id: IDWhereInput
-  name: StringWhereInput
   updatedAt: DateWhereInput
 }
 
@@ -346,7 +343,6 @@ input UpdateFolderDocumentInput {
 
 input UpdateFolderFieldsInput {
   documents: FolderDocumentCollectionInput
-  name: String
 }
 
 input UpdateFolderInput {

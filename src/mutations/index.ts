@@ -20,16 +20,13 @@ export const getCollection = (
   if (!firstParent) throw new Error("no parent found");
 
   if (firstParent.id) {
-    const ref = firestore()
+    const ref = (lastDoc || firestore())
       .collection(firstParent.fieldName)
       .doc(firstParent.id);
     const newParents = parents.slice(1);
     return getCollection(newParents, ref);
   } else {
-    if (lastDoc) {
-      return lastDoc.collection(firstParent.fieldName);
-    }
-    return firestore().collection(firstParent.fieldName);
+    return (lastDoc || firestore()).collection(firstParent.fieldName);
   }
 };
 

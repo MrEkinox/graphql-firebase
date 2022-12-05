@@ -60,7 +60,6 @@ export interface NexusGenInputs {
   }
   CreateFolderInput: { // input type
     documents?: NexusGenInputs['FolderDocumentCollectionInput'] | null; // FolderDocumentCollectionInput
-    name: string; // String!
   }
   DateWhereInput: { // input type
     arrayContains?: NexusGenScalars['Date'] | null; // Date
@@ -151,7 +150,6 @@ export interface NexusGenInputs {
     documents?: NexusGenInputs['FolderDocumentWhereInput'] | null; // FolderDocumentWhereInput
     exists?: boolean | null; // Boolean
     id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
-    name?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
     updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
   }
   IDWhereInput: { // input type
@@ -207,7 +205,6 @@ export interface NexusGenInputs {
   }
   UpdateFolderFieldsInput: { // input type
     documents?: NexusGenInputs['FolderDocumentCollectionInput'] | null; // FolderDocumentCollectionInput
-    name?: string | null; // String
   }
   UpdateFolderInput: { // input type
     fields: NexusGenInputs['UpdateFolderFieldsInput']; // UpdateFolderFieldsInput!
@@ -251,7 +248,6 @@ export interface NexusGenObjects {
   Folder: { // root type
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // ID!
-    name: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
   }
   FolderCollection: { // root type
@@ -326,7 +322,6 @@ export interface NexusGenFieldTypes {
     createdAt: NexusGenScalars['Date']; // Date!
     documents: NexusGenRootTypes['FolderDocumentCollection'] | null; // FolderDocumentCollection
     id: string; // ID!
-    name: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
   }
   FolderCollection: { // field return type
@@ -409,7 +404,6 @@ export interface NexusGenFieldTypeNames {
     createdAt: 'Date'
     documents: 'FolderDocumentCollection'
     id: 'ID'
-    name: 'String'
     updatedAt: 'Date'
   }
   FolderCollection: { // field return type name
