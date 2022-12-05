@@ -17,8 +17,8 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
-input CreatePostInput {
-  createdBy: UserReferenceInput
+input CreateLikeInput {
+  users: UserReferenceListInput!
 }
 
 input CreateUserInput {
@@ -40,7 +40,7 @@ input DateWhereInput {
   notIn: [Date]
 }
 
-input DeletePostInput {
+input DeleteLikeInput {
   id: ID!
 }
 
@@ -84,12 +84,66 @@ input IntWhereInput {
   notIn: [Int]
 }
 
+type Like {
+  createdAt: Date!
+  id: ID!
+  updatedAt: Date!
+  users: [User!]!
+}
+
+type LikeCollection {
+  count: Int
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [LikeEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+input LikeCollectionInput {
+  createAndAdd: [CreateLikeInput]
+  delete: [ID]
+  update: [UpdateLikeInput]
+}
+
+type LikeEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Like
+}
+
+input LikeReferenceInput {
+  createAndLink: CreateLikeInput
+  link: ID
+}
+
+input LikeReferenceListInput {
+  add: [ID]
+  createAndAdd: [CreateLikeInput]
+  remove: [ID]
+}
+
+input LikeWhereInput {
+  createdAt: DateWhereInput
+  exists: Boolean
+  id: IDWhereInput
+  updatedAt: DateWhereInput
+  users: UserWhereInput
+}
+
 type Mutation {
-  createPost(input: CreatePostInput!): Post
+  createLike(input: CreateLikeInput!): Like
   createUser(input: CreateUserInput!): User
-  deletePost(input: DeletePostInput!): Boolean
+  deleteLike(input: DeleteLikeInput!): Boolean
   deleteUser(input: DeleteUserInput!): Boolean
-  updatePost(force: Boolean, input: UpdatePostInput!): Post
+  updateLike(force: Boolean, input: UpdateLikeInput!): Like
   updateUser(force: Boolean, input: UpdateUserInput!): User
 }
 
@@ -118,63 +172,9 @@ type PageInfo {
   startCursor: String
 }
 
-type Post {
-  createdAt: Date!
-  createdBy: User
-  id: ID!
-  updatedAt: Date!
-}
-
-type PostCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [PostEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input PostCollectionInput {
-  createAndAdd: [CreatePostInput]
-  delete: [ID]
-  update: [UpdatePostInput]
-}
-
-type PostEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Post
-}
-
-input PostReferenceInput {
-  createAndLink: CreatePostInput
-  link: ID
-}
-
-input PostReferenceListInput {
-  add: [ID]
-  createAndAdd: [CreatePostInput]
-  remove: [ID]
-}
-
-input PostWhereInput {
-  createdAt: DateWhereInput
-  createdBy: UserWhereInput
-  exists: Boolean
-  id: IDWhereInput
-  updatedAt: DateWhereInput
-}
-
 type Query {
-  post(id: ID!): Post
-  posts(limit: Int = 50, offset: Int = 0, where: PostWhereInput): PostCollection
+  like(id: ID!): Like
+  likes(limit: Int = 50, offset: Int = 0, where: LikeWhereInput): LikeCollection
   user(id: ID!): User
   users(limit: Int = 50, offset: Int = 0, where: UserWhereInput): UserCollection
 }
@@ -192,12 +192,12 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdatePostFieldsInput {
-  createdBy: UserReferenceInput
+input UpdateLikeFieldsInput {
+  users: UserReferenceListInput
 }
 
-input UpdatePostInput {
-  fields: UpdatePostFieldsInput!
+input UpdateLikeInput {
+  fields: UpdateLikeFieldsInput!
   id: ID!
 }
 

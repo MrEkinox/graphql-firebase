@@ -56,9 +56,10 @@ export const GraphQLFirebasePlugin = () => {
           factory: ({ typeName, typeDef: t, ...config }) => {
             const fieldName = config.args[0];
             const isList = config.args[1].list;
+            const type = config.args[1].type;
             t.field(fieldName, {
               resolve: async (src, args, ctx, info) => {
-                return referenceResolver(fieldName, isList, src, info);
+                return referenceResolver(type, isList, src, info);
               },
               ...config.args[1],
             });
