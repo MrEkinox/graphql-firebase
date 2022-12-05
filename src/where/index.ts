@@ -73,7 +73,7 @@ export class WhereCollection {
     return allData.reduce(
       (acc, cur) => {
         const newCount = acc.count + cur.count;
-        const newEdges = [...acc.edges, ...cur.edges];
+        const newEdges = [...cur.edges, ...acc.edges];
         return { count: newCount, edges: newEdges };
       },
       { count: 0, edges: [] }
