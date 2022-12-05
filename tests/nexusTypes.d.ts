@@ -51,8 +51,8 @@ export interface NexusGenInputs {
     notEqualTo?: boolean | null; // Boolean
     notIn?: Array<boolean | null> | null; // [Boolean]
   }
-  CreateLikeInput: { // input type
-    users: NexusGenInputs['UserReferenceListInput']; // UserReferenceListInput!
+  CreatePostInput: { // input type
+    createdBy?: NexusGenInputs['UserReferenceInput'] | null; // UserReferenceInput
   }
   CreateUserInput: { // input type
     username: string; // String!
@@ -69,7 +69,7 @@ export interface NexusGenInputs {
     notEqualTo?: NexusGenScalars['Date'] | null; // Date
     notIn?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
   }
-  DeleteLikeInput: { // input type
+  DeletePostInput: { // input type
     id: string; // ID!
   }
   DeleteUserInput: { // input type
@@ -102,26 +102,26 @@ export interface NexusGenInputs {
     notEqualTo?: number | null; // Int
     notIn?: Array<number | null> | null; // [Int]
   }
-  LikeCollectionInput: { // input type
-    createAndAdd?: Array<NexusGenInputs['CreateLikeInput'] | null> | null; // [CreateLikeInput]
+  PostCollectionInput: { // input type
+    createAndAdd?: Array<NexusGenInputs['CreatePostInput'] | null> | null; // [CreatePostInput]
     delete?: Array<string | null> | null; // [ID]
-    update?: Array<NexusGenInputs['UpdateLikeInput'] | null> | null; // [UpdateLikeInput]
+    update?: Array<NexusGenInputs['UpdatePostInput'] | null> | null; // [UpdatePostInput]
   }
-  LikeReferenceInput: { // input type
-    createAndLink?: NexusGenInputs['CreateLikeInput'] | null; // CreateLikeInput
+  PostReferenceInput: { // input type
+    createAndLink?: NexusGenInputs['CreatePostInput'] | null; // CreatePostInput
     link?: string | null; // ID
   }
-  LikeReferenceListInput: { // input type
+  PostReferenceListInput: { // input type
     add?: Array<string | null> | null; // [ID]
-    createAndAdd?: Array<NexusGenInputs['CreateLikeInput'] | null> | null; // [CreateLikeInput]
+    createAndAdd?: Array<NexusGenInputs['CreatePostInput'] | null> | null; // [CreatePostInput]
     remove?: Array<string | null> | null; // [ID]
   }
-  LikeWhereInput: { // input type
+  PostWhereInput: { // input type
     createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    createdBy?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
     exists?: boolean | null; // Boolean
     id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
     updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    users?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
   }
   StringWhereInput: { // input type
     arrayContains?: string | null; // String
@@ -135,11 +135,11 @@ export interface NexusGenInputs {
     notEqualTo?: string | null; // String
     notIn?: Array<string | null> | null; // [String]
   }
-  UpdateLikeFieldsInput: { // input type
-    users?: NexusGenInputs['UserReferenceListInput'] | null; // UserReferenceListInput
+  UpdatePostFieldsInput: { // input type
+    createdBy?: NexusGenInputs['UserReferenceInput'] | null; // UserReferenceInput
   }
-  UpdateLikeInput: { // input type
-    fields: NexusGenInputs['UpdateLikeFieldsInput']; // UpdateLikeFieldsInput!
+  UpdatePostInput: { // input type
+    fields: NexusGenInputs['UpdatePostFieldsInput']; // UpdatePostFieldsInput!
     id: string; // ID!
   }
   UpdateUserFieldsInput: { // input type
@@ -205,26 +205,26 @@ export interface NexusGenObjects {
     name?: string | null; // String
     url?: string | null; // String
   }
-  Like: { // root type
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // ID!
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
-  LikeCollection: { // root type
-    count?: number | null; // Int
-    edges?: Array<NexusGenRootTypes['LikeEdge'] | null> | null; // [LikeEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  LikeEdge: { // root type
-    cursor: string; // String!
-    node?: NexusGenRootTypes['Like'] | null; // Like
-  }
   Mutation: {};
   PageInfo: { // root type
     endCursor?: string | null; // String
     hasNextPage: boolean; // Boolean!
     hasPreviousPage: boolean; // Boolean!
     startCursor?: string | null; // String
+  }
+  Post: { // root type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  PostCollection: { // root type
+    count?: number | null; // Int
+    edges?: Array<NexusGenRootTypes['PostEdge'] | null> | null; // [PostEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  PostEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['Post'] | null; // Post
   }
   Query: {};
   User: { // root type
@@ -260,27 +260,12 @@ export interface NexusGenFieldTypes {
     name: string | null; // String
     url: string | null; // String
   }
-  Like: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // ID!
-    updatedAt: NexusGenScalars['Date']; // Date!
-    users: NexusGenRootTypes['User'][]; // [User!]!
-  }
-  LikeCollection: { // field return type
-    count: number | null; // Int
-    edges: Array<NexusGenRootTypes['LikeEdge'] | null> | null; // [LikeEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  LikeEdge: { // field return type
-    cursor: string; // String!
-    node: NexusGenRootTypes['Like'] | null; // Like
-  }
   Mutation: { // field return type
-    createLike: NexusGenRootTypes['Like'] | null; // Like
+    createPost: NexusGenRootTypes['Post'] | null; // Post
     createUser: NexusGenRootTypes['User'] | null; // User
-    deleteLike: boolean | null; // Boolean
+    deletePost: boolean | null; // Boolean
     deleteUser: boolean | null; // Boolean
-    updateLike: NexusGenRootTypes['Like'] | null; // Like
+    updatePost: NexusGenRootTypes['Post'] | null; // Post
     updateUser: NexusGenRootTypes['User'] | null; // User
   }
   PageInfo: { // field return type
@@ -289,9 +274,24 @@ export interface NexusGenFieldTypes {
     hasPreviousPage: boolean; // Boolean!
     startCursor: string | null; // String
   }
+  Post: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    createdBy: NexusGenRootTypes['User'] | null; // User
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  PostCollection: { // field return type
+    count: number | null; // Int
+    edges: Array<NexusGenRootTypes['PostEdge'] | null> | null; // [PostEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  PostEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['Post'] | null; // Post
+  }
   Query: { // field return type
-    like: NexusGenRootTypes['Like'] | null; // Like
-    likes: NexusGenRootTypes['LikeCollection'] | null; // LikeCollection
+    post: NexusGenRootTypes['Post'] | null; // Post
+    posts: NexusGenRootTypes['PostCollection'] | null; // PostCollection
     user: NexusGenRootTypes['User'] | null; // User
     users: NexusGenRootTypes['UserCollection'] | null; // UserCollection
   }
@@ -318,27 +318,12 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     url: 'String'
   }
-  Like: { // field return type name
-    createdAt: 'Date'
-    id: 'ID'
-    updatedAt: 'Date'
-    users: 'User'
-  }
-  LikeCollection: { // field return type name
-    count: 'Int'
-    edges: 'LikeEdge'
-    pageInfo: 'PageInfo'
-  }
-  LikeEdge: { // field return type name
-    cursor: 'String'
-    node: 'Like'
-  }
   Mutation: { // field return type name
-    createLike: 'Like'
+    createPost: 'Post'
     createUser: 'User'
-    deleteLike: 'Boolean'
+    deletePost: 'Boolean'
     deleteUser: 'Boolean'
-    updateLike: 'Like'
+    updatePost: 'Post'
     updateUser: 'User'
   }
   PageInfo: { // field return type name
@@ -347,9 +332,24 @@ export interface NexusGenFieldTypeNames {
     hasPreviousPage: 'Boolean'
     startCursor: 'String'
   }
+  Post: { // field return type name
+    createdAt: 'Date'
+    createdBy: 'User'
+    id: 'ID'
+    updatedAt: 'Date'
+  }
+  PostCollection: { // field return type name
+    count: 'Int'
+    edges: 'PostEdge'
+    pageInfo: 'PageInfo'
+  }
+  PostEdge: { // field return type name
+    cursor: 'String'
+    node: 'Post'
+  }
   Query: { // field return type name
-    like: 'Like'
-    likes: 'LikeCollection'
+    post: 'Post'
+    posts: 'PostCollection'
     user: 'User'
     users: 'UserCollection'
   }
@@ -372,21 +372,21 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
-    createLike: { // args
-      input: NexusGenInputs['CreateLikeInput']; // CreateLikeInput!
+    createPost: { // args
+      input: NexusGenInputs['CreatePostInput']; // CreatePostInput!
     }
     createUser: { // args
       input: NexusGenInputs['CreateUserInput']; // CreateUserInput!
     }
-    deleteLike: { // args
-      input: NexusGenInputs['DeleteLikeInput']; // DeleteLikeInput!
+    deletePost: { // args
+      input: NexusGenInputs['DeletePostInput']; // DeletePostInput!
     }
     deleteUser: { // args
       input: NexusGenInputs['DeleteUserInput']; // DeleteUserInput!
     }
-    updateLike: { // args
+    updatePost: { // args
       force?: boolean | null; // Boolean
-      input: NexusGenInputs['UpdateLikeInput']; // UpdateLikeInput!
+      input: NexusGenInputs['UpdatePostInput']; // UpdatePostInput!
     }
     updateUser: { // args
       force?: boolean | null; // Boolean
@@ -394,13 +394,13 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
-    like: { // args
+    post: { // args
       id: string; // ID!
     }
-    likes: { // args
+    posts: { // args
       limit: number | null; // Int
       offset?: number | null; // Int
-      where?: NexusGenInputs['LikeWhereInput'] | null; // LikeWhereInput
+      where?: NexusGenInputs['PostWhereInput'] | null; // PostWhereInput
     }
     user: { // args
       id: string; // ID!

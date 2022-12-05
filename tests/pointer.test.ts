@@ -72,10 +72,11 @@ describe("Pointer Test", () => {
   let createdById = "";
 
   it("Create And Link", async () => {
-    const { createPost } = await graphQLClient.request(CREATE_DOCUMENT, {
+    const { createPost, errors } = await graphQLClient.request(CREATE_DOCUMENT, {
       createdBy: { createAndLink: { username: "User1" } },
     });
 
+    expect(errors).toBeUndefined()
     expect(createPost).not.toBeUndefined();
     expect(createPost.createdBy.username).toEqual("User1");
 
