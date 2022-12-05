@@ -19,7 +19,7 @@ export const referenceResolver = async (
     const refs: firestore.DocumentReference[] = src[info.fieldName];
     if (refs?.length) {
       if (isOnlyId) {
-        return refs.map((ref) => ref.id);
+        return refs.map((ref) => ({ id: ref.id }));
       }
       const collectionRefs = refs.map((ref) => collection.doc(ref.id));
       const snapshot = await firestore().getAll(...collectionRefs);
@@ -30,7 +30,7 @@ export const referenceResolver = async (
 
   const ref: firestore.DocumentReference = src[info.fieldName];
   if (!ref) return null;
-  if (isOnlyId) return ref.id;
+  if (isOnlyId) return { id: ref.id };
   const snapshot = await collection.doc(ref.id).get();
   return snapshot.data();
 };
