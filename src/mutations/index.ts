@@ -89,6 +89,7 @@ export const getCreateMutation = (options: FirestoreTypeOptions) => {
     args: { ...idsArgs, input: arg({ type: createInput, required: true }) },
     resolve: async (src, { input, ...ids }, ctx, info) => {
       const parents = getParents(name, options.parents, info.schema, ids);
+      const parentsIds = getParentIds(parents);
       const collection = getCollection(parents);
 
       const ref = collection.doc();
@@ -96,7 +97,7 @@ export const getCreateMutation = (options: FirestoreTypeOptions) => {
 
       const converter = new Converter(info.schema, batch);
       const newData = await converter.toFirebase(name, input, ref);
-      batch.set(ref, newData);
+      batch.set(ref, { ...newData, parentsIds });
 
       await batch.commit();
       const snapshot = await ref.get();
@@ -131,6 +132,7 @@ export const getUpdateMutation = (options: FirestoreTypeOptions) => {
       info
     ) => {
       const parents = getParents(name, options.parents, info.schema, ids);
+      const parentsIds = getParentIds(parents);
       const collection = getCollection(parents);
 
       const ref = collection.doc(id);
@@ -144,7 +146,7 @@ export const getUpdateMutation = (options: FirestoreTypeOptions) => {
       const converter = new Converter(info.schema, batch);
       const newData = await converter.toFirebase(name, fields, ref, snapshot);
 
-      batch.set(ref, newData, { merge: true });
+      batch.set(ref, { ...newData, ...parentsIds }, { merge: true });
 
       await batch.commit();
 
