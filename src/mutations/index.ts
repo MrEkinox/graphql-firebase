@@ -97,7 +97,7 @@ export const getCreateMutation = (options: FirestoreTypeOptions) => {
 
       const converter = new Converter(info.schema, batch);
       const newData = await converter.toFirebase(name, input, ref);
-      batch.set(ref, { ...newData, parentsIds });
+      batch.set(ref, { ...newData, ...parentsIds });
 
       await batch.commit();
       const snapshot = await ref.get();
