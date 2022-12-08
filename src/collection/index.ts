@@ -27,7 +27,8 @@ export const collectionResolver = async (
   let collection: firestore.Query = getCollection(parentFields);
 
   const fields = fieldsList(info, { path: "edges.node" });
-  if (fields.length) collection = collection.select(...fields);
+  if (fields.length)
+    collection = collection.select(...fields).orderBy("createdAt", "desc");
 
   if (where) {
     const whereCollection = new WhereCollection(info.schema, parentsIds);

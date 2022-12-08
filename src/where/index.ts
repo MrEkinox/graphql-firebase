@@ -65,7 +65,9 @@ export class WhereCollection {
 
     const allData = await Promise.all(
       chunkIds.map(async (id) => {
-        const newCollection = collection.where("id", "in", id);
+        const newCollection = collection
+          .orderBy("createdAt", "desc")
+          .where("id", "in", id);
         return this.getData(newCollection);
       })
     );
@@ -73,7 +75,12 @@ export class WhereCollection {
     return allData.reduce(
       (acc, cur) => {
         const newCount = acc.count + cur.count;
-        const newEdges = [...cur.edges, ...acc.edges];
+        const newEdges = [...cur.edges, ...acc.edges].sort((a, b) =>
+          new Date(a.node["createdAt"]).getTime() >
+          new Date(b.node["createdAt"]).getTime()
+            ? -1
+            : 1
+        );
         return { count: newCount, edges: newEdges };
       },
       { count: 0, edges: [] }
