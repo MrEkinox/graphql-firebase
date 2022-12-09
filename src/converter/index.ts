@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin";
+import admin from "firebase-admin";
 import { GraphQLSchema } from "graphql";
 import {
   uploadFile,
@@ -8,6 +8,7 @@ import {
 import async from "async";
 import { FirestoreField, getSchemaFields } from "../utils";
 import { getCollection, getParents } from "../mutations";
+import { firestore } from "firebase-admin";
 
 export interface ReferenceInput {
   link?: string | null;
@@ -28,9 +29,9 @@ export interface CollectionInput {
 
 export class Converter {
   private schema: GraphQLSchema;
-  private batch: admin.firestore.WriteBatch;
+  private batch: firestore.WriteBatch;
 
-  constructor(schema: GraphQLSchema, batch: admin.firestore.WriteBatch) {
+  constructor(schema: GraphQLSchema, batch: firestore.WriteBatch) {
     this.schema = schema;
     this.batch = batch;
   }
@@ -38,7 +39,7 @@ export class Converter {
   async toFirebase(
     name: string,
     newData: Record<string, any>,
-    parentRef: admin.firestore.DocumentReference,
+    parentRef: firestore.DocumentReference,
     created?: boolean
   ) {
     const fields = getSchemaFields(name, this.schema);
@@ -78,7 +79,7 @@ export class Converter {
   private async convertCollection(
     { name, target }: FirestoreField,
     input: CollectionInput,
-    parentRef: admin.firestore.DocumentReference
+    parentRef: firestore.DocumentReference
   ) {
     const ref = parentRef.collection(name);
 
@@ -129,7 +130,7 @@ export class Converter {
   private async convertReferenceList(
     field: FirestoreField,
     input: ReferenceListInput,
-    ref: admin.firestore.DocumentReference
+    ref: firestore.DocumentReference
   ) {
     if (!field.target)
       throw new Error(`·no target found for field ${field.name}`);
@@ -175,7 +176,7 @@ export class Converter {
   fileListToFirestore = async (
     field: FirestoreField,
     input: UploadFileListInputType,
-    ref: admin.firestore.DocumentReference
+    ref: firestore.DocumentReference
   ) => {
     const { link = [], add = [], remove = [] } = input;
     const addedFiles = await async.map(add || [], uploadFile);

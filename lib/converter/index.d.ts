@@ -1,7 +1,7 @@
-import * as admin from "firebase-admin";
 import { GraphQLSchema } from "graphql";
 import { UploadFileInputType, UploadFileListInputType } from "../file";
 import { FirestoreField } from "../utils";
+import { firestore } from "firebase-admin";
 export interface ReferenceInput {
     link?: string | null;
     createAndLink?: Record<string, any> | null;
@@ -19,13 +19,13 @@ export interface CollectionInput {
 export declare class Converter {
     private schema;
     private batch;
-    constructor(schema: GraphQLSchema, batch: admin.firestore.WriteBatch);
-    toFirebase(name: string, newData: Record<string, any>, parentRef: admin.firestore.DocumentReference, created?: boolean): Promise<{
+    constructor(schema: GraphQLSchema, batch: firestore.WriteBatch);
+    toFirebase(name: string, newData: Record<string, any>, parentRef: firestore.DocumentReference, created?: boolean): Promise<{
         [x: string]: any;
     }>;
     private convertCollection;
     private convertReference;
     private convertReferenceList;
-    fileListToFirestore: (field: FirestoreField, input: UploadFileListInputType, ref: admin.firestore.DocumentReference) => Promise<void>;
+    fileListToFirestore: (field: FirestoreField, input: UploadFileListInputType, ref: firestore.DocumentReference) => Promise<void>;
     fileToFirestore: (input: UploadFileInputType | null) => Promise<string | null>;
 }
