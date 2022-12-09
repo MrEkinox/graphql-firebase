@@ -1,8 +1,8 @@
 import { GraphQLResolveInfo } from "graphql";
 import { GraphQLSchema } from "graphql";
 import { AllOutputTypes, NexusInputFieldConfigWithName, ObjectDefinitionBlock } from "nexus/dist/core";
-export declare type FirestoreFieldType = AllOutputTypes | "File" | "FileList" | "Collection" | "Reference" | "ReferenceList" | "Object";
-export declare type FirestoreField = Omit<NexusInputFieldConfigWithName<any, string>, "type"> & {
+export type FirestoreFieldType = AllOutputTypes | "File" | "FileList" | "Collection" | "Reference" | "ReferenceList" | "Object";
+export type FirestoreField = Omit<NexusInputFieldConfigWithName<any, string>, "type"> & {
     type: FirestoreFieldType;
     target?: string;
 };

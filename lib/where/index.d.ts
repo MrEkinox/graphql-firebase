@@ -7,7 +7,7 @@ interface CollectionWhereInput {
     parentFieldName?: string;
     input: Record<string, any>;
 }
-export declare type WhereInputOperator = {
+export type WhereInputOperator = {
     exists?: boolean;
     equalTo?: any;
     notEqualTo?: any;

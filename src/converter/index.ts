@@ -1,4 +1,4 @@
-import { firestore } from "firebase-admin";
+import * as admin from "firebase-admin";
 import { GraphQLSchema } from "graphql";
 import {
   uploadFile,
@@ -28,9 +28,9 @@ export interface CollectionInput {
 
 export class Converter {
   private schema: GraphQLSchema;
-  private batch: firestore.WriteBatch;
+  private batch: admin.firestore.WriteBatch;
 
-  constructor(schema: GraphQLSchema, batch: firestore.WriteBatch) {
+  constructor(schema: GraphQLSchema, batch: admin.firestore.WriteBatch) {
     this.schema = schema;
     this.batch = batch;
   }
@@ -38,7 +38,7 @@ export class Converter {
   async toFirebase(
     name: string,
     newData: Record<string, any>,
-    parentRef: firestore.DocumentReference,
+    parentRef: admin.firestore.DocumentReference,
     created?: boolean
   ) {
     const fields = getSchemaFields(name, this.schema);
@@ -78,7 +78,7 @@ export class Converter {
   private async convertCollection(
     { name, target }: FirestoreField,
     input: CollectionInput,
-    parentRef: firestore.DocumentReference
+    parentRef: admin.firestore.DocumentReference
   ) {
     const ref = parentRef.collection(name);
 
@@ -129,7 +129,7 @@ export class Converter {
   private async convertReferenceList(
     field: FirestoreField,
     input: ReferenceListInput,
-    ref: firestore.DocumentReference
+    ref: admin.firestore.DocumentReference
   ) {
     if (!field.target)
       throw new Error(`·no target found for field ${field.name}`);
@@ -149,7 +149,7 @@ export class Converter {
     if (created.length) {
       this.batch.set(
         ref,
-        { [field.name]: firestore.FieldValue.arrayUnion(...created) },
+        { [field.name]: admin.firestore.FieldValue.arrayUnion(...created) },
         { merge: true }
       );
     }
@@ -159,7 +159,7 @@ export class Converter {
     if (addRef.length)
       this.batch.set(
         ref,
-        { [field.name]: firestore.FieldValue.arrayUnion(...addRef) },
+        { [field.name]: admin.firestore.FieldValue.arrayUnion(...addRef) },
         { merge: true }
       );
 
@@ -167,7 +167,7 @@ export class Converter {
 
     if (removeRef.length) {
       this.batch.update(ref, {
-        [field.name]: firestore.FieldValue.arrayRemove(...removeRef),
+        [field.name]: admin.firestore.FieldValue.arrayRemove(...removeRef),
       });
     }
   }
@@ -175,7 +175,7 @@ export class Converter {
   fileListToFirestore = async (
     field: FirestoreField,
     input: UploadFileListInputType,
-    ref: firestore.DocumentReference
+    ref: admin.firestore.DocumentReference
   ) => {
     const { link = [], add = [], remove = [] } = input;
     const addedFiles = await async.map(add || [], uploadFile);
@@ -183,20 +183,20 @@ export class Converter {
     if (addedFiles.length)
       this.batch.set(
         ref,
-        { [field.name]: firestore.FieldValue.arrayUnion(...addedFiles) },
+        { [field.name]: admin.firestore.FieldValue.arrayUnion(...addedFiles) },
         { merge: true }
       );
 
     if (link.length)
       this.batch.set(
         ref,
-        { [field.name]: firestore.FieldValue.arrayUnion(...link) },
+        { [field.name]: admin.firestore.FieldValue.arrayUnion(...link) },
         { merge: true }
       );
 
     if (remove.length)
       this.batch.update(ref, {
-        [field.name]: firestore.FieldValue.arrayRemove(...remove),
+        [field.name]: admin.firestore.FieldValue.arrayRemove(...remove),
       });
   };
 

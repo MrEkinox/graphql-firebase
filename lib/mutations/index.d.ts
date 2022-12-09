@@ -6,7 +6,7 @@ export declare const getCollection: (parents?: Array<{
     id: string;
     fieldName: string;
 }>, lastDoc?: firestore.DocumentReference) => firestore.CollectionReference;
-export declare type CollectionParent = {
+export type CollectionParent = {
     name: string;
     id: string;
     fieldName: string;
