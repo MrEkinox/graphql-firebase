@@ -51,6 +51,15 @@ const getWhereType = (
   return undefined;
 };
 
+export const orderByCreatedAt = (edges: any[]) => {
+  return edges.sort((a, b) =>
+    new Date(a.node["createdAt"]).getTime() >
+    new Date(b.node["createdAt"]).getTime()
+      ? -1
+      : 1
+  );
+};
+
 export class WhereCollection {
   private schema: GraphQLSchema;
   private parentsIds: Record<string, string>;
@@ -65,9 +74,7 @@ export class WhereCollection {
 
     const allData = await Promise.all(
       chunkIds.map(async (id) => {
-        const newCollection = collection
-          .orderBy("createdAt", "desc")
-          .where("id", "in", id);
+        const newCollection = collection.where("id", "in", id);
         return this.getData(newCollection);
       })
     );
@@ -75,12 +82,7 @@ export class WhereCollection {
     return allData.reduce(
       (acc, cur) => {
         const newCount = acc.count + cur.count;
-        const newEdges = [...cur.edges, ...acc.edges].sort((a, b) =>
-          new Date(a.node["createdAt"]).getTime() >
-          new Date(b.node["createdAt"]).getTime()
-            ? -1
-            : 1
-        );
+        const newEdges = orderByCreatedAt([...cur.edges, ...acc.edges]);
         return { count: newCount, edges: newEdges };
       },
       { count: 0, edges: [] }
@@ -92,9 +94,11 @@ export class WhereCollection {
 
     const data = await collection.get();
 
-    const edges = data.docs.map((doc) => ({
-      node: { id: doc.id, ...this.parentsIds, ...doc.data() },
-    }));
+    const edges = orderByCreatedAt(
+      data.docs.map((doc) => ({
+        node: { id: doc.id, ...this.parentsIds, ...doc.data() },
+      }))
+    );
 
     return { count, edges };
   }

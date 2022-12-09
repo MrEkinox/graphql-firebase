@@ -6,9 +6,5 @@ export declare const collectionResolver: (type: string, fieldName: string, paren
     offset: any;
 }, info: GraphQLResolveInfo) => Promise<{
     count: number;
-    edges: {
-        node: {
-            id: string;
-        };
-    }[];
+    edges: any[];
 }>;

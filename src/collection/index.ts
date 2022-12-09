@@ -3,7 +3,7 @@ import { GraphQLResolveInfo } from "graphql";
 import { fieldsList } from "graphql-fields-list";
 import { getCollection, getParentIds, getParents } from "../mutations";
 import { firstLowercase } from "../utils";
-import { WhereCollection } from "../where";
+import { orderByCreatedAt, WhereCollection } from "../where";
 
 export const collectionResolver = async (
   type: string,
@@ -27,8 +27,7 @@ export const collectionResolver = async (
   let collection: firestore.Query = getCollection(parentFields);
 
   const fields = fieldsList(info, { path: "edges.node" });
-  if (fields.length)
-    collection = collection.select(...fields).orderBy("createdAt", "desc");
+  if (fields.length) collection = collection.select(...fields);
 
   if (where) {
     const whereCollection = new WhereCollection(info.schema, parentsIds);
@@ -60,9 +59,11 @@ export const collectionResolver = async (
 
   const data = await collection.get();
 
-  const edges = data.docs.map((doc) => ({
-    node: { id: doc.id, ...parentsIds, ...doc.data() },
-  }));
+  const edges = orderByCreatedAt(
+    data.docs.map((doc) => ({
+      node: { id: doc.id, ...parentsIds, ...doc.data() },
+    }))
+  );
 
   return { count, edges };
 };

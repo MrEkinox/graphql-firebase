@@ -18,6 +18,7 @@ export declare type WhereInputOperator = {
     in?: any[];
     notIn?: any[];
 };
+export declare const orderByCreatedAt: (edges: any[]) => any[];
 export declare class WhereCollection {
     private schema;
     private parentsIds;
@@ -26,11 +27,7 @@ export declare class WhereCollection {
     private getData;
     get(whereInput: CollectionWhereInput[], collection: firestore.Query): Promise<{
         count: number;
-        edges: {
-            node: {
-                id: string;
-            };
-        }[];
+        edges: any[];
     }>;
     getWhereInput: (type: string, input?: Record<string, any>, parentFieldName?: string, fieldName?: string) => CollectionWhereInput[];
     private removeCollectionFields;
