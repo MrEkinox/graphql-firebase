@@ -37,6 +37,8 @@ export const LogTimePlugin = (enabled?: boolean) =>
   });
 
 export const GraphQLFirebasePlugin = () => {
+  const startTimeMs = new Date().valueOf();
+
   return plugin({
     name: "GraphQL-Firebase",
     fieldDefTypes: [
@@ -49,7 +51,10 @@ export const GraphQLFirebasePlugin = () => {
       console.log({ missingTypeName });
     },
     onAfterBuild: () => {
-      console.log("Generation schema finish !")
+      const endTimeMs = new Date().valueOf();
+      console.log(
+        `Generation schema finish in ${endTimeMs - startTimeMs} ms !`
+      );
     },
     onInstall: (builder) => {
       builder.addType(
@@ -91,7 +96,14 @@ export const GraphQLFirebasePlugin = () => {
             t.connectionField(filedName, {
               getConnectionName: () => `${type}Collection`,
               resolve: async (src, input, ctx, info) => {
-                return collectionResolver(type, filedName, parents, src, input, info);
+                return collectionResolver(
+                  type,
+                  filedName,
+                  parents,
+                  src,
+                  input,
+                  info
+                );
               },
               ...config.args[1],
               type,
