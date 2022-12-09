@@ -1,6 +1,5 @@
 import { firestore } from "firebase-admin";
 import { GraphQLResolveInfo } from "graphql";
-import { fieldsList } from "graphql-fields-list";
 import { getCollection, getParentIds, getParents } from "../mutations";
 import { firstLowercase } from "../utils";
 import { orderByCreatedAt, WhereCollection } from "../where";
@@ -61,6 +60,8 @@ export const collectionResolver = async (
       node: { id: doc.id, ...parentsIds, ...doc.data() },
     }))
   );
+
+  console.log(type, edges[0], edges);
 
   return { count, edges };
 };
