@@ -48,6 +48,9 @@ export const GraphQLFirebasePlugin = () => {
     onMissingType(missingTypeName, builder) {
       console.log({ missingTypeName });
     },
+    onAfterBuild: () => {
+      console.log("Generation schema finish !")
+    },
     onInstall: (builder) => {
       builder.addType(
         dynamicOutputMethod({

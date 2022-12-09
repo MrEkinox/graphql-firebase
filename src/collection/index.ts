@@ -61,7 +61,5 @@ export const collectionResolver = async (
     }))
   );
 
-  console.log(type, edges[0], edges);
-
   return { count, edges };
 };
