@@ -13,3 +13,5 @@ export declare const getParentIdLabel: (parentIds?: string[]) => string[] | unde
 export declare const plural: (str: string) => string;
 export declare const getSchemaFields: (name: string, schema: GraphQLSchema) => FirestoreField[];
 export declare const isOnlyIdField: (info: GraphQLResolveInfo) => boolean;
+export declare const hasCountField: (info: GraphQLResolveInfo) => boolean;
+export declare const hasEdgeField: (info: GraphQLResolveInfo) => boolean;

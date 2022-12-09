@@ -17,12 +17,13 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
-input CreateLikeInput {
-  users: UserReferenceListInput!
-}
-
 input CreateUserInput {
-  username: String!
+  multipleDate: [Date]
+  multipleFile: UploadFileListInput
+  multipleNumber: [Int]
+  singleDate: Date
+  singleFile: UploadFileInput
+  singleNumber: Int
 }
 
 scalar Date
@@ -40,19 +41,11 @@ input DateWhereInput {
   notIn: [Date]
 }
 
-input DeleteLikeInput {
-  id: ID!
-}
-
 input DeleteUserInput {
   id: ID!
 }
 
-type File {
-  isLinked: Boolean
-  name: String
-  url: String
-}
+scalar File
 
 input FileWhereInput {
   exists: Boolean
@@ -84,66 +77,9 @@ input IntWhereInput {
   notIn: [Int]
 }
 
-type Like {
-  createdAt: Date!
-  id: ID!
-  updatedAt: Date!
-  users: [User!]!
-}
-
-type LikeCollection {
-  count: Int
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [LikeEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-input LikeCollectionInput {
-  createAndAdd: [CreateLikeInput]
-  delete: [ID]
-  update: [UpdateLikeInput]
-}
-
-type LikeEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Like
-}
-
-input LikeReferenceInput {
-  createAndLink: CreateLikeInput
-  link: ID
-}
-
-input LikeReferenceListInput {
-  add: [ID]
-  createAndAdd: [CreateLikeInput]
-  remove: [ID]
-}
-
-input LikeWhereInput {
-  createdAt: DateWhereInput
-  exists: Boolean
-  id: IDWhereInput
-  updatedAt: DateWhereInput
-  users: UserWhereInput
-}
-
 type Mutation {
-  createLike(input: CreateLikeInput!): Like
   createUser(input: CreateUserInput!): User
-  deleteLike(input: DeleteLikeInput!): Boolean
   deleteUser(input: DeleteUserInput!): Boolean
-  updateLike(force: Boolean, input: UpdateLikeInput!): Like
   updateUser(force: Boolean, input: UpdateUserInput!): User
 }
 
@@ -173,8 +109,6 @@ type PageInfo {
 }
 
 type Query {
-  like(id: ID!): Like
-  likes(limit: Int = 50, offset: Int = 0, where: LikeWhereInput): LikeCollection
   user(id: ID!): User
   users(limit: Int = 50, offset: Int = 0, where: UserWhereInput): UserCollection
 }
@@ -192,17 +126,13 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input UpdateLikeFieldsInput {
-  users: UserReferenceListInput
-}
-
-input UpdateLikeInput {
-  fields: UpdateLikeFieldsInput!
-  id: ID!
-}
-
 input UpdateUserFieldsInput {
-  username: String
+  multipleDate: [Date]
+  multipleFile: UploadFileListInput
+  multipleNumber: [Int]
+  singleDate: Date
+  singleFile: UploadFileInput
+  singleNumber: Int
 }
 
 input UpdateUserInput {
@@ -214,26 +144,26 @@ input UpdateUserInput {
 scalar Upload
 
 input UploadFileInput {
-  link: UploadFileLinkInput
+  link: String
   upload: Upload
-}
-
-input UploadFileLinkInput {
-  name: String!
-  url: String!
 }
 
 input UploadFileListInput {
   add: [Upload]
-  link: [UploadFileLinkInput]
+  link: [String]
   remove: [String]
 }
 
 type User {
   createdAt: Date!
   id: ID!
+  multipleDate: [Date]
+  multipleFile: [File]
+  multipleNumber: [Int]
+  singleDate: Date
+  singleFile: File
+  singleNumber: Int
   updatedAt: Date!
-  username: String!
 }
 
 type UserCollection {
@@ -279,6 +209,9 @@ input UserWhereInput {
   createdAt: DateWhereInput
   exists: Boolean
   id: IDWhereInput
+  multipleDate: DateWhereInput
+  multipleNumber: IntWhereInput
+  singleDate: DateWhereInput
+  singleNumber: IntWhereInput
   updatedAt: DateWhereInput
-  username: StringWhereInput
 }

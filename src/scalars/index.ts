@@ -19,12 +19,7 @@ export const DateScalar = scalarType({
 export const AnyScalar = scalarType({ name: "Any", asNexusMethod: "any" });
 export const Upload = scalarType({ ...GraphQLUpload, name: "Upload" });
 
-export const FileScalar = objectType({
+export const FileScalar = scalarType({
   name: "File",
   asNexusMethod: "file",
-  definition(t) {
-    t.string("url");
-    t.string("name");
-    t.boolean("isLinked");
-  },
 });

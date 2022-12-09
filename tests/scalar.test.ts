@@ -23,14 +23,8 @@ const CREATE_DOCUMENT = gql`
       multipleDate
       singleNumber
       multipleNumber
-      singleFile {
-        name
-        url
-      }
-      multipleFile {
-        name
-        url
-      }
+      singleFile
+      multipleFile
     }
   }
 `;
@@ -43,38 +37,8 @@ const UPDATE_DOCUMENT = gql`
       multipleDate
       singleNumber
       multipleNumber
-      singleFile {
-        name
-        url
-      }
-      multipleFile {
-        name
-        url
-      }
-    }
-  }
-`;
-
-const QUERY_DOCUMENT = gql`
-  query queryUser($where: UserWhereInput) {
-    users(where: $where) {
-      edges {
-        node {
-          id
-          singleDate
-          multipleDate
-          singleNumber
-          multipleNumber
-          singleFile {
-            name
-            url
-          }
-          multipleFile {
-            name
-            url
-          }
-        }
-      }
+      singleFile
+      multipleFile
     }
   }
 `;
@@ -197,7 +161,7 @@ describe("Scalar Test", () => {
       id: userId,
       fields: {
         singleFile: null,
-        multipleFile: { remove: files.map((file) => file["name"]) },
+        multipleFile: { remove: files.map((file) => file) },
       },
     });
 

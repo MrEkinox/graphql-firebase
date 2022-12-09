@@ -1,7 +1,8 @@
 import { firestore } from "firebase-admin";
 import { GraphQLResolveInfo } from "graphql";
+import { fieldsMap } from "graphql-fields-list";
 import { getCollection, getParentIds, getParents } from "../mutations";
-import { firstLowercase } from "../utils";
+import { firstLowercase, hasCountField, hasEdgeField } from "../utils";
 import { orderByCreatedAt, WhereCollection } from "../where";
 
 export const collectionResolver = async (
@@ -51,12 +52,14 @@ export const collectionResolver = async (
     collection = collection.offset(offset);
   }
 
-  const count = (await collection.count().get()).data().count;
+  const count = hasCountField(info)
+    ? (await collection.count().get()).data().count
+    : 0;
 
-  const data = await collection.get();
+  const documents = hasEdgeField(info) ? (await collection.get()).docs : [];
 
   const edges = orderByCreatedAt(
-    data.docs.map((doc) => ({
+    documents.map((doc) => ({
       node: { id: doc.id, ...parentsIds, ...doc.data() },
     }))
   );

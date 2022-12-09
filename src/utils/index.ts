@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from "graphql";
 import { GraphQLObjectType } from "graphql";
-import { GraphQLSchema, isListType, isTypeSubTypeOf } from "graphql";
+import { GraphQLSchema, isListType } from "graphql";
 import { fieldsList } from "graphql-fields-list";
 import {
   AllOutputTypes,
@@ -193,4 +193,15 @@ export const getSchemaFields = (
 export const isOnlyIdField = (info: GraphQLResolveInfo) => {
   const fields = fieldsList(info);
   return fields.length === 1 && fields[0] === "id";
+};
+
+export const hasCountField = (info: GraphQLResolveInfo) => {
+  const fields = fieldsList(info);
+  return !!fields.find((field) => field === "count");
+};
+
+
+export const hasEdgeField = (info: GraphQLResolveInfo) => {
+  const fields = fieldsList(info);
+  return !!fields.find((field) => field === "edges");
 };

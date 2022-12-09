@@ -95,7 +95,7 @@ export const getCreateMutation = (options: FirestoreTypeOptions) => {
 
       const converter = new Converter(info.schema, batch);
       const newData = await converter.toFirebase(name, input, ref);
-      batch.set(ref, { ...newData, ...parentsIds });
+      batch.set(ref, { ...newData, ...parentsIds }, { merge: true });
 
       await batch.commit();
 
@@ -139,14 +139,9 @@ export const getUpdateMutation = (options: FirestoreTypeOptions) => {
 
       const ref = collection.doc(id);
       const batch = firestore().batch();
-      const snapshot = await ref.get();
-
-      if (!snapshot.exists && !force) {
-        throw new Error("Object not found");
-      }
 
       const converter = new Converter(info.schema, batch);
-      const newData = await converter.toFirebase(name, fields, ref, snapshot);
+      const newData = await converter.toFirebase(name, fields, ref, true);
 
       batch.set(ref, { ...newData, ...parentsIds }, { merge: true });
 

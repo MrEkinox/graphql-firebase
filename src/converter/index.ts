@@ -1,6 +1,10 @@
 import { firestore } from "firebase-admin";
 import { GraphQLSchema } from "graphql";
-import { fileListToFirestore, fileToFirestore } from "../file";
+import {
+  uploadFile,
+  UploadFileInputType,
+  UploadFileListInputType,
+} from "../file";
 import async from "async";
 import { FirestoreField, getSchemaFields } from "../utils";
 import { getCollection, getParents } from "../mutations";
@@ -35,33 +39,29 @@ export class Converter {
     name: string,
     newData: Record<string, any>,
     parentRef: firestore.DocumentReference,
-    snapshot?: firestore.DocumentSnapshot
+    created?: boolean
   ) {
-    const lastData = snapshot?.data();
     const fields = getSchemaFields(name, this.schema);
 
     const resultArray = await Promise.all(
       fields.map(async (field) => {
         let fieldData = newData[field.name];
-        const lastFieldData = lastData?.[field.name];
 
         if (typeof fieldData === "undefined") return {};
 
         if (field.type === "Reference") {
           fieldData = await this.convertReference(field, fieldData);
         } else if (field.type === "ReferenceList") {
-          fieldData = await this.convertReferenceList(
-            field,
-            fieldData,
-            lastFieldData
-          );
+          await this.convertReferenceList(field, fieldData, parentRef);
+          return {};
         } else if (field.type === "Collection") {
           await this.convertCollection(field, fieldData, parentRef);
           return {};
         } else if (field.type === "File") {
-          fieldData = await fileToFirestore(fieldData, lastFieldData);
+          fieldData = await this.fileToFirestore(fieldData);
         } else if (field.type === "FileList") {
-          fieldData = await fileListToFirestore(fieldData, lastFieldData);
+          await this.fileListToFirestore(field, fieldData, parentRef);
+          return {};
         }
 
         return { [field.name]: fieldData };
@@ -71,35 +71,29 @@ export class Converter {
     return resultArray.reduce((acc, cur) => ({ ...acc, ...cur }), {
       id: parentRef.id,
       updatedAt: new Date(),
-      ...(!lastData && { createdAt: new Date() }),
+      ...(created && { createdAt: new Date() }),
     });
   }
 
   private async convertCollection(
-    field: FirestoreField,
+    { name, target }: FirestoreField,
     input: CollectionInput,
     parentRef: firestore.DocumentReference
   ) {
-    const ref = parentRef.collection(field.name);
+    const ref = parentRef.collection(name);
 
     await async.map(input?.createAndAdd || [], async (data2) => {
-      if (!field.target) return;
+      if (!target) throw new Error(`·no target found for field ${name}`);
       const docRef = ref.doc();
-      const data = await this.toFirebase(field.target, data2, docRef);
+      const data = await this.toFirebase(target, data2, docRef, true);
       this.batch.set(docRef, data);
       return docRef;
     });
 
     await async.map(input?.update || [], async (data2) => {
-      if (!field.target) return;
+      if (!target) throw new Error(`·no target found for field ${name}`);
       const docRef = ref.doc(data2.id);
-      const snapshot = await docRef.get();
-      const data = await this.toFirebase(
-        field.target,
-        data2.fields,
-        docRef,
-        snapshot
-      );
+      const data = await this.toFirebase(target, data2.fields, docRef);
       this.batch.update(docRef, data);
       return docRef;
     });
@@ -116,12 +110,13 @@ export class Converter {
     input: ReferenceInput | null
   ) {
     if (!target) return null;
+    const createAndLink = input?.createAndLink;
     const parents = getParents(target, [], this.schema);
     const collection = getCollection(parents);
 
-    if (input?.createAndLink) {
+    if (createAndLink) {
       const docRef = collection.doc();
-      const data = await this.toFirebase(target, input.createAndLink, docRef);
+      const data = await this.toFirebase(target, createAndLink, docRef, true);
       this.batch.set(docRef, data);
       return docRef;
     }
@@ -132,32 +127,88 @@ export class Converter {
   }
 
   private async convertReferenceList(
-    { target }: FirestoreField,
+    field: FirestoreField,
     input: ReferenceListInput,
-    lastData: firestore.DocumentReference[] = []
+    ref: firestore.DocumentReference
   ) {
-    if (!target) return [];
-    const parents = getParents(target, [], this.schema);
+    if (!field.target)
+      throw new Error(`·no target found for field ${field.name}`);
+    const parents = getParents(field.target, [], this.schema);
     const collection = getCollection(parents);
 
     const created = await async.map(input.createAndAdd || [], async (data2) => {
+      if (!field.target)
+        throw new Error(`·no target found for field ${field.name}`);
       const ref = collection.doc();
-      const data = await this.toFirebase(target, data2, ref);
+      const data = await this.toFirebase(field.target, data2, ref, true);
       this.batch.set(ref, data);
 
       return ref;
     });
 
+    if (created.length) {
+      this.batch.set(
+        ref,
+        { [field.name]: firestore.FieldValue.arrayUnion(...created) },
+        { merge: true }
+      );
+    }
+
     const addRef = (input.add || []).map((id) => collection.doc(id));
 
-    const newCurrentData = lastData
-      .filter((data) => !input.remove?.includes(data.id))
-      .concat(created)
-      .concat(addRef);
+    if (addRef.length)
+      this.batch.set(
+        ref,
+        { [field.name]: firestore.FieldValue.arrayUnion(...addRef) },
+        { merge: true }
+      );
 
-    return newCurrentData.reduce((acc, cur) => {
-      if (acc.find((c) => c.id === cur.id)) return acc;
-      return [...acc, cur];
-    }, [] as typeof lastData);
+    const removeRef = (input.remove || []).map((id) => collection.doc(id));
+
+    if (removeRef.length) {
+      this.batch.update(ref, {
+        [field.name]: firestore.FieldValue.arrayRemove(...removeRef),
+      });
+    }
   }
+
+  fileListToFirestore = async (
+    field: FirestoreField,
+    input: UploadFileListInputType,
+    ref: firestore.DocumentReference
+  ) => {
+    const { link = [], add = [], remove = [] } = input;
+    const addedFiles = await async.map(add || [], uploadFile);
+
+    if (addedFiles.length)
+      this.batch.set(
+        ref,
+        { [field.name]: firestore.FieldValue.arrayUnion(...addedFiles) },
+        { merge: true }
+      );
+
+    if (link.length)
+      this.batch.set(
+        ref,
+        { [field.name]: firestore.FieldValue.arrayUnion(...link) },
+        { merge: true }
+      );
+
+    if (remove.length)
+      this.batch.update(ref, {
+        [field.name]: firestore.FieldValue.arrayRemove(...remove),
+      });
+  };
+
+  fileToFirestore = async (
+    input: UploadFileInputType | null
+  ): Promise<string | null> => {
+    if (input?.upload) {
+      return uploadFile(input.upload);
+    }
+    if (input?.link) {
+      return input.link;
+    }
+    return null;
+  };
 }
