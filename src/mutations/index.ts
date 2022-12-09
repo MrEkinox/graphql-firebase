@@ -8,6 +8,7 @@ import {
   firstLowercase,
   getParentIdLabel,
   getSchemaFields,
+  isOnlyIdField,
   plural,
 } from "../utils";
 
@@ -97,6 +98,10 @@ export const getCreateMutation = (options: FirestoreTypeOptions) => {
       batch.set(ref, { ...newData, ...parentsIds });
 
       await batch.commit();
+
+      const isOnlyId = isOnlyIdField(info);
+      if (isOnlyId) return { id: ref.id };
+
       const snapshot = await ref.get();
 
       return snapshot.data();
@@ -146,6 +151,9 @@ export const getUpdateMutation = (options: FirestoreTypeOptions) => {
       batch.set(ref, { ...newData, ...parentsIds }, { merge: true });
 
       await batch.commit();
+
+      const isOnlyId = isOnlyIdField(info);
+      if (isOnlyId) return { id: ref.id };
 
       const newSnapshot = await ref.get();
       return newSnapshot.data();

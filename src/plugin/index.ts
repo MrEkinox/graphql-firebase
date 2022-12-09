@@ -32,9 +32,9 @@ export const LogTimePlugin = (enabled?: boolean) =>
           const value = await next(root, args, ctx, info);
           const endTimeMs = new Date().valueOf();
           console.log(
-            `${config.parentTypeConfig.name} ${info.operation.name} took ${
-              endTimeMs - startTimeMs
-            } ms`
+            `${config.parentTypeConfig.name} ${
+              info.operation.name?.value
+            } took ${endTimeMs - startTimeMs} ms`
           );
           return value;
         };

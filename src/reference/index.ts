@@ -2,6 +2,7 @@ import { firestore } from "firebase-admin";
 import { GraphQLResolveInfo } from "graphql";
 import { fieldsList } from "graphql-fields-list";
 import { getCollection, getParents } from "../mutations";
+import { isOnlyIdField } from "../utils";
 
 export const referenceResolver = async (
   target: string,
@@ -9,8 +10,7 @@ export const referenceResolver = async (
   src,
   info: GraphQLResolveInfo
 ) => {
-  const fields = fieldsList(info);
-  const isOnlyId = fields.length === 1 && fields[0] === "id";
+  const isOnlyId = isOnlyIdField(info)
 
   const parents = getParents(target, [], info.schema);
   const collection = getCollection(parents);

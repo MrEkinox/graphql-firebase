@@ -1,3 +1,4 @@
+import { GraphQLResolveInfo } from "graphql";
 import { GraphQLSchema } from "graphql";
 import { AllOutputTypes, NexusInputFieldConfigWithName, ObjectDefinitionBlock } from "nexus/dist/core";
 export declare type FirestoreFieldType = AllOutputTypes | "File" | "FileList" | "Collection" | "Reference" | "ReferenceList" | "Object";
@@ -11,3 +12,4 @@ export declare const firstLowercase: (str: string) => string;
 export declare const getParentIdLabel: (parentIds?: string[]) => string[] | undefined;
 export declare const plural: (str: string) => string;
 export declare const getSchemaFields: (name: string, schema: GraphQLSchema) => FirestoreField[];
+export declare const isOnlyIdField: (info: GraphQLResolveInfo) => boolean;
