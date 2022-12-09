@@ -20,15 +20,21 @@ export const LogTimePlugin = (enabled?: boolean) =>
   plugin({
     name: "LogTimePlugin",
     onCreateFieldResolver(config) {
+      if (
+        config.parentTypeConfig.name !== "Mutation" &&
+        config.parentTypeConfig.name !== "Query"
+      ) {
+        return;
+      }
       if (enabled)
         return async (root, args, ctx, info, next) => {
           const startTimeMs = new Date().valueOf();
           const value = await next(root, args, ctx, info);
           const endTimeMs = new Date().valueOf();
           console.log(
-            `${config.parentTypeConfig.name} ${
-              info.operation.name?.value
-            } took ${endTimeMs - startTimeMs} ms`
+            `${config.parentTypeConfig.name} ${info.operation.name} took ${
+              endTimeMs - startTimeMs
+            } ms`
           );
           return value;
         };
