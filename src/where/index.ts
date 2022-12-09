@@ -1,5 +1,5 @@
 import { firestore } from "firebase-admin";
-import { WhereFilterOp } from "firebase-admin/firestore";
+import { Timestamp, WhereFilterOp } from "firebase-admin/firestore";
 import { GraphQLSchema } from "graphql";
 import { getCollection, getParents } from "../mutations";
 import chunk from "lodash/chunk";
@@ -51,10 +51,12 @@ const getWhereType = (
   return undefined;
 };
 
-export const orderByCreatedAt = (edges: any[]) => {
+export const orderByCreatedAt = (
+  edges: Array<{ node: Record<string, any> & { createdAt?: Timestamp } }>
+) => {
   return edges.sort((a, b) =>
-    new Date(a.node["createdAt"]).getTime() >
-    new Date(b.node["createdAt"]).getTime()
+    Timestamp.fromMillis(a.node.createdAt?.toMillis() || 0).toMillis() >
+    Timestamp.fromMillis(b.node.createdAt?.toMillis() || 0).toMillis()
       ? -1
       : 1
   );

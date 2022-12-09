@@ -1,4 +1,5 @@
 import { firestore } from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import { GraphQLSchema } from "graphql";
 interface CollectionWhereInput {
     name: string;
@@ -18,7 +19,15 @@ export declare type WhereInputOperator = {
     in?: any[];
     notIn?: any[];
 };
-export declare const orderByCreatedAt: (edges: any[]) => any[];
+export declare const orderByCreatedAt: (edges: Array<{
+    node: Record<string, any> & {
+        createdAt?: Timestamp;
+    };
+}>) => {
+    node: Record<string, any> & {
+        createdAt?: Timestamp;
+    };
+}[];
 export declare class WhereCollection {
     private schema;
     private parentsIds;
@@ -27,7 +36,11 @@ export declare class WhereCollection {
     private getData;
     get(whereInput: CollectionWhereInput[], collection: firestore.Query): Promise<{
         count: number;
-        edges: any[];
+        edges: {
+            node: Record<string, any> & {
+                createdAt?: firestore.Timestamp | undefined;
+            };
+        }[];
     }>;
     getWhereInput: (type: string, input?: Record<string, any>, parentFieldName?: string, fieldName?: string) => CollectionWhereInput[];
     private removeCollectionFields;

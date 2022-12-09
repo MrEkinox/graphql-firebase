@@ -1,3 +1,4 @@
+import { firestore } from "firebase-admin";
 import { GraphQLResolveInfo } from "graphql";
 export declare const collectionResolver: (type: string, fieldName: string, parents: string[], src: any, { where, limit, offset, ...input }: {
     [x: string]: any;
@@ -6,5 +7,9 @@ export declare const collectionResolver: (type: string, fieldName: string, paren
     offset: any;
 }, info: GraphQLResolveInfo) => Promise<{
     count: number;
-    edges: any[];
+    edges: {
+        node: Record<string, any> & {
+            createdAt?: firestore.Timestamp | undefined;
+        };
+    }[];
 }>;
