@@ -4,6 +4,7 @@ export declare const getCreateInput: (options: FirestoreTypeOptions) => import("
 export declare const getObjectUpdateInput: (options: FirestoreTypeOptions) => import("nexus/dist/core").NexusInputObjectTypeDef<`Update${string}Input`>;
 export declare const getUpdateInput: (options: FirestoreTypeOptions) => import("nexus/dist/core").NexusInputObjectTypeDef<`Update${string}Input`>;
 export declare const getDeleteInput: (name: string) => import("nexus/dist/core").NexusInputObjectTypeDef<`Delete${string}Input`>;
+export declare const getOrderByInput: (options: FirestoreTypeOptions) => import("nexus/dist/core").NexusInputObjectTypeDef<`${string}OrderByInput`>;
 export declare const getReferenceListInput: (name: string) => import("nexus/dist/core").NexusInputObjectTypeDef<`${string}ReferenceListInput`>;
 export declare const getReferenceInput: (name: string) => import("nexus/dist/core").NexusInputObjectTypeDef<`${string}ReferenceInput`>;
 export declare const getCollectionInput: (name: string) => import("nexus/dist/core").NexusInputObjectTypeDef<`${string}CollectionInput`>;

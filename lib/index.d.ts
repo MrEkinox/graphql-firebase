@@ -6,7 +6,7 @@ export declare const objectType: (options: NexusObjectTypeConfig<string>) => (im
 export interface FirestoreTypeOptions extends NexusObjectTypeConfig<string> {
     parents?: string[];
 }
-export declare const firestoreType: (options: FirestoreTypeOptions) => (import("nexus/dist/core").NexusObjectTypeDef<string> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}ReferenceListInput`> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}ReferenceInput`> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}CollectionInput`> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}WhereInput`> | import("nexus/dist/core").NexusExtendTypeDef<"Mutation"> | import("nexus/dist/core").NexusExtendTypeDef<"Query">)[];
+export declare const firestoreType: (options: FirestoreTypeOptions) => (import("nexus/dist/core").NexusObjectTypeDef<string> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}OrderByInput`> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}ReferenceListInput`> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}ReferenceInput`> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}CollectionInput`> | import("nexus/dist/core").NexusInputObjectTypeDef<`${string}WhereInput`> | import("nexus/dist/core").NexusExtendTypeDef<"Mutation"> | import("nexus/dist/core").NexusExtendTypeDef<"Query">)[];
 export declare const makeSchema: (config: SchemaConfig & {
     debug?: boolean;
 }) => import("nexus/dist/core").NexusGraphQLSchema;

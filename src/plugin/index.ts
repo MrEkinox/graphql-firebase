@@ -118,6 +118,7 @@ export const GraphQLFirebasePlugin = () => {
                 limit: arg({ type: "Int", default: 50 }),
                 offset: arg({ type: "Int", default: 0 }),
                 where: arg({ type: `${type}WhereInput` }),
+                orderBy: arg({ type: `${type}OrderByInput` }),
               },
             });
           },

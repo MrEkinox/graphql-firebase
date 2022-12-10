@@ -1,7 +1,12 @@
 import { InputDefinitionBlock } from "nexus/dist/core";
 import { inputObjectType } from "nexus";
-import { FirestoreField, FirestoreFieldType, getDefinitionFields } from "../utils";
+import {
+  FirestoreField,
+  FirestoreFieldType,
+  getDefinitionFields,
+} from "../utils";
 import { FirestoreTypeOptions } from "..";
+import { orderBy } from "../scalars";
 
 const getFieldsDefinition = (
   t: InputDefinitionBlock<any>,
@@ -101,6 +106,20 @@ export const getDeleteInput = (name: string) =>
       t.id("id", { required: true });
     },
   });
+
+export const getOrderByInput = (options: FirestoreTypeOptions) => {
+  const fields = getDefinitionFields(options.definition);
+
+  return inputObjectType({
+    name: `${options.name}OrderByInput`,
+    definition(t) {
+      fields.forEach((field) => {
+        // @ts-ignore
+        t.field(field.name, { type: "OrderByEnum" });
+      });
+    },
+  });
+};
 
 export const getReferenceListInput = (name: string) =>
   inputObjectType({

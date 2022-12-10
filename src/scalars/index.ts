@@ -1,4 +1,4 @@
-import { objectType, scalarType } from "nexus";
+import { enumType, objectType, scalarType } from "nexus";
 import { GraphQLUpload } from "graphql-upload-minimal";
 import admin from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
@@ -22,4 +22,14 @@ export const Upload = scalarType({ ...GraphQLUpload, name: "Upload" });
 export const FileScalar = scalarType({
   name: "File",
   asNexusMethod: "file",
+});
+
+export enum OrderByEnum {
+  asc = "asc",
+  desc = "desc",
+}
+
+export const orderBy = enumType({
+  name: "OrderByEnum",
+  members: OrderByEnum,
 });

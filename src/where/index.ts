@@ -4,6 +4,7 @@ import { GraphQLSchema } from "graphql";
 import { getCollection, getParents } from "../mutations";
 import chunk from "lodash/chunk";
 import { FirestoreField, getSchemaFields, plural } from "../utils";
+import { OrderByEnum } from "../scalars";
 
 interface CollectionWhereInput {
   name: string;
@@ -51,24 +52,42 @@ const getWhereType = (
   return undefined;
 };
 
-export const orderByCreatedAt = (
-  edges: Array<{ node: Record<string, any> & { createdAt?: Timestamp } }>
+export const computeDate = (value?: Timestamp | any) => {
+  if (value instanceof Timestamp) return value.toMillis();
+  return value;
+};
+
+export const sortOrderBy = (
+  edges: Array<{ node: Record<string, any> & { createdAt?: Timestamp } }>,
+  orderBy: Record<string, OrderByEnum> = { createdAt: OrderByEnum.desc }
 ) => {
-  return edges.sort((a, b) =>
-    Timestamp.fromMillis(a.node.createdAt?.toMillis() || 0).toMillis() >
-    Timestamp.fromMillis(b.node.createdAt?.toMillis() || 0).toMillis()
-      ? -1
-      : 1
-  );
+  return edges.sort((a, b) => {
+    return Object.keys(orderBy).reduce((acc, fieldName) => {
+      const direction = orderBy[fieldName];
+      const valueA = computeDate(a[fieldName]);
+      const valueAB = computeDate(b[fieldName]);
+
+      if (direction === OrderByEnum.desc) {
+        return valueA > valueAB ? -1 : 1;
+      }
+      return valueA < valueAB ? -1 : 1;
+    }, 0);
+  });
 };
 
 export class WhereCollection {
   private schema: GraphQLSchema;
   private parentsIds: Record<string, string>;
+  private orderBy?: Record<string, OrderByEnum>;
 
-  constructor(schema: GraphQLSchema, parentsIds: Record<string, string>) {
+  constructor(
+    schema: GraphQLSchema,
+    parentsIds: Record<string, string>,
+    orderBy?: Record<string, OrderByEnum>
+  ) {
     this.schema = schema;
     this.parentsIds = parentsIds;
+    this.orderBy = orderBy;
   }
 
   private async chunkQuery(collection: firestore.Query, ids: string[]) {
@@ -81,14 +100,19 @@ export class WhereCollection {
       })
     );
 
-    return allData.reduce(
+    const concatValue = allData.reduce(
       (acc, cur) => {
         const newCount = acc.count + cur.count;
-        const newEdges = orderByCreatedAt([...cur.edges, ...acc.edges]);
+        const newEdges = [...cur.edges, ...acc.edges];
         return { count: newCount, edges: newEdges };
       },
       { count: 0, edges: [] }
     );
+
+    return {
+      count: concatValue.count,
+      edges: sortOrderBy(concatValue.edges, this.orderBy),
+    };
   }
 
   private async getData(collection: firestore.Query) {
@@ -96,10 +120,11 @@ export class WhereCollection {
 
     const data = await collection.get();
 
-    const edges = orderByCreatedAt(
+    const edges = sortOrderBy(
       data.docs.map((doc) => ({
         node: { id: doc.id, ...this.parentsIds, ...doc.data() },
-      }))
+      })),
+      this.orderBy
     );
 
     return { count, edges };

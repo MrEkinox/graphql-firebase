@@ -1,6 +1,7 @@
 import { firestore } from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { GraphQLSchema } from "graphql";
+import { OrderByEnum } from "../scalars";
 interface CollectionWhereInput {
     name: string;
     fieldName: string;
@@ -19,11 +20,12 @@ export type WhereInputOperator = {
     in?: any[];
     notIn?: any[];
 };
-export declare const orderByCreatedAt: (edges: Array<{
+export declare const computeDate: (value?: Timestamp | any) => any;
+export declare const sortOrderBy: (edges: Array<{
     node: Record<string, any> & {
         createdAt?: Timestamp;
     };
-}>) => {
+}>, orderBy?: Record<string, OrderByEnum>) => {
     node: Record<string, any> & {
         createdAt?: Timestamp;
     };
@@ -31,7 +33,8 @@ export declare const orderByCreatedAt: (edges: Array<{
 export declare class WhereCollection {
     private schema;
     private parentsIds;
-    constructor(schema: GraphQLSchema, parentsIds: Record<string, string>);
+    private orderBy?;
+    constructor(schema: GraphQLSchema, parentsIds: Record<string, string>, orderBy?: Record<string, OrderByEnum>);
     private chunkQuery;
     private getData;
     get(whereInput: CollectionWhereInput[], collection: firestore.Query): Promise<{

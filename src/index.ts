@@ -21,6 +21,7 @@ import {
   createDefaultWhereInputs,
   getFieldWhereInput,
   getWhereInput,
+  getOrderByInput,
 } from "./inputs";
 import * as fileInput from "./file";
 import {
@@ -87,6 +88,7 @@ export const firestoreType = (options: FirestoreTypeOptions) => {
   const singleQuery = getQuery(options);
   const allQuery = getAllQuery(options);
   const whereInput = getWhereInput(type.value);
+  const orderByInput = getOrderByInput(options)
   const deleteMutation = getDeleteMutation(options);
   const createMutation = getCreateMutation(options);
   const updateMutation = getUpdateMutation(options);
@@ -96,6 +98,7 @@ export const firestoreType = (options: FirestoreTypeOptions) => {
 
   return [
     type,
+    orderByInput,
     deleteMutation,
     whereInput,
     allQuery,

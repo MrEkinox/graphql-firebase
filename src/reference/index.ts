@@ -1,6 +1,5 @@
 import { firestore } from "firebase-admin";
 import { GraphQLResolveInfo } from "graphql";
-import { fieldsList } from "graphql-fields-list";
 import { getCollection, getParents } from "../mutations";
 import { isOnlyIdField } from "../utils";
 

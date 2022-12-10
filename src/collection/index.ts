@@ -1,16 +1,23 @@
 import { firestore } from "firebase-admin";
 import { GraphQLResolveInfo } from "graphql";
-import { fieldsMap } from "graphql-fields-list";
 import { getCollection, getParentIds, getParents } from "../mutations";
+import { OrderByEnum } from "../scalars";
 import { firstLowercase, hasCountField, hasEdgeField } from "../utils";
-import { orderByCreatedAt, WhereCollection } from "../where";
+import { sortOrderBy, WhereCollection } from "../where";
+
+interface CollectionInput {
+  where?: Record<string, any>;
+  limit?: number;
+  offset?: number;
+  orderBy?: Record<string, OrderByEnum>;
+}
 
 export const collectionResolver = async (
   type: string,
   fieldName: string,
   parents: string[],
   src,
-  { where, limit, offset, ...input },
+  { where, limit, offset, orderBy, ...input }: CollectionInput,
   info: GraphQLResolveInfo
 ) => {
   const allInputs = {
@@ -27,7 +34,11 @@ export const collectionResolver = async (
   let collection: firestore.Query = getCollection(parentFields);
 
   if (where) {
-    const whereCollection = new WhereCollection(info.schema, parentsIds);
+    const whereCollection = new WhereCollection(
+      info.schema,
+      parentsIds,
+      orderBy
+    );
     const whereInput = whereCollection.getWhereInput(
       type,
       where,
@@ -58,10 +69,11 @@ export const collectionResolver = async (
 
   const documents = hasEdgeField(info) ? (await collection.get()).docs : [];
 
-  const edges = orderByCreatedAt(
+  const edges = sortOrderBy(
     documents.map((doc) => ({
       node: { id: doc.id, ...parentsIds, ...doc.data() },
-    }))
+    })),
+    orderBy
   );
 
   return { count, edges };
