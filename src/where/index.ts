@@ -64,8 +64,8 @@ export const sortOrderBy = (
   return edges.sort((a, b) => {
     return Object.keys(orderBy).reduce((acc, fieldName) => {
       const direction = orderBy[fieldName];
-      const valueA = computeDate(a[fieldName]);
-      const valueAB = computeDate(b[fieldName]);
+      const valueA = computeDate(a?.node?.[fieldName]);
+      const valueAB = computeDate(b?.node?.[fieldName]);
 
       if (direction === OrderByEnum.desc) {
         return valueA > valueAB ? -1 : 1;
