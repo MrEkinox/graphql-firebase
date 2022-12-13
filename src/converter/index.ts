@@ -63,6 +63,13 @@ export class Converter {
         } else if (field.type === "FileList") {
           await this.fileListToFirestore(field, fieldData, parentRef);
           return {};
+        } else if (field.type === "Object" && field.target) {
+          fieldData = await this.toFirebase(
+            field.target,
+            fieldData,
+            parentRef,
+            created
+          );
         }
 
         return { [field.name]: fieldData };

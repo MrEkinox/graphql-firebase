@@ -1,7 +1,8 @@
-import { enumType, objectType, scalarType } from "nexus";
+import { enumType, scalarType } from "nexus";
 import { GraphQLUpload } from "graphql-upload-minimal";
 import admin from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
+import { uploadFile } from "../file";
 
 export const DateScalar = scalarType({
   name: "Date",

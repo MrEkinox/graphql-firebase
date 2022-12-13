@@ -52,13 +52,11 @@ export interface NexusGenInputs {
     notEqualTo?: boolean | null; // Boolean
     notIn?: Array<boolean | null> | null; // [Boolean]
   }
+  CreateLikeInput: { // input type
+    users: NexusGenInputs['UserReferenceListInput']; // UserReferenceListInput!
+  }
   CreateUserInput: { // input type
-    multipleDate?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
-    multipleFile?: NexusGenInputs['UploadFileListInput'] | null; // UploadFileListInput
-    multipleNumber?: Array<number | null> | null; // [Int]
-    singleDate?: NexusGenScalars['Date'] | null; // Date
-    singleFile?: NexusGenInputs['UploadFileInput'] | null; // UploadFileInput
-    singleNumber?: number | null; // Int
+    username: string; // String!
   }
   DateWhereInput: { // input type
     arrayContains?: NexusGenScalars['Date'] | null; // Date
@@ -71,6 +69,9 @@ export interface NexusGenInputs {
     lessThanOrEqualTo?: NexusGenScalars['Date'] | null; // Date
     notEqualTo?: NexusGenScalars['Date'] | null; // Date
     notIn?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
+  }
+  DeleteLikeInput: { // input type
+    id: string; // ID!
   }
   DeleteUserInput: { // input type
     id: string; // ID!
@@ -102,6 +103,30 @@ export interface NexusGenInputs {
     notEqualTo?: number | null; // Int
     notIn?: Array<number | null> | null; // [Int]
   }
+  LikeCollectionInput: { // input type
+    createAndAdd?: Array<NexusGenInputs['CreateLikeInput'] | null> | null; // [CreateLikeInput]
+    delete?: Array<string | null> | null; // [ID]
+    update?: Array<NexusGenInputs['UpdateLikeInput'] | null> | null; // [UpdateLikeInput]
+  }
+  LikeOrderByInput: { // input type
+    users?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+  }
+  LikeReferenceInput: { // input type
+    createAndLink?: NexusGenInputs['CreateLikeInput'] | null; // CreateLikeInput
+    link?: string | null; // ID
+  }
+  LikeReferenceListInput: { // input type
+    add?: Array<string | null> | null; // [ID]
+    createAndAdd?: Array<NexusGenInputs['CreateLikeInput'] | null> | null; // [CreateLikeInput]
+    remove?: Array<string | null> | null; // [ID]
+  }
+  LikeWhereInput: { // input type
+    createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    exists?: boolean | null; // Boolean
+    id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
+    updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    users?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
+  }
   StringWhereInput: { // input type
     arrayContains?: string | null; // String
     equalTo?: string | null; // String
@@ -114,13 +139,15 @@ export interface NexusGenInputs {
     notEqualTo?: string | null; // String
     notIn?: Array<string | null> | null; // [String]
   }
+  UpdateLikeFieldsInput: { // input type
+    users?: NexusGenInputs['UserReferenceListInput'] | null; // UserReferenceListInput
+  }
+  UpdateLikeInput: { // input type
+    fields: NexusGenInputs['UpdateLikeFieldsInput']; // UpdateLikeFieldsInput!
+    id: string; // ID!
+  }
   UpdateUserFieldsInput: { // input type
-    multipleDate?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
-    multipleFile?: NexusGenInputs['UploadFileListInput'] | null; // UploadFileListInput
-    multipleNumber?: Array<number | null> | null; // [Int]
-    singleDate?: NexusGenScalars['Date'] | null; // Date
-    singleFile?: NexusGenInputs['UploadFileInput'] | null; // UploadFileInput
-    singleNumber?: number | null; // Int
+    username?: string | null; // String
   }
   UpdateUserInput: { // input type
     fields: NexusGenInputs['UpdateUserFieldsInput']; // UpdateUserFieldsInput!
@@ -140,6 +167,9 @@ export interface NexusGenInputs {
     delete?: Array<string | null> | null; // [ID]
     update?: Array<NexusGenInputs['UpdateUserInput'] | null> | null; // [UpdateUserInput]
   }
+  UserOrderByInput: { // input type
+    username?: NexusGenEnums['OrderByEnum'] | null; // OrderByEnum
+  }
   UserReferenceInput: { // input type
     createAndLink?: NexusGenInputs['CreateUserInput'] | null; // CreateUserInput
     link?: string | null; // ID
@@ -153,15 +183,13 @@ export interface NexusGenInputs {
     createdAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
     exists?: boolean | null; // Boolean
     id?: NexusGenInputs['IDWhereInput'] | null; // IDWhereInput
-    multipleDate?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    multipleNumber?: NexusGenInputs['IntWhereInput'] | null; // IntWhereInput
-    singleDate?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
-    singleNumber?: NexusGenInputs['IntWhereInput'] | null; // IntWhereInput
     updatedAt?: NexusGenInputs['DateWhereInput'] | null; // DateWhereInput
+    username?: NexusGenInputs['StringWhereInput'] | null; // StringWhereInput
   }
 }
 
 export interface NexusGenEnums {
+  OrderByEnum: "asc" | "desc"
 }
 
 export interface NexusGenScalars {
@@ -177,6 +205,20 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  Like: { // root type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  LikeCollection: { // root type
+    count?: number | null; // Int
+    edges?: Array<NexusGenRootTypes['LikeEdge'] | null> | null; // [LikeEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  LikeEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['Like'] | null; // Like
+  }
   Mutation: {};
   PageInfo: { // root type
     endCursor?: string | null; // String
@@ -188,13 +230,8 @@ export interface NexusGenObjects {
   User: { // root type
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // ID!
-    multipleDate?: Array<NexusGenScalars['Date'] | null> | null; // [Date]
-    multipleFile?: Array<NexusGenScalars['File'] | null> | null; // [File]
-    multipleNumber?: Array<number | null> | null; // [Int]
-    singleDate?: NexusGenScalars['Date'] | null; // Date
-    singleFile?: NexusGenScalars['File'] | null; // File
-    singleNumber?: number | null; // Int
     updatedAt: NexusGenScalars['Date']; // Date!
+    username: string; // String!
   }
   UserCollection: { // root type
     count?: number | null; // Int
@@ -215,12 +252,30 @@ export interface NexusGenUnions {
 
 export type NexusGenRootTypes = NexusGenObjects
 
-export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
+export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  Like: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    updatedAt: NexusGenScalars['Date']; // Date!
+    users: NexusGenRootTypes['User'][]; // [User!]!
+  }
+  LikeCollection: { // field return type
+    count: number | null; // Int
+    edges: Array<NexusGenRootTypes['LikeEdge'] | null> | null; // [LikeEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  LikeEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['Like'] | null; // Like
+  }
   Mutation: { // field return type
+    createLike: NexusGenRootTypes['Like'] | null; // Like
     createUser: NexusGenRootTypes['User'] | null; // User
+    deleteLike: boolean | null; // Boolean
     deleteUser: boolean | null; // Boolean
+    updateLike: NexusGenRootTypes['Like'] | null; // Like
     updateUser: NexusGenRootTypes['User'] | null; // User
   }
   PageInfo: { // field return type
@@ -230,19 +285,16 @@ export interface NexusGenFieldTypes {
     startCursor: string | null; // String
   }
   Query: { // field return type
+    like: NexusGenRootTypes['Like'] | null; // Like
+    likes: NexusGenRootTypes['LikeCollection'] | null; // LikeCollection
     user: NexusGenRootTypes['User'] | null; // User
     users: NexusGenRootTypes['UserCollection'] | null; // UserCollection
   }
   User: { // field return type
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // ID!
-    multipleDate: Array<NexusGenScalars['Date'] | null> | null; // [Date]
-    multipleFile: Array<NexusGenScalars['File'] | null> | null; // [File]
-    multipleNumber: Array<number | null> | null; // [Int]
-    singleDate: NexusGenScalars['Date'] | null; // Date
-    singleFile: NexusGenScalars['File'] | null; // File
-    singleNumber: number | null; // Int
     updatedAt: NexusGenScalars['Date']; // Date!
+    username: string; // String!
   }
   UserCollection: { // field return type
     count: number | null; // Int
@@ -256,9 +308,27 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  Like: { // field return type name
+    createdAt: 'Date'
+    id: 'ID'
+    updatedAt: 'Date'
+    users: 'User'
+  }
+  LikeCollection: { // field return type name
+    count: 'Int'
+    edges: 'LikeEdge'
+    pageInfo: 'PageInfo'
+  }
+  LikeEdge: { // field return type name
+    cursor: 'String'
+    node: 'Like'
+  }
   Mutation: { // field return type name
+    createLike: 'Like'
     createUser: 'User'
+    deleteLike: 'Boolean'
     deleteUser: 'Boolean'
+    updateLike: 'Like'
     updateUser: 'User'
   }
   PageInfo: { // field return type name
@@ -268,19 +338,16 @@ export interface NexusGenFieldTypeNames {
     startCursor: 'String'
   }
   Query: { // field return type name
+    like: 'Like'
+    likes: 'LikeCollection'
     user: 'User'
     users: 'UserCollection'
   }
   User: { // field return type name
     createdAt: 'Date'
     id: 'ID'
-    multipleDate: 'Date'
-    multipleFile: 'File'
-    multipleNumber: 'Int'
-    singleDate: 'Date'
-    singleFile: 'File'
-    singleNumber: 'Int'
     updatedAt: 'Date'
+    username: 'String'
   }
   UserCollection: { // field return type name
     count: 'Int'
@@ -295,11 +362,21 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    createLike: { // args
+      input: NexusGenInputs['CreateLikeInput']; // CreateLikeInput!
+    }
     createUser: { // args
       input: NexusGenInputs['CreateUserInput']; // CreateUserInput!
     }
+    deleteLike: { // args
+      input: NexusGenInputs['DeleteLikeInput']; // DeleteLikeInput!
+    }
     deleteUser: { // args
       input: NexusGenInputs['DeleteUserInput']; // DeleteUserInput!
+    }
+    updateLike: { // args
+      force?: boolean | null; // Boolean
+      input: NexusGenInputs['UpdateLikeInput']; // UpdateLikeInput!
     }
     updateUser: { // args
       force?: boolean | null; // Boolean
@@ -307,12 +384,22 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
+    like: { // args
+      id: string; // ID!
+    }
+    likes: { // args
+      limit: number | null; // Int
+      offset?: number | null; // Int
+      orderBy?: NexusGenInputs['LikeOrderByInput'] | null; // LikeOrderByInput
+      where?: NexusGenInputs['LikeWhereInput'] | null; // LikeWhereInput
+    }
     user: { // args
       id: string; // ID!
     }
     users: { // args
       limit: number | null; // Int
       offset?: number | null; // Int
+      orderBy?: NexusGenInputs['UserOrderByInput'] | null; // UserOrderByInput
       where?: NexusGenInputs['UserWhereInput'] | null; // UserWhereInput
     }
   }
@@ -328,7 +415,7 @@ export type NexusGenObjectNames = keyof NexusGenObjects;
 
 export type NexusGenInputNames = keyof NexusGenInputs;
 
-export type NexusGenEnumNames = never;
+export type NexusGenEnumNames = keyof NexusGenEnums;
 
 export type NexusGenInterfaceNames = never;
 
