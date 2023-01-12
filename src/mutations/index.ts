@@ -94,7 +94,7 @@ export const getCreateMutation = (options: FirestoreTypeOptions) => {
       const batch = firestore().batch();
 
       const converter = new Converter(info.schema, batch);
-      const newData = await converter.toFirebase(name, input, ref);
+      const newData = await converter.toFirebase(name, input, ref, true);
       batch.set(ref, { ...newData, ...parentsIds }, { merge: true });
 
       await batch.commit();
@@ -141,7 +141,7 @@ export const getUpdateMutation = (options: FirestoreTypeOptions) => {
       const batch = firestore().batch();
 
       const converter = new Converter(info.schema, batch);
-      const newData = await converter.toFirebase(name, fields, ref, true);
+      const newData = await converter.toFirebase(name, fields, ref, force);
 
       batch.set(ref, { ...newData, ...parentsIds }, { merge: true });
 

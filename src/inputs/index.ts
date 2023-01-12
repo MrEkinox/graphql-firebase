@@ -6,7 +6,6 @@ import {
   getDefinitionFields,
 } from "../utils";
 import { FirestoreTypeOptions } from "..";
-import { orderBy } from "../scalars";
 
 const getFieldsDefinition = (
   t: InputDefinitionBlock<any>,
